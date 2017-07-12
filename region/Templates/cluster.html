@@ -419,6 +419,10 @@
             array_json = array_json + "}";
             com_ant = JSON.parse(array_json);
             //generé el JSON de comunidades. 
+            console.log("com_ant");
+            console.log(com_ant);
+            console.log("array_json");
+            console.log(array_json);
 
             ord_com = []; // [[comunidad, cantidad],[comunidad, cantidad],... ]
 
@@ -574,10 +578,10 @@
                 " ranking :"+antena[0].toString() +" nombre:"+ antena[1].toString();
             
             var polyBor = L.polygon(latlngArray, {color:'#800026', fillOpacity: 0}).bindPopup(antena_popup);
-            console.log("polyBor");
-            console.log(polyBor);
+            //console.log("polyBor");
+            //console.log(polyBor);
             var geoPoly = polyBor.toGeoJSON();
-            console.log(geoPoly);
+            //console.log(geoPoly);
             var polyRell = L.polygon(latlngArray, {opacity: 0, fillColor: '#800026', fillOpacity: 0.5}).bindPopup(antena_popup);
 
             borde_antenas.push(polyBor);

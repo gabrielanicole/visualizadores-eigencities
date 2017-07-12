@@ -44,6 +44,7 @@ def index(request):
 
 			# lista de torres seleccionadas
 			l_torres = torres.split(",")
+			print(l_torres)
 			
 			net = loadNet(l_torres)
 

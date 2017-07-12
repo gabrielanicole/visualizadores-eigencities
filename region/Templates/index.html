@@ -1,0 +1,2683 @@
+<!DOCTYPE html>
+{% load static %} 
+<html> 
+<head>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+  <script src="https://unpkg.com/leaflet@1.0.2/dist/leaflet.js"></script>
+  <script type="text/javascript" src="{% static 'leaflet-routing-machine-3.2.5/dist/leaflet-routing-machine.js' %}">
+  </script>
+  <script type="text/javascript" src="http://maps.stamen.com/js/tile.stamen.js?v1.3.0"></script>
+
+  <script type="text/javascript" src="{% static 'js/manzanas_censales_wgs84v1.js' %}"></script>
+  <script type="text/javascript" src="{% static 'js/valdivia_100_0315.json' %}"></script>
+
+  <script src="http://d3js.org/d3.v3.min.js"></script>
+  <script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script> 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/js/bootstrap-select.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css">
+  <link rel="stylesheet" href="{% static 'leaflet-routing-machine-3.2.5/dist/leaflet-routing-machine.css' %}"> 
+  <link rel="stylesheet" href="{% static 'css/visualizador_style.css' %}">
+ <!-- sidebar v2 -->
+  <link rel="stylesheet" href="{% static 'sidebar-v2-master/css/leaflet-sidebar.css' %}  " />
+  <script src="{% static 'sidebar-v2-master/js/leaflet-sidebar.js' %}"></script>
+  
+  
+</head>
+  <body>
+    <div id="sidebar" class="sidebar collapsed">
+        <!-- Nav tabs -->
+        <div class="sidebar-tabs">
+            <ul role="tablist">
+                <li><a href="#home" role="tab"><span class="glyphicon glyphicon-th-list"><i class="fa fa-bars"></i></i></span>  </a></li>
+                <li><a href="#trazas" role="tab"><span class="glyphicon glyphicon-map-marker"><i class="fa fa-user"></i></span></a></li>        
+            </ul>
+        </div>
+
+
+   
+
+        <!-- Tab panes -->
+        <div class="sidebar-content">
+            <div class="sidebar-pane" id="home">
+                <h1> Indicadores</h1>
+                
+                <h2> <span class="glyphicon glyphicon-triangle-left sidebar-close"><i class="fa fa-caret-left"></i></span></h2>
+                <h4>Personas: </h4>
+                <select id="mySelect_Personas" class="selectpicker indicadores_select"  data-live-search="true" deselectAllText="Deseleccionar todas" selectAllText="Seleccionar Todas"  data-actions-box="true" title="Escoge uno de los siguientes..." onchange="CambiarMapa(this.value)" multiple="multiple" data-width="fit" >
+                  <option value="normal" title="Habitantes" descripcion="Cantidad de habitantes en cada una de las manzanas. </br>  <b>Mapa: </b> Degradado de colores según cantidad de habitantes" data-tokens="Cantidad de Habitantes"> Cantidad de Habitantes </option>
+                  <option value="densidad" title="Densidad" descripcion="Densidad de habitantes en cada una de las manzanas respecto al tamaño de la misma. </br>  <b>Mapa: </b> Degradado de colores según densidad de habitantes" data-tokens="Cantidad de Habitantes"> Densidad de Habitantes </option>
+                  <option value="genero" descripcion="Cantidad de Habitantes divididos en genero femenino y masculino en cada una de las manzanas.</br>  <b>Mapa: </b> Distinto color según la mayoria de genero presente en la manzana" data-tokens="Cantidad de Hombres Mujeres"> Mayoria de Genero </option>
+                  <option value="femenino" descripcion="Cantidad de mujeres en cada una de las manzanas.</br> <b>Mapa: </b> Degradado de colores según cantidad de mujeres"> Cantidad de Mujeres </option>
+                  <option value="masculino" descripcion="Cantidad de hombres en cada una de las manzanas.</br>  <b>Mapa: </b>Degradado de colores según cantidad de hombres" data-tokens="Cantidad de Hombres Masculino"> Cantidad de Hombres </option>
+                  <option value="analfabetismo" descripcion="Cantidad personas analfabetas cada una de las manzanas.</br>  <b>Mapa: </b>Degradado de colores según cantidad de analfabetos en la ciudad" data-tokens="Cantidad de Analfabetismo"> Cantidad de Analfabetismo </option>
+                  <option value="cultura" descripcion="Cantidad de personas pertenecientes a una determinada cultura en cada una de las manzanas.</br>  <b>Mapa: </b>Distinto color según la mayoria de personas que pertenecen a una cultura presente en la manzana"data-tokens="Cultura">Cultura</option>
+                  <option value="religion" descripcion="Cantidad de personas que profesan una determinada religión en cada una de las manzanas.</br>  <b>Mapa: </b>Distinto color según la mayoria de personas que profesan determinada religión "data-tokens="Religion">Religion</option>
+                  <option value="educacion" descripcion="Cantidad de personas que aprobaron determinado nivel educacional en cada una de las manzanas.</br>  <b>Mapa: </b>Distinto color según la mayoria de personas que aprobaron determinado nivel educacional. Se considera enseñanza media haber aprobado Media Común, Humanidades, Media comercial, Media Industrial, Media Agrícola, Media Marítima y enseñanza Normal " data-tokens="Educacion Escolarizacion">Escolarizacion</option>
+                  <option value="empleabilidad" descripcion="Cantidad de habitantes que trabajan, divididos en: asalariados; de servicio domestico; por cuenta propia; empleadores, empresarios o patrones y familiares no remunerados.</br>  <b>Mapa: </b>Distinto color según el tipo de trabajo mayoritario en la manzana"  data-tokens="Empleabilidad">Empleabilidad</option>
+                  <option value="disc" descripcion="Cantidad de habitantes que poseen alguna discapacidad.</br>  <b>Mapa: </b>Degradado de colores según cantidad de habitantes con discapacidad" data-tokens="Discapacidad sordera ceguera lisiado">Discapacidad</option>
+                  <option value="disc_tipos" descripcion="Cantidad habitantes con distintos tipos de discapacidad (ceguera, mudez, sordera, lisiado/paralizado, deficiencia mental) en cada una de las manzanas.</br>  <b>Mapa: </b>Distinto color según el tipo de discapacidad mayoritaria en la manzana " data-tokens="Discapacidad sordera ceguera lisiado">Tipos de Discapacidad</option>
+                  <option value="trab_ingreso" descripcion="Cantidad de trabajadores con ingreso.</br>  <b>Mapa: </b>Degradado de colores según cantidad de trabajadores con ingreso" data-tokens="Trabajadores con Ingreso">Trabajadores con Ingreso</option>
+                  <option value="sin_trabajo_con_ingreso" descripcion="Cantidad de personas con ingreso, pero son trabajo.</br>  <b>Mapa: </b>Degradado de colores según cantidad de personas"  data-tokens="Personas sin trabajo con ingreso">Personas sin trabajo con ingreso</option>
+                  <option value="trab_prim" descripcion="Cantidad de trabajadores que buscan trabajo por primera vez.</br>  <b>Mapa: </b>Degradado de colores según cantidad de trabajadores que buscan trabajo por primera vez"  data-tokens="Buscan Trabajo por primera vez">Buscan Trabajo por primera vez</option>
+                  <option value="trab_hogar" descripcion="Cantidad de personas que trabajan en quehaceres de su hogar.</br>  <b>Mapa: </b>Degradado de colores según cantidad de personas que trabajan en quehaceres de su hogar"  data-tokens="Trabajadores en el Hogar">Trabajadores en el Hogar</option>
+                  <option value="trab_estudia" descripcion="Cantidad de personas que estudian.</br>  <b>Mapa: </b>Degradado de colores según cantidad de estudiantes"  data-tokens="Cantidad de Estudiantes">Cantidad de Estudiantes</option>
+                  <option value="trab_jubilado" descripcion="Cantidad de trabajadores jubilados o rentistas.</br>  <b>Mapa: </b>Degradado de colores según cantidad de trabajadores jubilados o rentistas"  data-tokens="Trabajadores Jubilados">Trabajadores Jubilados</option>
+                  <option value="trab_incapacitado" descripcion="Cantidad de personas incapacitadas permanentes para trabajar.</br>  <b>Mapa: </b>Degradado de colores según cantidad de personas incapacitadas permanentes para trabajar" data-tokens="Personas incapacitadas de trabajar">Personas incapacitadas de trabajar</option>
+                  <option value="hijos" descripcion="Cantidad personas que tienen 1,2,3,4,5, entre 6 y 10 hijos y más 10 de hijos en la manzana.</br>  <b>Mapa: </b>Degradado de colores según cantidad de hijos" data-tokens="Cantidad de Hijos">Cantidad de Hijos</option>
+                  <option value="edad" descripcion="Cantidad de personas de distintas edades, divididos en edades quinquenales.</br>  <b>Mapa: </b>Degradado de colores según rango etario predominante en la manzana" data-tokens="Vejez">Rango Etario</option>
+                </select></br>
+
+
+                <h4>Hogares y Viviendas: </h4>
+                <select id="mySelect_HyV" class="selectpicker indicadores_select"  data-live-search="true" data-actions-box="true" title="Escoge uno de los siguientes..." onchange="CambiarMapa_hogares(this.value)" multiple data-width="fit" >
+                  <optgroup label="Hogares">
+                    <option value="combustion" descripcion="Cantidad de hogares que utizan distinto tipo de combustion (Gas Natural, Gas Licuado, Parafina, Leña, Carbón o Aserrín, Electricidad, Energía Solar o si No cocinan).</br>  <b>Mapa: </b>Distinto color para el tipo de combustion más utilizado por los hogares de la manzana" data-tokens="Tipo de Combustion">Tipo de combustion</option>
+                    <option value="internet" descripcion="Porcentaje de hogares que tienen acceso a internet.</br>  <b>Mapa: </b>degradado de colores según el porcentaje de hogares con acceso a internet por manzana"data-tokens="Cantidad de conexiones a Internet">Cantidad de casas con conexion a Internet</option>
+                    <option value="cable" descripcion="Porcentaje de hogares que tienen acceso a television por cable.</br>  <b>Mapa: </b>degradado de colores según el porcentaje de hogares con acceso a cable por manzana" data-tokens="Tipo de Combustion" data-tokens="Cantidad de tv cable ">Cantidad de casas con TV-Cable</option>
+                    <option value="computador" descripcion="Porcentaje de hogares que tienen acceso a computador.</br>  <b>Mapa: </b>degradado de colores según el porcentaje de hogares con acceso a computador por manzana"data-tokens="Cantidad de Computadores">Cantidad de casas con computador</option>
+                    <option value="bicicleta" descripcion="Porcentaje de hogares que poseen almenos una bicicleta.</br>  <b>Mapa: </b>degradado de colores según el porcentaje de hogares con al menos una bicicleta por manzana"data-tokens="Cantidad de Bicicletas">Cantidad de Bicicletas por hogar</option>
+                    <option value="auto" descripcion="Porcentaje de hogares que poseen al menos un vehiculo para uso particular (se considera autos y camionetas).</br>  <b>Mapa: </b>degradado de colores según el porcentaje de hogares que poseen almenos un vehículo particular"data-tokens="Cantidad de Autos">Cantidad de Vehiculos particulares por hogar</option>
+                    <option value="moto" descripcion="Porcentaje de hogares que poseen al menos una moto para uso particular.</br>  <b>Mapa: </b>degradado de colores según el porcentaje de hogares que poseen al menos una moto para uso particular"data-tokens="Cantidad de Motos">Cantidad de Moto particulares por hogar</option>
+                  </optgroup>
+                  <optgroup label="Viviendas">
+                    <option value="tipo" descripcion="Cantidad de viviendas según su tipo en la manzana (Casa, Departamento en edificio, Pieza en casa antigua o conventillo, Mejora o Mediagua, Rancho o choza, Ruca, otro tipo de vivienda particular, Vivienda Colectiva, Viajeros) .</br>  <b>Mapa: </b>Distinto color para el tipo de vivienda predominante en la manzana" data-tokens="Cantidad de Vivienda">Tipo de Vivienda</option>
+                    <option value="condicion" descripcion="Cantidad de viviendas según su condición de ocupación en la manzana (Ocupada por personas presentes, ausentes o Desocupada) .</br>  <b>Mapa: </b>Distinto color para el tipo de ocupacion predominante en la manzana" data-tokens="Tipo de ocupacion">Tipo de ocupacion</option>
+                    <option value="tenencia" descripcion="Cantidad de viviendas el tipo de tenencia, propiedad de las viviendas en la manzana (Propia, pagada totalmente o pagada a plazo; Arrendada; Cedida por trabajo o servicio; Gratuita) .</br>  <b>Mapa: </b>Distinto color para el tipo de propiedad predominante en la manzana"  data-tokens="Cantidad de Habitantes">Tipo de tenencia</option>
+                    <option value="alumbra" descripcion="Cantidad de viviendas que no poseen alumbrado eléctrico .</br>  <b>Mapa: </b>Degradado de colores para según la cantidad de viviendas sin alumbrado eléctrico"  data-tokens="Cantidad de Habitantes">Existencia de viviendas sin acceso a alumbrado</option>
+                    <option value="caneria" descripcion="Cantidad de viviendas que no poseen agua por cañería .</br>  <b>Mapa: </b>Degradado de colores para según la cantidad de viviendas sin agua por cañería"  data-tokens="cañería">Existencia de viviendas sin acceso a caneria</option>
+                    <option value="agua_red" descripcion="Cantidad de viviendas que poseen agua desde la red pública (compañía de agua potable) .</br>  <b>Mapa: </b>Degradado de colores para según la cantidad de viviendas con agua desde red pública"  data-tokens="pozo o noria ">Viviendas con acceso a agua desde Red Publica</option>
+                    <option value="agua_pozo" descripcion="Cantidad de viviendas que poseen agua desde un pozo o noria .</br>  <b>Mapa: </b>Degradado de colores para según la cantidad de viviendas con agua desde pozo o noria" data-tokens="Cantidad de Habitantes">Viviendas con acceso a agua desde Pozo o Noria</option>
+                    <option value="agua_rio" descripcion="Cantidad de viviendas que poseen agua desde río, vertiente o estero .</br>  <b>Mapa: </b>Degradado de colores para según la cantidad de viviendas con agua desde río, vertiente o estero" data-tokens="río, vertiente o estero">Viviendas con acceso a agua desde Rio, Vertiente o Estero</option>
+                    <option value="carencia_alcantarillado" descripcion="Cantidad de viviendas que no poseen agua por cañería .</br>  <b>Mapa: </b>Degradado de colores para según la cantidad de viviendas sin disponibilidad de servicio higiénico (W.C.)"  data-tokens="alcantarillado wc ">Viviendas sin disponibilidad de Servicio Higiénico (W.C.)</option>
+                  </optgroup>
+                </select></br></br>
+                <button class="btn btn-default" onclick="deleteRoute()">Volver a los Valores Iniciales</button></br></br>
+                <button class="btn btn-default" onclick="CambiarIndicadorRuta()">Actualizar Ruta <span class="glyphicon glyphicon-map-marker"></span></button>
+              </div>
+              <div class="sidebar-pane" id="trazas">
+                <h1>Trazas</h1>
+                <h2><i class="fa fa-caret-left"></i><span class="sidebar-close"><span class="glyphicon glyphicon-triangle-left"></span></span></h2></br>
+                <h4>Identificador de la traza: </h4>
+                <select id="Rutas" class="selectpicker"  data-live-search="true" title="Escoge una de las trazas..." data-actions-box="true" onchange="ShowRoute(this.value)" multiple data-width="fit" >
+                </select></br></br>
+                <button class="btn btn-default" onclick="deleteRoute()">Volver a los Valores Iniciales</button>
+              </div>
+              <div class="sidebar-pane" id="messages">
+                <h1 class="sidebar-header">Messages</h1><span class="glyphicon glyphicon-remove-circle"><i class="fa fa-caret-left"></i></span>
+              </div>
+              <div class="sidebar-pane" id="settings">
+                <h1 class="sidebar-header">Settings</h1><span class="glyphicon glyphicon-remove-circle"><i class="fa fa-caret-left"></i></span>
+              </div>
+            </div>
+          </div>
+          <div id = 'map' class="sidebar-map">
+          </div>
+          <div id="new-parent">
+          </div>
+        </br>
+      </br>
+    </div>
+
+    <script type="text/javascript">
+
+
+  var valor_select = "normal"; //criterio por defecto del mapa
+  var d_1, d_2, d_3, d_4, d_5; //valores de las secciones de indicador
+  var v_1, v_2, v_3, v_4, v_5; 
+  var valores_colores; //colores del mapa y leyenda
+  var rutas_pintadas = []; // indica las rutas que al ser seleccionadas ya han sido pintadas. 
+  var manzana_redcode;
+  d3.json( "{% static 'js/valdivia_100_0315.json' %}" , function(data) {
+  //carga de las rutas de valdivia en el select #Rutas dentro del Sidebar          
+    data.forEach(function(d){
+      var option = document.createElement("option");
+      option.text = d.numa;
+      option.value = d.numa;
+      var select = document.getElementById("Rutas");
+      select.appendChild(option);
+    });
+  });
+
+  function ShowRoute(numa) {
+    /* Funcion que pinta las rutas que no han sido pintadas anteriormente
+    */
+    var pintar = true;
+    rutas_pintadas.forEach(function(numa_pintada){
+    numa == numa_pintada ? pintar = false : pintar = pintar;
+  });
+
+    if (pintar){
+      rutas_pintadas.push(numa);
+      d3.json( "{% static 'js/valdivia_100_0315.json' %}" , function(data) {
+        var ruta = $.grep(data, function(d){ return d.numa == numa; }); 
+        puntos = [];
+        primera = true;
+        datos_ant = [];
+        var valor_ant ;
+        ruta[0].path.forEach(function(p){
+          antPoint = new L.latLng(p.lat,p.lon);
+          puntos.push(antPoint);
+          primera ? valor_ant = cliclingMap(antPoint, true) : valor_ant = cliclingMap(antPoint, false);
+          datos_ant.push({'hora': p.hora, 'torre': p.torre, 'valor': valor_ant});
+          primera = false;
+        });
+
+        CreateRoute(puntos,numa, datos_ant);
+      });
+    }
+  }
+  var mapURL = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw'
+  var mapURL_OSM_BW = 'http://{s}.www.toolserver.org/tiles/bw-mapnik/{z}/{x}/{y}.png'
+  var mapURL_OSM = 'http://{s}.tile.osm.org/{z}/{x}/{y}.png'
+
+  var grayscale = L.tileLayer(mapURL, {id: 'mapbox.light', attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors,'}),
+    streets   = L.tileLayer(mapURL, {id: 'mapbox.streets', attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors,'})
+    blanco_negro   = L.tileLayer(mapURL_OSM_BW, {attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors,'})
+    normal   = L.tileLayer(mapURL_OSM, {attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors,'});
+
+  var map = L.map('map', {
+    center: [-39.81, -73.24],
+    zoom: 13,
+    layers: [blanco_negro]
+  });
+
+  var baseMaps = {
+    "Blanco y Negro": blanco_negro,
+    "OpenStreetMap": normal,
+    "Grayscale": grayscale,
+    "Streets": streets
+  };
+
+  L.control.layers(null, baseMaps, {position: 'topleft'}).addTo(map);
+  
+  var sidebar = L.control.sidebar('sidebar').addTo(map);
+  
+  L.control.scale().addTo(map);
+
+  var info = L.control();
+  
+  var contenido = L.control();
+  
+  contenido.onAdd = function (map) {
+    this._div = L.DomUtil.create('div', 'info_contenido'); // create a div with a class "info_contenido"
+    this.update();
+    return this._div;
+  };
+
+  contenido.update = function (data_valor) {
+    this._div.innerHTML = ( data_valor ? '<b>' + data_valor.respuesta + '</b><br/>'
+        : 'Selecciona una manzana' );
+  };
+
+  info.onAdd = function (map){
+    this._div = L.DomUtil.create('div', 'info'); // create a div with a class "info"
+    this.update();
+    return this._div;
+  };
+
+  
+  info.update = function (data_valor) {
+    var html = "";
+    if (data_valor){
+      if (data_valor.cant){
+        for (var i = 0 ; i < data_valor.cant; i++){
+          html +=  '<h4>' + data_valor.titulo[i] + '</h4> <p>'+data_valor.descripcion[i]+'</p>';
+        }
+      }
+      else{
+        html = '<h4>' + data_valor.titulo + '</h4> <p>'+data_valor.descripcion+'</p>';
+      }
+    } 
+    else {
+      html = '<h4> Selecciona un Indicador  </h4>';
+    }
+    this._div.innerHTML = html;
+  };
+
+  info.addTo(map);
+  contenido.addTo(map);
+
+  var legend_info = L.control({position: 'bottomright'});
+
+  legend_info.onAdd = function (map) {
+  
+      //valores_colores =[{'valor': valor_label, 'col': color_label}, ] 
+      var div = L.DomUtil.create('div', 'legend_info'),
+        
+      grades = [d_5,d_4,d_3,d_2,d_1],
+      labels = [];
+
+    // loop through our density intervals and generate a label with a colored square for each interval
+    if (valores_colores && valores_colores.length > 0 ) {
+      for (var i = 0; i < valores_colores.length ; i++) {
+        div.innerHTML += '<i style="background:' + valores_colores[i].col + '"></i> ' +
+        valores_colores[i].valor + (valores_colores[i + 1] ?  '<br/>' : ' ');
+      }
+    }
+    else{
+      for (var i = 0; i < grades.length ; i++) {
+        div.innerHTML += '<i style="background:' + getColorLegend(grades[i] + 1, d_1,d_2,d_3,d_4,d_5) + '"></i> ' +
+        grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br/>' : '+');
+      }
+    }
+    return div;
+  };
+
+  function getColorLegend(d,d_1,d_2,d_3,d_4,d_5) {
+    //Funcion para determinar el color de la leyenda, segun los "grades".
+    return d > d_1 ? '#FFFFFF' : 
+    d > d_2 ? '#FC4E2A' :
+    d > d_3 ? '#FEB24C' :
+    d > d_4 ? '#FED976' :
+    d > d_5 ? '#FFEDA0' :
+    '#FFFFFF';
+  }
+
+  function getColor(d) {
+
+    //Funcion para determinar el color en el criterio "normal" segun cantidad de personas
+    var cpersona = $.grep(personas_cantidad, function(e){ return e.redcode == d; });
+    if (cpersona.length >0) {
+      d = cpersona[0].cant;
+    }
+    return d == undefined || d == null || d < 0 ? '#FFFFFF' :
+    d <= d_5 ? '#FFFF64' : 
+    d <= d_4 ? '#FFCB2A' :
+    d <= d_3 ? '#FF9B2A'  :
+    d <= d_2 ? '#FE0006' : 
+    d <= d_1 ? '#BC006E' : 
+    '#FFFFFF';
+  }
+
+  function style(feature) {
+    //Determina el estilo de la manzana, color segun getColor.
+    return { 
+      fillColor: getColor(
+      feature.properties.MANZENT), 
+      weight: 2, 
+      opacity: 1, 
+      color: 'white', 
+      dashArray: '3', 
+      fillOpacity: 0.7
+    };
+  }
+
+  function onEachFeature(feature, layer) {
+    //funciones sobre las capas, según eventos
+    layer.on('dblclick', function(e) {
+      var layer = e.target;
+      layer.setStyle({
+        weight: 3,
+        color: '#7D8B93',
+        dashArray: '',
+        fillOpacity: 0.7,
+        fillColor: 'red'
+      });
+    });
+
+    layer.on('mouseover', function(e) {
+      var layer = e.target;
+      layer.setStyle({
+        weight: 3,
+        color: '#7D8B93',
+        dashArray: '',
+        fillOpacity: 0.7,
+        fillColor: 'grey'
+      });
+      if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+        //layer.bringToFront();
+      }
+      var manzana_redcode = feature.properties.MANZENT.toString();
+      !(typeof valor_select === 'string') ? valor_select = valor_select.join() : console.log(valor_select);
+      $.ajax({
+        url: "{% url 'index' %}" , 
+        type: 'POST',
+        data: {
+          redcode_valor : manzana_redcode,
+          valor_seleccion : valor_select,
+          csrfmiddlewaretoken: '{{ csrf_token }}'} ,
+          success: function(data) {
+            if (valor_select == "densidad"){
+              data.respuesta = ( feature.properties.DENS ? data.respuesta + "</br> Densidad: " + feature.properties.DENS.toString() :
+                data.respuesta + "</br> No Existe Información de Densidad " );
+            }
+            contenido.update(data);
+          },
+          failure: function(data) {
+            alert('Error de conexión');
+          },
+          crossDomain: true
+        });
+    });
+
+    layer.on('mouseout', function(e) {
+      geojson.resetStyle(e.target);
+    });
+
+    layer.on( 'click', function (e) {
+      var manzana_redcode = feature.properties.MANZENT.toString();
+      var cantidad = 0;
+      $.ajax({
+        url: "{% url 'index' %}" , 
+        type: 'POST',
+        data: {
+          redcode : manzana_redcode,
+          csrfmiddlewaretoken: '{{ csrf_token }}'},
+          success: function(data) {
+            var popup = L.popup().setContent(data);
+            layer.bindPopup(popup).openPopup();
+          },
+          failure: function(data) {
+            alert('Error de conexión');
+          },
+          crossDomain: true
+        });
+    });
+  }
+
+  var personas_cantidad=[];
+  {%for cpersona in personas_cant %}
+    personas_cantidad.push({redcode:{{cpersona.0}}, cant: {{cpersona.1}}});
+  {%endfor%}
+
+  var valores_colores = color_define_personas();
+  
+  //Creación del GEOJson de manzanas, con criterio por defecto: Cantidad de Habitantes
+  geojson = L.geoJson(manzanas, {
+    style: style, onEachFeature: onEachFeature
+  })
+  .addTo(map);
+  geojson.bringToBack();
+
+  legend_info.addTo(map);
+
+  function color_define(d_1,d_2,d_3,d_4,d_5) {
+    //Funcion que define los colores de la legenda del criterio selccionado 
+    return [
+    {'valor': (d_2 + 1) + ' - ' + d_1 , 'col': '#BC006E'},
+    {'valor': (d_3 + 1) + ' - ' + d_2 , 'col': '#FE0006'},
+    {'valor': (d_4 + 1) + ' - ' + d_3 , 'col': '#FF9B2A'},
+    {'valor': (d_5 + 1) + ' - ' + d_4 , 'col': '#FFCB2A'},
+    {'valor': d_5, 'col': '#FFFF64'},
+    {'valor': 'Sin información' , 'col': '#FFFFFF'}
+    ];
+  }
+
+  function color_define_personas () {
+    //Funcion que define los colores de la legenda del criterio "normal"
+    d_1 = {{max_cant}};
+    d_2 = ( ( {{max_cant}} - {{min_cant}} ) / 4 ) * 3
+    d_3 = ( ( {{max_cant}} - {{min_cant}} ) / 4 ) * 2
+    d_4 = ( ( {{max_cant}} - {{min_cant}} ) / 4 )
+    d_5 = {{min_cant}};
+    return [
+    {'valor': (d_2 +1) + ' - ' + d_1 , 'col': '#BC006E'},
+    {'valor': (d_3 +1) + ' - ' + d_2 , 'col': '#FE0006'},
+    {'valor': (d_4 +1) + ' - ' + d_3 , 'col': '#FF9B2A'},
+    {'valor': (d_5 +1) + ' - ' + d_4 , 'col': '#FFCB2A'},
+    {'valor': d_5, 'col': '#FFFF64'},
+    {'valor': 'Sin información' , 'col': '#FFFFFF'}
+    ];
+  }
+
+  function color_define_densidad (d_1,d_2,d_3,d_4,d_5) {
+    //Funcion que define los colores de la legenda del criterio "densidad"
+    return [
+    {'valor': (d_2 ) + ' - ' + d_1 , 'col': '#BC006E'},
+    {'valor': (d_3 ) + ' - ' + d_2 , 'col': '#FE0006'},
+    {'valor': (d_4 ) + ' - ' + d_3 , 'col': '#FF9B2A'},
+    {'valor': (d_5 ) + ' - ' + d_4 , 'col': '#FFCB2A'},
+    {'valor': d_5, 'col': '#FFFF64'},
+    {'valor': 'Sin información' , 'col': '#FFFFFF'}
+    ];
+  }
+
+  function CambiarMapa(val) {
+
+    function findManzana(element) {
+      return element.redcode == manzana_redcode;
+    }
+
+    function estilo(criterio, funcion, data, d_1, d_2, d_3, d_4, d_5) {
+      var manzana = data.find(findManzana);
+      var manzana_color = (manzana == undefined ? undefined : manzana[criterio]);
+
+      return { 
+        fillColor: (d_1 ? getColor(manzana_color, d_1, d_2, d_3, d_4, d_5) : funcion(manzana_color) ), 
+        weight: 2, 
+        opacity: 0.7, 
+        color: 'white', 
+        dashArray: '3', 
+        fillOpacity: 0.7
+      };
+    }
+
+    legend_info ?  map.removeControl(legend_info) : console.log("no hay leyenda");
+    valores_colores = [];
+
+    function getColor(d, d_1, d_2, d_3, d_4, d_5) {
+      console.log("d")
+      console.log(d);
+      return d == undefined || d == null || d < 0 ? '#FFFFFF' :
+      d <= d_5 ? '#FFFF64' :
+      d <= d_4 ? '#FFCB2A' :
+      d <= d_3 ? '#FF9B2A' :
+      d <= d_2 ? '#FE0006' : 
+      d <= d_1 ? '#BC006E' : 
+      '#FFFFFF';
+    }
+    if (val == "densidad"){
+      function style_densidad(feature) {
+        return {
+          fillColor: getColor(
+          feature.properties.DENS, d_5,d_4,d_3,d_2,d_1 ),
+          weight: 2, 
+          opacity: 1, 
+          color: 'white', 
+          dashArray: '3', 
+          fillOpacity: 0.7
+        };
+      }
+
+      map.removeLayer(geojson);
+      
+      function getMaxMin(ciudad) {
+        var max = (ciudad[0].properties.DENS);
+        for (var i=1 ; i<ciudad.length ; i++) {
+          max = Math.max((ciudad[i].properties.DENS), max);
+        }
+        return max;
+      }
+      var max_densidad = getMaxMin(manzanas.features);
+      d_1 = (max_densidad) / (4 * 4);
+      d_2 = (max_densidad) / (4 * 3) ;
+      d_3 = (max_densidad) / (4 * 2);
+      d_4 = (max_densidad) / (4);
+      d_5 = 0;
+
+      geojson = L.geoJson(manzanas, {
+        style: style_densidad, onEachFeature: onEachFeature
+      })
+      .addTo(map);
+      valores_colores = color_define_densidad(d_5,d_4,d_3,d_2,d_1);
+      legend_info.addTo(map);
+      geojson.bringToBack();
+    } //Fin densidad
+
+    else if (val == 'hijos'){
+      $.ajax({
+        url: "{% url 'index' %}" , 
+        type: 'POST',
+        data:{
+          nuevoMapa_hijos : val,
+          csrfmiddlewaretoken: '{{ csrf_token }}'} ,
+          success: function(data) {
+            geojson ? map.removeLayer(geojson): console.log("nada geojson hijos") ;
+            legend_info ? map.removeControl(legend_info) : console.log("nada legend_info hijos");
+            
+            valores_colores =[
+            {'valor': 'ninguna', 'col': '#FF7600'},
+            {'valor': '1', 'col': '#FFFA00'},
+            {'valor': '2', 'col': '#FA0084'},
+            {'valor': '3', 'col': '#00E0F5'},
+            {'valor': '4', 'col': '#6DFC00'},
+            {'valor': '5', 'col': '#6DFC00'},
+            {'valor': '5+', 'col': '#6DFC00'},
+            {'valor': '10+', 'col': '#6DFC00'},
+            {'valor': 'Sin información' , 'col': '#FFFFFF'},
+            ] ;
+            
+            legend_info.addTo(map);
+            geojson = L.geoJson(manzanas, {
+              style: style_hijos, onEachFeature: onEachFeature
+            })
+            .addTo(map);
+            geojson.bringToBack();
+            
+            function getColor_hijos(d){
+              return d == undefined ? '#FFFFFF' ://blanco
+              d == 'ninguna' ? '#FF7600' :  // naranjo
+              d == '1' ? '#FFFA00' :  // amarillo
+              d == '2' ? '#FA0084' :  // rosado
+              d == '3' ? '#00E0F5' :  // celeste
+              d == '4' ? '#6DFC00' :  // verde
+              d == '5' ? '#6DFC00' :  // verde
+              d == '5mas' ? '#6DFC00' :  // verde
+              d == '10mas' ? '#6DFC00' :  // verde
+              '#FFFFFF';
+            }
+
+            function style_hijos(feature) {
+              manzana_redcode = feature.properties.MANZENT;
+              return estilo("hijos", getColor_hijos, data);
+            }
+
+          },
+          failure: function(data) {
+            alert('Error de conexión');
+          },
+          crossDomain: true
+        });
+      } //Fin hijos
+
+      else if (val == 'edad'){
+        $.ajax({
+          url: "{% url 'index' %}" , 
+          type: 'POST',
+          data:{  
+            nuevoMapa_edades : val,
+            csrfmiddlewaretoken: '{{ csrf_token }}'
+          },
+          success: function(data) {
+            map.removeLayer(geojson);
+            valores_colores =[{'valor': 'ninguna', 'col': 'white'},
+            {'valor': '0-4', 'col': '#FFFA00'},
+            {'valor': '4-9', 'col': '#FFFA00'},
+            {'valor': '10-14', 'col': '#FFFA00'},
+            {'valor': '14-19', 'col': '#FFFA00'},
+            {'valor': '20-24', 'col': '#FF7600'},
+            {'valor': '24-29', 'col': '#FF7600'},
+            {'valor': '30-34', 'col': '#FF7600'},
+            {'valor': '34-39', 'col': '#FF7600'},
+            {'valor': '40-44', 'col': '#FA0084'},
+            {'valor': '44-49', 'col': '#FA0084'},
+            {'valor': '50-54', 'col': '#FA0084'},
+            {'valor': '54-59', 'col': '#00E0F5'},
+            {'valor': '60-64', 'col': '#00E0F5'},
+            {'valor': '64-69', 'col': '#6DFC00'},
+            {'valor': '70-74', 'col': '#6DFC00'},
+            {'valor': '74-79', 'col': 'red'},
+            {'valor': '80+', 'col': 'red'},
+            {'valor': 'Sin información' , 'col': '#FFFFFF'},
+            ];
+
+            legend_info.addTo(map);
+
+            geojson = L.geoJson(manzanas, {
+              style: style_edad, onEachFeature: onEachFeature
+            })
+            .addTo(map);
+
+            geojson.bringToBack();
+
+            function getColor_edad(d) {
+              return d == undefined ? '#FFFFFF' : //blanco
+              d == 'ninguna' ? 'white' :  // blanco
+              d == '4' ? '#FFFA00' :  // amarillo
+              d == '9' ? '#FFFA00' :  // amarillo
+              d == '14' ? '#FFFA00' :  // amarillo
+              d == '19' ? '#FFFA00' :  // amarillo
+              d == '24' ? '#FF7600' :  // naranjo
+              d == '29' ? '#FF7600' :  // naranjo
+              d == '34' ? '#FF7600' :  // naranjo
+              d == '39' ? '#FF7600' :  // naranjo
+              d == '44' ? '#FA0084' :  // rosado
+              d == '49' ? '#FA0084' :  // rosado
+              d == '54' ? '#FA0084' :  // rosado
+              d == '59' ? '#00E0F5' :  // celeste
+              d == '64' ? '#00E0F5' :  // celeste
+              d == '69' ? '#6DFC00' :  // verde
+              d == '74' ? '#6DFC00' :  // verde
+              d == '79' ? 'red' :  // rojo
+              d == '84' ? 'red' :  // rojo
+              '#FFFFFF';
+            }
+            function style_edad(feature) {
+              manzana_redcode = feature.properties.MANZENT;
+              return estilo("quinquena", getColor_edad, data);
+            }
+          },
+          failure: function(data) {
+            alert('Error de conexión');
+          },
+          crossDomain: true
+        });
+      }
+
+      else if (val == 'religion'){
+        
+        $.ajax({
+          url: "{% url 'index' %}" ,
+          type: 'POST',
+          data:{
+            nuevoMapa_religion : val,
+            csrfmiddlewaretoken: '{{ csrf_token }}'
+          },
+          success: function(data) {
+            map.removeLayer(geojson);
+            valores_colores =[{'valor': 'Ninguna, ateo, agnostico', 'col': 'red'},
+            {'valor': 'Catolica', 'col': '#FFFA00'},
+            {'valor': 'Evangelica', 'col': '#FA0084'},
+            {'valor': 'Testigo de Jehova', 'col': '#00E0F5'},
+            {'valor': 'Judaica', 'col': '#6DFC00'},
+            {'valor': 'Mormon', 'col': '#6DFC00'},
+            {'valor': 'Musulmana', 'col': '#6DFC00'},
+            {'valor': 'Ortodoxa Profesional', 'col': '#6DFC00'},
+            {'valor': 'Otra', 'col': '#6DFC00'},
+            {'valor': 'Sin información' , 'col': '#FFFFFF'},
+            ];
+            
+            legend_info.addTo(map);
+            
+            geojson = L.geoJson(manzanas, {
+              style: style_religion, onEachFeature: onEachFeature
+            })
+            .addTo(map);
+            geojson.bringToBack;
+            console.log("en getColor_religion");
+
+            function getColor_religion(d) {
+              return d == undefined ? '#FFFFFF' : //blanco
+              d == 'Ninguna, ateo, agnostico' ? 'red' :  // naranjo
+              d == 'Catolica' ? '#FFFA00' :  // amarillo
+              d == 'Evangelica' ? '#FA0084' :  // rosado
+              d == 'Testigo de Jehova' ? '#00E0F5' :  // celeste
+              d == 'Judaica' ? '#6DFC00' :  // verde
+              d == 'Mormon' ? '#6DFC00' :  // verde
+              d == 'Musulmana' ? '#6DFC00' :  // verde
+              d == 'Ortodoxa Profesional' ? '#6DFC00' :  // verde
+              d == 'Otra' ? '#6DFC00' :  // verde
+              '#FFFFFF';
+            }
+
+            function style_religion(feature) {
+              manzana_redcode = feature.properties.MANZENT;
+              return estilo("religion", getColor_religion, data);
+            }
+          },
+          failure: function(data) {
+            alert('Error de conexión');
+          },
+          crossDomain: true
+        });
+      }
+      else if (val == 'empleabilidad'){
+        $.ajax({
+          url: "{% url 'index' %}" , 
+          type: 'POST',
+          data:{
+            nuevoMapa_trabajo : val,
+            csrfmiddlewaretoken: '{{ csrf_token }}'
+          },
+          success: function(data) {
+            map.removeLayer(geojson);
+            
+            valores_colores = [{'valor': 'Ninguna', 'col': 'red'},
+            {'valor': 'asalariado', 'col': '#FFFA00'},
+            {'valor': 'domestico', 'col': '#FA0084'},
+            {'valor': 'cuenta propia', 'col': '#00E0F5'},
+            {'valor': 'empleador', 'col': '#6DFC00'},
+            {'valor': 'no remunerado', 'col': '#red'},
+            {'valor': 'Sin información' , 'col': '#FFFFFF'},
+            ];
+
+            legend_info.addTo(map);
+            
+            geojson = L.geoJson(manzanas, {
+              style: style_trabajo, onEachFeature: onEachFeature
+            })
+            .addTo(map);
+
+            geojson.bringToBack();
+
+            function getColor_trabajo(d) {
+              return d == undefined ? '#FFFFFF' : //blanco
+              d == 'ninguna' ? 'red' :  // naranjo
+              d == 'asalariado' ? '#FFFA00' :  // amarillo
+              d == 'domestico' ? '#FA0084' :  // rosado
+              d == 'cuenta propia' ? '#00E0F5' :  // celeste
+              d == 'empleador' ? '#6DFC00' :  // verde
+              d == 'no remunerado' ? 'red' :  // amarillo
+              '#FFFFFF';
+            }
+
+            function style_trabajo(feature) {
+              manzana_redcode = feature.properties.MANZENT;
+              return estilo("trabajo", getColor_trabajo, data);
+              }
+            },
+            failure: function(data) {
+              alert('Error de conexión');
+            },
+            crossDomain: true
+          });
+        }
+
+        else if (val == 'trab_ingreso'){
+          console.log("en trab_ingreso");
+          $.ajax({
+            url: "{% url 'index' %}" ,
+            type: 'POST',
+            data:{
+              nuevoMapa_slaboral_trabajoIngreso : val,
+              csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            success: function(data) {
+              map.removeLayer(geojson);
+              var d_1 = data.maxim;
+              var d_2 = ( ( data.maxim - data.minim ) / 4 ) * 3
+              var d_3 = ( ( data.maxim - data.minim ) / 4 ) * 2
+              var d_4 = ( ( data.maxim - data.minim ) / 4 )
+              var d_5 = data.minim;
+              valores_colores = color_define(d_1,d_2,d_3,d_4,d_5);
+
+              legend_info.addTo(map);
+
+              geojson = L.geoJson(manzanas, {
+               style: style_trab1, onEachFeature: onEachFeature 
+              })
+              .addTo(map);
+              geojson.bringToBack();
+
+              function style_trab1(feature) {
+                manzana_redcode = feature.properties.MANZENT;
+                return estilo("slaboral_1", getColor, data.cantidad, d_1, d_2, d_3, d_4, d_5);
+              }
+            },
+            failure: function(data) {
+              alert('Error de conexión');
+            },
+            crossDomain: true
+          });
+        }
+        else if (val == 'sin_trabajo_con_ingreso'){
+          console.log("en sin_trabajo_con_ingreso");
+          $.ajax({
+            url: "{% url 'index' %}" , 
+            type: 'POST',
+            data:{  nuevoMapa_slaboral_STCE : val,
+              csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            success: function(data) {
+              map.removeLayer(geojson);
+              var d_1 = data.maxim;
+              var d_2 = ( ( data.maxim - data.minim ) / 4 ) * 3
+              var d_3 = ( ( data.maxim - data.minim ) / 4 ) * 2
+              var d_4 = ( ( data.maxim - data.minim ) / 4 )
+              var d_5 = data.minim;
+              valores_colores = color_define(d_1,d_2,d_3,d_4,d_5);
+              legend_info.addTo(map);
+              geojson = L.geoJson(manzanas, {
+               style: style_trab2, onEachFeature: onEachFeature 
+              })
+              .addTo(map);
+              geojson.bringToBack();
+
+              function style_trab2(feature) {
+                manzana_redcode = feature.properties.MANZENT;
+                return estilo("slaboral_2", getColor, data.cantidad, d_1, d_2, d_3, d_4, d_5);
+              }
+            },
+            failure: function(data) {
+                alert('Error de conexión');
+            },
+            crossDomain: true
+          });
+        }
+        
+        else if (val == 'trab_prim'){
+          console.log("en trab_prim");
+          $.ajax({
+            url: "{% url 'index' %}" , 
+            type: 'POST',
+            data:{nuevoMapa_slaboral_BuscaPrim : val,
+                  csrfmiddlewaretoken: '{{ csrf_token }}'
+                },
+            success: function(data) {
+              map.removeLayer(geojson);
+              var d_1 = data.maxim;
+              var d_2 = ( ( data.maxim - data.minim ) / 4 ) * 3
+              var d_3 = ( ( data.maxim - data.minim ) / 4 ) * 2
+              var d_4 = ( ( data.maxim - data.minim ) / 4 )
+              var d_5 = data.minim;
+
+               valores_colores = color_define(d_1,d_2,d_3,d_4,d_5);
+              legend_info.addTo(map);
+              geojson = L.geoJson(manzanas, {
+               style: style_trab5, onEachFeature: onEachFeature 
+              })
+              .addTo(map);
+              geojson.bringToBack();
+
+              function style_trab5(feature) {
+                manzana_redcode = feature.properties.MANZENT;
+                return estilo("slaboral_5", getColor, data.cantidad, d_1, d_2, d_3, d_4, d_5);
+              }
+            },
+            failure: function(data) {
+                alert('Error de conexión');
+            },
+            crossDomain: true
+          });
+        }
+        else if (val == 'trab_hogar'){
+          console.log("en trab_hogar");
+          $.ajax({
+
+            url: "{% url 'index' %}" , 
+            type: 'POST',
+            data:{  nuevoMapa_slaboral_hogar : val,
+                    csrfmiddlewaretoken: '{{ csrf_token }}'} ,
+            success: function(data) {
+               map.removeLayer(geojson);
+                  var d_1 = data.maxim;
+                  var d_2 = ( ( data.maxim - data.minim ) / 4 ) * 3
+                  var d_3 = ( ( data.maxim - data.minim ) / 4 ) * 2
+                  var d_4 = ( ( data.maxim - data.minim ) / 4 )
+                  var d_5 = data.minim;
+
+                    valores_colores = color_define(d_1,d_2,d_3,d_4,d_5);
+
+                  legend_info.addTo(map);
+                  geojson = L.geoJson(manzanas, {
+                   style: style_trab6, onEachFeature: onEachFeature 
+                  })
+                  .addTo(map);
+                  geojson.bringToBack();
+
+              function style_trab6(feature) {
+                manzana_redcode = feature.properties.MANZENT;
+                return estilo("slaboral_6", getColor, data.cantidad, d_1, d_2, d_3, d_4, d_5);
+
+                  }
+              },
+            failure: function(data) {
+                alert('Error de conexión');
+            },
+            crossDomain: true
+          });
+        }
+        else if (val == 'trab_estudia'){
+          console.log("en trab_estudia");
+          $.ajax({
+            url: "{% url 'index' %}" , 
+            type: 'POST',
+            data:{  nuevoMapa_slaboral_Estudia : val,
+                    csrfmiddlewaretoken: '{{ csrf_token }}'} ,
+            success: function(data) {
+              map.removeLayer(geojson);
+              var d_1 = data.maxim;
+              var d_2 = ( ( data.maxim - data.minim ) / 4 ) * 3
+              var d_3 = ( ( data.maxim - data.minim ) / 4 ) * 2
+              var d_4 = ( ( data.maxim - data.minim ) / 4 )
+              var d_5 = data.minim;
+               valores_colores = color_define(d_1,d_2,d_3,d_4,d_5);
+              legend_info.addTo(map);
+              geojson = L.geoJson(manzanas, {
+               style: style_trab7, onEachFeature: onEachFeature 
+              })
+              .addTo(map);
+              geojson.bringToBack();
+
+              function style_trab7(feature) { 
+                manzana_redcode = feature.properties.MANZENT;
+                return estilo("slaboral_7", getColor, data.cantidad, d_1, d_2, d_3, d_4, d_5); 
+              }
+            },
+            failure: function(data) {
+                alert('Error de conexión');
+            },
+            crossDomain: true
+          });
+        }
+        else if (val == 'trab_jubilado'){
+          console.log("en trab_jubilado");
+          $.ajax({
+            url: "{% url 'index' %}" , 
+            type: 'POST',
+            data:{  nuevoMapa_slaboral_Jubilado : val,
+                    csrfmiddlewaretoken: '{{ csrf_token }}'} ,
+            success: function(data) {
+               map.removeLayer(geojson);
+                  var d_1 = data.maxim;
+                  var d_2 = ( ( data.maxim - data.minim ) / 4 ) * 3
+                  var d_3 = ( ( data.maxim - data.minim ) / 4 ) * 2
+                  var d_4 = ( ( data.maxim - data.minim ) / 4 )
+                  var d_5 = data.minim;
+                   valores_colores = color_define(d_1,d_2,d_3,d_4,d_5);
+                  legend_info.addTo(map);
+                  geojson = L.geoJson(manzanas, {
+                   style: style_trab8, onEachFeature: onEachFeature 
+                  })
+                  .addTo(map);
+                  geojson.bringToBack();
+
+              function style_trab8(feature) { 
+               
+                  manzana_redcode = feature.properties.MANZENT;
+                  return estilo("slaboral_8", getColor, data.cantidad, d_1, d_2, d_3, d_4, d_5); 
+                   
+                  }
+              },
+            failure: function(data) {
+                alert('Error de conexión');
+            },
+            crossDomain: true
+          });
+        }
+        else if (val == 'trab_incapacitado'){
+          $.ajax({
+            url: "{% url 'index' %}" , 
+            type: 'POST',
+            data:{
+              nuevoMapa_slaboral_Incapacitado : val,
+              csrfmiddlewaretoken: '{{ csrf_token }}'
+            } ,
+            success: function(data) {
+               map.removeLayer(geojson);
+                  var d_1 = data.maxim;
+                  var d_2 = ( ( data.maxim - data.minim ) / 4 ) * 3
+                  var d_3 = ( ( data.maxim - data.minim ) / 4 ) * 2
+                  var d_4 = ( ( data.maxim - data.minim ) / 4 )
+                  var d_5 = data.minim;
+                   valores_colores = color_define(d_1,d_2,d_3,d_4,d_5);
+                  legend_info.addTo(map);
+                  geojson = L.geoJson(manzanas, {
+                   style: style_trab9, onEachFeature: onEachFeature 
+                  })
+                  .addTo(map);
+                  geojson.bringToBack();
+
+              function style_trab9(feature) { 
+                manzana_redcode = feature.properties.MANZENT;
+                return estilo("slaboral_9", getColor, data.cantidad, d_1, d_2, d_3, d_4, d_5); 
+                  }
+              },
+            failure: function(data) {
+              alert('Error de conexión');
+            },
+            crossDomain: true
+          });
+        }
+        else if (val == 'analfabetismo'){
+              console.log("en analfabetismo");
+              $.ajax({
+
+                    url: "{% url 'index' %}" , 
+                    type: 'POST',
+                    data:{  nuevoMapa_analf : val,
+                            csrfmiddlewaretoken: '{{ csrf_token }}'} ,
+                          success: function(data) {
+                             map.removeLayer(geojson);
+                                var d_1 = data.maxim;
+                                var d_2 = ( ( data.maxim - data.minim ) / 4 ) * 3
+                                var d_3 = ( ( data.maxim - data.minim ) / 4 ) * 2
+                                var d_4 = ( ( data.maxim - data.minim ) / 4 )
+                                var d_5 = data.minim;
+                                valores_colores = color_define(d_1,d_2,d_3,d_4,d_5);
+                                legend_info.addTo(map);
+                                geojson = L.geoJson(manzanas, {
+                                 style: style_analf, onEachFeature: onEachFeature 
+                                })
+                                .addTo(map);
+
+                               
+
+                                geojson.bringToBack();
+
+                            function style_analf(feature) { 
+                              manzana_redcode = feature.properties.MANZENT;
+                              return estilo("lee_2", getColor, data.cantidad, d_1, d_2, d_3, d_4, d_5); 
+
+                                
+                                }
+
+                            function style_analf(feature) { 
+                              manzana_redcode = feature.properties.MANZENT;
+                              return estilo("lee_2", getColor, data.cantidad, d_1, d_2, d_3, d_4, d_5); 
+
+                                
+                                }
+                            },
+                          failure: function(data) {
+                              alert('Error de conexión');
+                          },
+                          crossDomain: true
+                      });
+            }
+
+        else if (val == 'masculino'){
+              console.log("en hombres");
+              $.ajax({
+
+                    url: "{% url 'index' %}" , 
+                    type: 'POST',
+                    data:{  nuevoMapa_masculino : val,
+                            csrfmiddlewaretoken: '{{ csrf_token }}'} ,
+                          success: function(data) {
+                             map.removeLayer(geojson);
+                                var d_1 = data.max_mas;
+                                var d_2 = ( ( data.max_mas - data.min_mas ) / 4 ) * 3
+                                var d_3 = ( ( data.max_mas - data.min_mas ) / 4 ) * 2
+                                var d_4 = ( ( data.max_mas - data.min_mas ) / 4 )
+                                var d_5 = data.min_mas;
+                                valores_colores = color_define(d_1,d_2,d_3,d_4,d_5);
+                                legend_info.addTo(map);
+                                geojson = L.geoJson(manzanas, {
+                                 style: style_masculino, onEachFeature: onEachFeature 
+                                })
+                                .addTo(map);
+                                geojson.bringToBack();
+
+                            function getColor_masculino(d) {
+                              //  console.log(d);
+                                return d == undefined || d < 0 ? '#FFFFFF' :
+                                d < d_5 ? '#FFFF64' : 
+                                d < d_4 ? '#FFCB2A' : 
+                                d < d_3 ? '#FF9B2A'  : 
+                                d < d_2 ? '#FE0006' : 
+                                d < d_1 ? '#BC006E' : 
+                                '#FFFFFF'; 
+                                }
+                            function style_masculino(feature) { 
+                               manzana_redcode = feature.properties.MANZENT;
+                              return estilo("sexo_1", getColor, data.cantidad_hom, d_1, d_2, d_3, d_4, d_5); 
+
+                                }
+                      
+                            },
+                          failure: function(data) {
+                              alert('Error de conexión');
+                          },
+                          crossDomain: true
+                      });
+
+
+            }
+        else if (val == 'femenino'){
+              
+          $.ajax({
+
+            url: "{% url 'index' %}" , 
+            type: 'POST',
+            data:{  
+              nuevoMapa_femenino : val,
+              csrfmiddlewaretoken: '{{ csrf_token }}'} ,
+              success: function(data) {
+                map.removeLayer(geojson);
+                var d_1 = data.max_fem;
+                var d_2 = ( ( data.max_fem - data.min_fem ) / 4 ) * 3
+                var d_3 = ( ( data.max_fem - data.min_fem ) / 4 ) * 2
+                var d_4 = ( ( data.max_fem - data.min_fem ) / 4 )
+                var d_5 = data.min_fem;
+                valores_colores = color_define(d_1,d_2,d_3,d_4,d_5);
+                legend_info.addTo(map);
+                geojson = L.geoJson(manzanas, {
+                 style: style_femenino, onEachFeature: onEachFeature 
+                })
+                .addTo(map);
+                geojson.bringToBack();
+
+                function getColor_femenino(d) {
+                  return d == undefined || d < 0 ? '#FFFFFF' :
+                  d < d_5 ? '#FFFF64' : 
+                  d < d_4 ? '#FFCB2A' : 
+                  d < d_3 ? '#FF9B2A'  : 
+                  d < d_2 ? '#FE0006' : 
+                  d < d_1 ? '#BC006E' : 
+                  '#FFFFFF'; 
+                  }
+                function style_femenino(feature) {
+                  manzana_redcode = feature.properties.MANZENT;
+                  return estilo("sexo_2", getColor, data.cantidad_muj, d_1, d_2, d_3, d_4, d_5);
+                  }                      
+                },
+              failure: function(data) {
+                  alert('Error de conexión');
+              },
+              crossDomain: true
+          });
+        }
+        else if (val == 'cultura'){
+          $.ajax({
+            url: "{% url 'index' %}" , 
+            type: 'POST',
+            data:{  
+              nuevoMapa_cultura : val,
+              csrfmiddlewaretoken: '{{ csrf_token }}'
+            } ,
+            success: function(data) {
+              map.removeLayer(geojson);
+              valores_colores =[{'valor': 'ninguna', 'col': 'white'},
+              {'valor': 'Alacalufe (Kawashkar)', 'col': '#FF7600'},
+              {'valor': 'Atacameno', 'col': '#FFFA00'},
+              {'valor': 'Aimara', 'col': '#FA0084'},
+              {'valor': 'Colla', 'col': '#FFFA00'},
+              {'valor': 'Mapuche', 'col': '#6DFC00'},
+              {'valor': 'Quechua', 'col': '#FFFA00'},
+              {'valor': 'Rapa Nui', 'col': '#FFFA00'},
+              {'valor': 'Yamana (Yagan)', 'col': '#00E0F5'},
+              ];
+
+              legend_info.addTo(map); 
+              geojson = L.geoJson(manzanas, {
+               style: style_cultura, onEachFeature: onEachFeature 
+              })
+              .addTo(map);
+              geojson.bringToBack();
+
+              function getColor_cultura(d) {
+                return d == undefined ? 'white' : //blanco
+                d == 'Alacalufe (Kawashkar)' ? '#FF7600' :  // naranjo
+                d == 'Atacameno' ? '#FFFA00' :  // amarillo
+                d == 'Aimara' ? '#FA0084' :  // rosado
+                d == 'Colla' ? '#FFFA00' :  // amarillo
+                d == 'Mapuche' ? '#6DFC00' :  // verde
+                d == 'Quechua' ? '#FFFA00' :  // amarillo
+                d == 'Rapa Nui' ? '#FFFA00' :  // amarillo
+                d == 'Yamana (Yagan)' ? '#00E0F5' :  // celeste
+                d == 'ninguna' ? 'white' :  // amarillo
+                'white'; 
+              }
+
+              function style_cultura(feature) { 
+                manzana_redcode = feature.properties.MANZENT;
+                return estilo("cultura", getColor_cultura, data);
+              }
+            },
+            failure: function(data) {
+              alert('Error de conexión');
+            },
+            crossDomain: true
+          });
+        }
+
+        else if (val == 'educacion'){
+          $.ajax({
+
+            url: "{% url 'index' %}" , 
+            type: 'POST',
+            data:{  
+              nuevoMapa_tipoEduc : val,
+              csrfmiddlewaretoken: '{{ csrf_token }}'
+            } ,
+            success: function(data) {
+              map.removeLayer(geojson);
+
+              valores_colores =[
+              {'valor': 'Universitaria', 'col': '#FF7600'},
+              {'valor': 'Instituto Profesional', 'col': '#FA0084'},
+              {'valor': 'Tecnica', 'col': '#6DFC00'},
+              {'valor': 'Medica', 'col': '#FFFA00'},
+              {'valor': 'Básica/Primaria', 'col': '#00E0F5'},
+              {'valor': 'Especial/Diferencial', 'col': '#00E0F5'},
+              {'valor': 'Pre-Básica', 'col': '#00E0F5'},
+              {'valor': 'No Asistió', 'col': '#FFFA00'},
+              ];
+               legend_info.addTo(map); 
+
+              geojson = L.geoJson(manzanas, {
+               style: style_educ, onEachFeature: onEachFeature 
+              })
+              .addTo(map);
+              geojson.bringToBack();
+
+              function getColor_educ(d) {
+                return d == undefined ? '#FFFFFF' : //blanco
+                d == 'Universitaria' ? '#FF7600' :  // naranjo
+                d == 'Instituto Profesional' ? '#FA0084' :  // rosado
+                d == 'Tecnica' ? '#FA0084' :  // rosado
+                d == 'Media' ? '#6DFC00' :  // verde
+                d == 'Basica/Primaria' ? '#FFFA00' :  // amarillo
+                d == 'Especial/Diferencial' ? '#00E0F5' :  // celeste
+                d == 'Pre-Basica' ? '#00E0F5' :  // celeste
+                d == 'No Asistio' ? '#FFFA00' :  // amarillo
+                '#FFFFFF'; 
+              }
+
+              function style_educ(feature) { 
+                manzana_redcode = feature.properties.MANZENT;
+                return estilo("educ", getColor_educ, data);
+              }
+            },
+            failure: function(data) {
+              alert('Error de conexión');
+            },
+          crossDomain: true
+          });
+        }
+        else if (val == 'genero'){
+          $.ajax({
+              url: "{% url 'index' %}" , 
+              type: 'POST',
+              data:{  nuevoMapa_genero : val,
+                csrfmiddlewaretoken: '{{ csrf_token }}'} ,
+              success: function(data) {
+
+                map.removeLayer(geojson);
+
+                valores_colores =[
+                {'valor': 'Femenino', 'col': '#FF7600'},
+                {'valor': 'Masculino', 'col': '#6DFC00'},
+                {'valor': 'iguales', 'col': '#FFFA00'},
+                ];
+                 legend_info.addTo(map); 
+
+                geojson = L.geoJson(manzanas, {
+                 style: style_genero, onEachFeature: onEachFeature 
+                })
+                .addTo(map);
+                geojson.bringToBack();
+
+
+
+                function getColor_genero(d) {
+                    return d == undefined ? '#FFFFFF' : //blanco
+                    d == 'Femenino' ? '#FF7600' :  // naranjo
+                    d == 'Masculino' ? '#6DFC00' :  // verde
+                    d == 'iguales' ? '#FFFA00' :  // amarillo
+                    '#FFFFFF'; 
+                }
+
+               function style_genero(feature) { 
+                manzana_redcode = feature.properties.MANZENT;
+                return estilo("genero", getColor_genero, data);
+                  }
+
+        
+              },
+              failure: function(data) {
+                  alert('Error de conexión');
+              },
+              crossDomain: true
+          });  
+        }
+        else if (val == 'normal'){
+                map.removeLayer(geojson);
+                geojson = L.geoJson(manzanas, {
+                 style: style, onEachFeature: onEachFeature 
+                })
+                .addTo(map);
+                valores_colores = color_define_personas();
+                legend_info.addTo(map); 
+                geojson.bringToBack();
+
+            }
+                else if (val == 'disc' || val == 'disc_tipos'){
+                    console.log("en disc");
+                    $.ajax({
+
+                    url: "{% url 'index' %}" , 
+                    type: 'POST',
+                    data:{  nuevoMapa_disc : val,
+                            csrfmiddlewaretoken: '{{ csrf_token }}'} ,
+                          success: function(data) {
+
+                            if (val =='disc_tipos'){
+                                console.log("tipos de discapacidad");
+
+                                 map.removeLayer(geojson);
+
+                                  valores_colores =[
+                                {'valor': 'ninguna', 'col': '#FFFFFF'},
+                                {'valor': 'ceguera', 'col': '#FF7600'},
+                                {'valor': 'sordera', 'col': '#6DFC00'},
+                                {'valor': 'mudez', 'col': '#00E0F5'},
+                                {'valor': 'lisiado_paralisado', 'col': '#FFFA00'},
+                                {'valor': 'mental', 'col': '#FA0084'},
+                                ];
+                                 legend_info.addTo(map); 
+
+                                geojson = L.geoJson(manzanas, {
+                                 style: style_discapacidad_tipos, onEachFeature: onEachFeature 
+                                })
+                                .addTo(map);
+                                geojson.bringToBack();
+
+                                function getColor_disc_tipos(d) {
+                                  //  console.log(d);
+                                    return d == undefined ? '#FFFFFF' : //blanco
+                                    d == 'ceguera' ? '#FF7600' :  // naranjo
+                                    d == 'sordera' ? '#6DFC00' :  // verde
+                                    d == 'mudez' ? '#00E0F5'  : //celeste
+                                    d == 'lisiado_paralisado' ? '#FFFA00' : //amarillo
+                                    d == 'mental' ? '#FA0084' : //rosado
+                                    '#FFFFFF'; 
+                                }
+
+                                 function style_discapacidad_tipos(feature) { 
+
+                                  manzana_redcode = feature.properties.MANZENT;
+                                  return estilo("discapacidad", getColor_disc_tipos, data.por_disc);
+                                    
+                                    }
+                            }
+
+                            else{
+                                map.removeLayer(geojson);
+                                var d_1 = data.max_disc;
+                                var d_2 = ( ( data.max_disc - data.min_disc ) / 4 ) * 3
+                                var d_3 = ( ( data.max_disc - data.min_disc ) / 4 ) * 2
+                                var d_4 = ( ( data.max_disc - data.min_disc ) / 4 )
+                                var d_5 = data.min_disc;
+                                 valores_colores = color_define(d_1,d_2,d_3,d_4,d_5);
+                                legend_info.addTo(map);
+                                geojson = L.geoJson(manzanas, {
+                                 style: style_discapacidad, onEachFeature: onEachFeature 
+                                })
+                                .addTo(map);
+                                geojson.bringToBack();
+
+                            function getColor_disc(d) {
+
+                                return d == undefined || d < 0 ? '#FFFFFF' :
+                                d < d_5 ? '#FFFF64' : 
+                                d < d_4 ? '#FFCB2A' : 
+                                d < d_3 ? '#FF9B2A'  : 
+                                d < d_2 ? '#FE0006' : 
+                                d < d_1 ? '#BC006E' : 
+                                '#BC006E'; 
+                                }
+                            function style_discapacidad(feature) {
+                              manzana_redcode = feature.properties.MANZENT;
+                              return estilo("discapac_0", getColor, data.tipos_disc, d_1, d_2, d_3, d_4, d_5); 
+
+                             
+                                }
+                            }
+                            },
+                          failure: function(data) {
+                              alert('Error de conexión');
+                          },
+                          crossDomain: true
+                      });
+                    }
+            
+
+          CambiarIndicadorRuta();
+        }
+  function CambiarMapa_hogares(val) {
+
+    function findManzana(element) {
+      return element.redcode == manzana_redcode;
+    }
+
+    function estilo(criterio, funcion, data, d_1, d_2, d_3, d_4, d_5) {
+      var manzana = data.find(findManzana);
+      var manzana_color = (manzana == undefined ? undefined : manzana[criterio]) ;
+      return { 
+        fillColor: (d_1 ? getColor(manzana_color, d_1, d_2, d_3, d_4, d_5) : funcion(manzana_color) ), 
+        weight: 2, 
+        opacity: 0.7, 
+        color: 'white', 
+        dashArray: '3', 
+        fillOpacity: 0.7
+      };
+    }
+    legend_info ?  map.removeControl(legend_info) : console.log("nada");
+    valores_colores = [];
+
+    function getColor_hog(d, d_1, d_2, d_3, d_4, d_5) {
+      return d == undefined || d < 0 ? '#FFFFFF' :
+      d < d_5 ? '#FFFF64' : 
+      d < d_4 ? '#FFCB2A' : 
+      d < d_3 ? '#FF9B2A'  : 
+      d < d_2 ? '#FE0006' : 
+      d <= d_1 ? '#BC006E' : 
+      '#FFFFFF'; 
+    }
+
+    if (val == 'combustion'){
+      $.ajax({
+            url: "{% url 'index' %}" , 
+            type: 'POST',
+            data:{  nuevoMapa_combustion : val,
+                    csrfmiddlewaretoken: '{{ csrf_token }}'} ,
+                  success: function(data) {
+                        map.removeLayer(geojson);
+                         valores_colores =[
+                      {'valor': 'ninguna', 'col': '#FF7600'},
+                      {'valor': 'Natural', 'col': '#FFFA00'},
+                      {'valor': 'Licuado', 'col': '#FA0084'},
+                      {'valor': 'Parafina', 'col': '#FA0084'},
+                      {'valor': 'Lena', 'col': '#00E0F5'},
+                      {'valor': 'Carbon, Aserrin', 'col': '#00E0F5'},
+                      {'valor': 'Electricidad', 'col': '#6DFC00'},
+                      {'valor': 'Energia Solar', 'col': '#6DFC00'},
+                      {'valor': 'No cocina', 'col': '#FF7600'},
+                      ];
+                       legend_info.addTo(map); 
+
+                    geojson = L.geoJson(manzanas, {
+                     style: style_combustion, onEachFeature: onEachFeature 
+                    })
+                    .addTo(map);
+
+                     
+                    geojson.bringToBack();
+
+                    console.log("en getColor_hijos");
+
+                    function getColor_combustion(d) {
+                        return d == undefined ? '#FFFFFF' : //blanco
+                        d == 'ninguna' ? '#FF7600' :  // naranjo
+                        d == 'Natural' ? '#FFFA00' :  // amarillo
+                        d == 'Licuado' ? '#FA0084' :  // rosado
+                        d == 'Parafina' ? '#FA0084' :  // rosado
+
+                        d == 'Lena' ? '#00E0F5' :  // celeste
+                        d == 'Carbon, Aserrin' ? '#00E0F5' :  // celeste
+
+                        d == 'Electricidad' ? '#6DFC00' :  // verde
+                        d == 'Energia Solar' ? '#6DFC00' :  // verde
+                        d == 'No cocina' ? '#FF7600' :  // naranjo
+
+
+                        '#FFFFFF'; 
+                    }
+                    function style_combustion(feature) {
+                      manzana_redcode = feature.properties.MANZENT;
+                      return estilo("tipo", getColor_combustion, data);
+
+                        }
+                    },
+                  failure: function(data) {
+                      alert('Error de conexión');
+                  },
+                  crossDomain: true
+              });
+    }
+    else{
+       if (val == 'internet'){
+      console.log("en internet");
+      $.ajax({
+            url: "{% url 'index' %}" , 
+            type: 'POST',
+            data:{  nuevoMapa_internet : val,
+                    csrfmiddlewaretoken: '{{ csrf_token }}'} ,
+                  success: function(data) {
+
+                      map.removeLayer(geojson);
+                      var d_1 = data.maxim;
+                      var d_2 = ( ( data.maxim - data.minim ) / 4 ) * 3
+                      var d_3 = ( ( data.maxim - data.minim ) / 4 ) * 2
+                      var d_4 = ( ( data.maxim - data.minim ) / 4 )
+                      var d_5 = data.minim;
+
+                      valores_colores = color_define(d_1,d_2,d_3,d_4,d_5);
+                      legend_info.addTo(map);
+
+                    geojson = L.geoJson(manzanas, {
+                     style: style_internet, onEachFeature: onEachFeature 
+                    })
+                    .addTo(map);
+                    geojson.bringToBack();
+
+                    console.log("en getColor internet");
+
+                    function style_internet(feature) { 
+                      manzana_redcode = feature.properties.MANZENT;
+                      return estilo("porcentaje", getColor_hog, data.cantidad, d_1, d_2, d_3, d_4, d_5); 
+                        }
+                    },
+                  failure: function(data) {
+                      alert('Error de conexión');
+                  },
+                  crossDomain: true
+              });
+    }
+    else{
+       if (val == 'cable'){
+      console.log("en cable");
+      $.ajax({
+            url: "{% url 'index' %}" , 
+            type: 'POST',
+            data:{  nuevoMapa_cable : val,
+                    csrfmiddlewaretoken: '{{ csrf_token }}'} ,
+                  success: function(data) {
+                        map.removeLayer(geojson);
+                      var d_1 = data.maxim;
+                      var d_2 = ( ( data.maxim - data.minim ) / 4 ) * 3
+                      var d_3 = ( ( data.maxim - data.minim ) / 4 ) * 2
+                      var d_4 = ( ( data.maxim - data.minim ) / 4 )
+                      var d_5 = data.minim;
+                       valores_colores = color_define(d_1,d_2,d_3,d_4,d_5);
+                      legend_info.addTo(map);
+                    geojson = L.geoJson(manzanas, {
+                     style: style_cable, onEachFeature: onEachFeature 
+                    })
+                    .addTo(map);
+                    geojson.bringToBack();
+
+                    console.log("en getColor");
+
+                    function style_cable(feature) {
+                      manzana_redcode = feature.properties.MANZENT;
+                      return estilo("porcentaje", getColor_hog, data.cantidad, d_1, d_2, d_3, d_4, d_5); 
+                        
+                        }
+                    },
+                  failure: function(data) {
+                      alert('Error de conexión');
+                  },
+                  crossDomain: true
+              });
+    }
+    else{
+       if (val == 'computador'){
+      console.log("en computador");
+      $.ajax({
+            url: "{% url 'index' %}" , 
+            type: 'POST',
+            data:{  nuevoMapa_computador : val,
+                    csrfmiddlewaretoken: '{{ csrf_token }}'} ,
+                  success: function(data) {
+                        map.removeLayer(geojson);
+                      var d_1 = data.maxim;
+                      var d_2 = ( ( data.maxim - data.minim ) / 4 ) * 3
+                      var d_3 = ( ( data.maxim - data.minim ) / 4 ) * 2
+                      var d_4 = ( ( data.maxim - data.minim ) / 4 )
+                      var d_5 = data.minim;
+                       valores_colores = color_define(d_1,d_2,d_3,d_4,d_5);
+                      legend_info.addTo(map);
+
+
+                    geojson = L.geoJson(manzanas, {
+                     style: style_computador, onEachFeature: onEachFeature 
+                    })
+                    .addTo(map);
+                    geojson.bringToBack();
+                    console.log("en getColor");
+
+                    function style_computador(feature) { 
+                      manzana_redcode = feature.properties.MANZENT;
+                      return estilo("porcentaje", getColor_hog, data.cantidad, d_1, d_2, d_3, d_4, d_5);
+                    }
+                  },
+                  failure: function(data) {
+                      alert('Error de conexión');
+                  },
+                  crossDomain: true
+              });
+          }
+          else{
+            if (val == 'bicicleta'){
+              console.log("en bicicleta");
+              $.ajax({
+                    url: "{% url 'index' %}" , 
+                    type: 'POST',
+                    data:{
+                      nuevoMapa_bicicleta : val,
+                      csrfmiddlewaretoken: '{{ csrf_token }}'} ,
+                    success: function(data) {
+                      map.removeLayer(geojson);
+                      var d_1 = data.maxim;
+                      var d_2 = ( ( data.maxim - data.minim ) / 4 ) * 3
+                      var d_3 = ( ( data.maxim - data.minim ) / 4 ) * 2
+                      var d_4 = ( ( data.maxim - data.minim ) / 4 )
+                      var d_5 = data.minim;
+                       valores_colores = color_define(d_1,d_2,d_3,d_4,d_5);
+                      legend_info.addTo(map);
+                      geojson = L.geoJson(manzanas, {
+                       style: style_bicicleta, onEachFeature: onEachFeature 
+                      })
+                      .addTo(map);
+                      geojson.bringToBack();
+
+                      function style_bicicleta(feature) { 
+                        manzana_redcode = feature.properties.MANZENT;
+                        return estilo("porcentaje", getColor_hog, data.cantidad, d_1, d_2, d_3, d_4, d_5);
+                          
+                          }
+                      },
+                    failure: function(data) {
+                        alert('Error de conexión');
+                    },
+                    crossDomain: true
+                      });
+                  }
+                  else{
+                    if (val == 'auto'){
+                      console.log("en auto");
+                      $.ajax({
+                            url: "{% url 'index' %}" , 
+                            type: 'POST',
+                            data:{  nuevoMapa_auto: val,
+                                    csrfmiddlewaretoken: '{{ csrf_token }}'} ,
+                                  success: function(data) {
+                                        map.removeLayer(geojson);
+                                      var d_1 = data.maxim;
+                                      var d_2 = ( ( data.maxim - data.minim ) / 4 ) * 3
+                                      var d_3 = ( ( data.maxim - data.minim ) / 4 ) * 2
+                                      var d_4 = ( ( data.maxim - data.minim ) / 4 )
+                                      var d_5 = data.minim;
+                                       valores_colores = color_define(d_1,d_2,d_3,d_4,d_5);
+                      legend_info.addTo(map);
+                                    geojson = L.geoJson(manzanas, {
+                                     style: style_auto, onEachFeature: onEachFeature 
+                                    })
+                                    .addTo(map);
+                                    geojson.bringToBack();
+                                    console.log("en getColor");
+
+                                    function style_auto(feature) {
+                                      manzana_redcode = feature.properties.MANZENT;
+                                      return estilo("porcentaje", getColor_hog, data.cantidad, d_1, d_2, d_3, d_4, d_5);
+
+                                        }
+                                    },
+                                  failure: function(data) {
+                                      alert('Error de conexión');
+                                  },
+                                  crossDomain: true
+                              });
+                          }
+                          else{
+                            if (val == 'moto'){
+                              console.log("en moto");
+                              $.ajax({
+                                    url: "{% url 'index' %}" , 
+                                    type: 'POST',
+                                    data:{  nuevoMapa_moto: val,
+                                            csrfmiddlewaretoken: '{{ csrf_token }}'} ,
+                                          success: function(data) {
+                                                map.removeLayer(geojson);
+                                              var d_1 = data.maxim;
+                                              var d_2 = ( ( data.maxim - data.minim ) / 4 ) * 3
+                                              var d_3 = ( ( data.maxim - data.minim ) / 4 ) * 2
+                                              var d_4 = ( ( data.maxim - data.minim ) / 4 )
+                                              var d_5 = data.minim;
+                                               valores_colores = color_define(d_1,d_2,d_3,d_4,d_5);
+                      legend_info.addTo(map);
+                                            geojson = L.geoJson(manzanas, {
+                                             style: style_moto, onEachFeature: onEachFeature 
+                                            })
+                                            .addTo(map);
+                                            geojson.bringToBack();
+                                            console.log("en getColor");
+
+                                            function style_moto(feature) {
+                                              manzana_redcode = feature.properties.MANZENT;
+                                              return estilo("porcentaje", getColor_hog, data.cantidad, d_1, d_2, d_3, d_4, d_5);
+                                                
+                                                }
+                                            },
+                                          failure: function(data) {
+                                              alert('Error de conexión');
+                                          },
+                                          crossDomain: true
+                                      });
+                                  }
+                                  else{
+                                    if (val == 'tipo'){
+                                      console.log("en tipo");
+                                      $.ajax({
+                                            url: "{% url 'index' %}" , 
+                                            type: 'POST',
+                                            data:{  nuevoMapa_tipo : val,
+                                                    csrfmiddlewaretoken: '{{ csrf_token }}'} ,
+                                                  success: function(data) {
+                                                        map.removeLayer(geojson);
+
+
+                                                             valores_colores =[
+                                                        {'valor': 'Casa', 'col': '#FF7600'},
+                                                        {'valor': 'Departamento en edificio', 'col': '#FFFA00'},
+                                                        {'valor': 'Piezas en casa antigua o conventillo', 'col': '#FA0084'},
+                                                        {'valor': 'Mejora, mediagua', 'col': '#FA0084'},
+                                                        {'valor': 'Rancho, choza', 'col': '#00E0F5'},
+                                                        {'valor': 'Ruca', 'col': '#00E0F5'},
+                                                        {'valor': 'Movil (carpa, vagon, container, bote, lancha, similar)', 'col': '#6DFC00'},
+                                                        {'valor': 'Otro tipo de vivienda particular', 'col': '#6DFC00'},
+                                                        {'valor': 'Vivienda colectiva (Residencial, Hotel, Hospital, etc.)', 'col': '#FF7600'},
+                                                        {'valor': 'Viajeros (no es considerado vivienda)', 'col': '#FF7600'},
+                                                        ];
+                                                         legend_info.addTo(map); 
+                                                    geojson = L.geoJson(manzanas, {
+                                                     style: style_tipo, onEachFeature: onEachFeature 
+                                                    })
+                                                    .addTo(map);
+                                                    geojson.bringToBack();
+
+                                                    function getColor_tipo(d) {
+                                                        return d == undefined ? '#FFFFFF' : //blanco
+                                                        d == 'Casa' ? '#FF7600' :  // naranjo
+                                                        d == 'Departamento en edificio' ? '#FFFA00' :  // amarillo
+                                                        d == 'Piezas en casa antigua o conventillo' ? '#FA0084' :  // rosado
+                                                        d == 'Mejora, mediagua' ? '#FA0084' :  // rosado
+
+                                                        d == 'Rancho, choza' ? '#00E0F5' :  // celeste
+                                                        d == 'Ruca' ? '#00E0F5' :  // celeste
+
+                                                        d == 'Movil (carpa, vagon, container, bote, lancha, similar)' ? '#6DFC00' :  // verde
+                                                        d == 'Otro tipo de vivienda particular' ? '#6DFC00' :  // verde
+
+                                                        d == 'Vivienda colectiva (Residencial, Hotel, Hospital, etc.)' ? '#FF7600' :  // naranjo
+                                                        d == 'Viajeros (no es considerado vivienda)' ? '#FF7600' :  // naranjo
+                                                        '#FFFFFF'; 
+                                                    }
+                                                    function style_tipo(feature) { 
+                                                        var manzana_redcode = feature.properties.MANZENT;
+                                                         for (i = 0; i < data.length; i++){
+                                                            if (manzana_redcode == data[i].redcode){
+                                                                var manzana_color = data[i].tipo; 
+                                                                break;
+                                                            }
+                                                        }
+                                                        return { 
+                                                        fillColor: getColor_tipo(manzana_color), 
+                                                        weight: 2, 
+                                                        opacity: 0.7, 
+                                                        color: 'white', 
+                                                        dashArray: '3', 
+                                                        fillOpacity: 0.5
+                                                        }; 
+                                                        }
+                                                    },
+                                                  failure: function(data) {
+                                                      alert('Error de conexión');
+                                                  },
+                                                  crossDomain: true
+                                              });
+                                    }
+                                    else{
+                                      if (val == 'condicion'){
+                                        console.log("en condicion");
+                                        $.ajax({
+                                              url: "{% url 'index' %}" , 
+                                              type: 'POST',
+                                              data:{  nuevoMapa_condicion : val,
+                                                      csrfmiddlewaretoken: '{{ csrf_token }}'} ,
+                                                    success: function(data) {
+                                                          map.removeLayer(geojson);
+                                                      geojson = L.geoJson(manzanas, {
+                                                       style: style_condicion, onEachFeature: onEachFeature 
+                                                      })
+                                                      .addTo(map);
+                                                      geojson.bringToBack();
+
+                                                      geojson.bringToBack();
+                                                      console.log("en getColor_condicion");
+                                                        valores_colores =[
+                                                        {'valor': 'Ocupada con personas presentes', 'col': '#FF7600'},
+                                                        {'valor': 'Ocupada con personas ausentes', 'col': '#FFFA00'},
+                                                        {'valor': 'Desocupada', 'col': '#00E0F5'},
+                                                        ];
+                                                         legend_info.addTo(map); 
+
+                                                      function getColor_condicion(d) {
+                                                          return d == undefined ? '#FFFFFF' : //blanco
+                                                          d == 'Ocupada con personas presentes' ? '#FF7600' :  // naranjo
+                                                          d == 'Ocupada con personas ausentes' ? '#FFFA00' :  // amarillo
+                                                          d == 'Desocupada' ? '#00E0F5' :  // celeste
+                                                          '#FFFFFF'; 
+                                                      }
+                                                      function style_condicion(feature) { 
+                                                          var manzana_redcode = feature.properties.MANZENT;
+                                                           for (i = 0; i < data.length; i++){
+                                                              if (manzana_redcode == data[i].redcode){
+                                                                  var manzana_color = data[i].tipo; 
+                                                                  break;
+                                                              }
+                                                          }
+                                                          return { 
+                                                          fillColor: getColor_condicion(manzana_color), 
+                                                          weight: 2, 
+                                                          opacity: 0.7, 
+                                                          color: 'white', 
+                                                          dashArray: '3', 
+                                                          fillOpacity: 0.5
+                                                          }; 
+                                                          }
+                                                      },
+                                                    failure: function(data) {
+                                                        alert('Error de conexión');
+                                                    },
+                                                    crossDomain: true
+                                                });
+                                      }
+                                                       else{
+                                    if (val == 'tenencia'){
+                                        console.log("en tenencia");
+                                        $.ajax({
+                                              url: "{% url 'index' %}" , 
+                                              type: 'POST',
+                                              data:{  nuevoMapa_tenencia : val,
+                                                      csrfmiddlewaretoken: '{{ csrf_token }}'} ,
+                                                    success: function(data) {
+                                                                    map.removeLayer(geojson);
+
+
+                                                                    valores_colores =[
+                                                                  {'valor': 'Propia (pagada totalmente)', 'col': '#FF7600'},
+                                                                  {'valor': 'Propia (pagando a plazo)', 'col': '#FFFA00'},
+                                                                  {'valor': 'Arrendada', 'col': '#FA0084'},
+                                                                  {'valor': 'Cedida por trabajo o servicio', 'col': '#00E0F5'},
+                                                                  {'valor': 'Gratuita', 'col': '#6DFC00'},
+                                                                  ];
+                                                                   legend_info.addTo(map); 
+
+
+                                                                geojson = L.geoJson(manzanas, {
+                                                                 style: style_tenencia, onEachFeature: onEachFeature 
+                                                                })
+                                                                .addTo(map);
+                                                                geojson.bringToBack();
+
+                                                                console.log("en getColor_hijos");
+
+                                                                function getColor_tenencia(d) {
+                                                                    return d == undefined ? '#FFFFFF' : //blanco
+                                                                      d == 'Propia (pagada totalmente)' ? '#FF7600' :  // naranjo
+                                                                      d == 'Propia (pagando a plazo)' ? '#FFFA00' :  // amarillo
+                                                                      d == 'Arrendada' ? '#FA0084' :  // rosado
+                                                                      d == 'Cedida por trabajo o servicio' ? '#00E0F5' :  // celeste
+                                                                      d == 'Gratuita' ? '#6DFC00' :  // verde
+                                                                      '#FFFFFF'; 
+                                                                    }
+                                                                function style_tenencia(feature) { 
+                                                                    var manzana_redcode = feature.properties.MANZENT;
+                                                                     for (i = 0; i < data.length; i++){
+                                                                        if (manzana_redcode == data[i].redcode){
+                                                                            var manzana_color = data[i].tipo; 
+                                                                            break;
+                                                                        }
+                                                                    }
+                                                                    return { 
+                                                                    fillColor: getColor_tenencia(manzana_color), 
+                                                                    weight: 2, 
+                                                                    opacity: 0.7, 
+                                                                    color: 'white', 
+                                                                    dashArray: '3', 
+                                                                    fillOpacity: 0.5
+                                                                    }; 
+                                                                    }
+                                                                },
+                                                              failure: function(data) {
+                                                                  alert('Error de conexión');
+                                                              },
+                                                              crossDomain: true
+                                                          });
+                                                      }
+                                                      else{
+                                              if (val == 'alumbra'){
+                                                  console.log("en alumbra");
+                                                  $.ajax({
+                                                      url: "{% url 'index' %}" , 
+                                                      type: 'POST',
+                                                      data:{  nuevoMapa_alumbra: val,
+                                                              csrfmiddlewaretoken: '{{ csrf_token }}'} ,
+                                                            success: function(data) {
+                                                                  map.removeLayer(geojson);
+                                                                var d_1 = data.maxim;
+                                                                var d_2 = ( ( data.maxim - data.minim ) / 4 ) * 3
+                                                                var d_3 = ( ( data.maxim - data.minim ) / 4 ) * 2
+                                                                var d_4 = ( ( data.maxim - data.minim ) / 4 )
+                                                                var d_5 = data.minim;
+                                                          valores_colores = color_define(d_1,d_2,d_3,d_4,d_5);
+                                legend_info.addTo(map);
+
+                                                              geojson = L.geoJson(manzanas, {
+                                                               style: style_alumbra, onEachFeature: onEachFeature 
+                                                                })
+                                                                .addTo(map);
+                                                                geojson.bringToBack();
+
+
+                                                              console.log("en getColor");
+
+                                                              function style_alumbra(feature) { 
+                                                                  var manzana_redcode = feature.properties.MANZENT;
+                                                                   for (i = 0; i < data.cantidad.length; i++){
+                                                                      if (manzana_redcode == data.cantidad[i].redcode){
+                                                                          var manzana_color = data.cantidad[i].alumbra_4; 
+                                                                         
+                                                                          break;
+                                                                      }
+                                                                  }
+                                                                  return { 
+                                                                  fillColor: getColor_hog(manzana_color, d_1, d_2 , d_3, d_4, d_5), 
+                                                                  weight: 2, 
+                                                                  opacity: 0.7, 
+                                                                  color: 'white', 
+                                                                  dashArray: '3', 
+                                                                  fillOpacity: 0.5
+                                                                  }; 
+                                                                  }
+                                                              },
+                                                            failure: function(data) {
+                                                                alert('Error de conexión');
+                                                            },
+                                                            crossDomain: true
+                                                        });
+                                                }
+                                                else {
+                                              if (val == 'caneria'){
+                                                  console.log("en caneria");
+                                                  $.ajax({
+                                                      url: "{% url 'index' %}" , 
+                                                      type: 'POST',
+                                                      data:{  nuevoMapa_caneria: val,
+                                                              csrfmiddlewaretoken: '{{ csrf_token }}'} ,
+                                                            success: function(data) {
+                                                                  map.removeLayer(geojson);
+                                                                var d_1 = data.maxim;
+                                                                var d_2 = ( ( data.maxim - data.minim ) / 4 ) * 3
+                                                                var d_3 = ( ( data.maxim - data.minim ) / 4 ) * 2
+                                                                var d_4 = ( ( data.maxim - data.minim ) / 4 )
+                                                                var d_5 = data.minim;
+                                                                 valores_colores = color_define(d_1,d_2,d_3,d_4,d_5);
+                                legend_info.addTo(map);
+                                                              geojson = L.geoJson(manzanas, {
+                                                               style: style_caneria, onEachFeature: onEachFeature 
+                                                              })
+                                                              .addTo(map);
+                                                                geojson.bringToBack();
+
+                                                              console.log("en getColor");
+
+                                                              function style_caneria(feature) { 
+                                                                  var manzana_redcode = feature.properties.MANZENT;
+                                                                   for (i = 0; i < data.cantidad.length; i++){
+                                                                      if (manzana_redcode == data.cantidad[i].redcode){
+                                                                          var manzana_color = data.cantidad[i].caneria_3; 
+                                                                          
+                                                                          break;
+                                                                      }
+                                                                  }
+                                                                  return { 
+                                                                  fillColor: getColor_hog(manzana_color, d_1, d_2 , d_3, d_4, d_5), 
+                                                                  weight: 2, 
+                                                                  opacity: 0.7, 
+                                                                  color: 'white', 
+                                                                  dashArray: '3', 
+                                                                  fillOpacity: 0.5
+                                                                  }; 
+                                                                  }
+                                                              },
+                                                            failure: function(data) {
+                                                                alert('Error de conexión');
+                                                            },
+                                                            crossDomain: true
+                                                        });
+                                                }
+
+                                            else{
+                                              if (val == 'agua_red'){
+                                                  console.log("en red");
+                                                  $.ajax({
+                                                      url: "{% url 'index' %}" , 
+                                                      type: 'POST',
+                                                      data:{  nuevoMapa_red: val,
+                                                              csrfmiddlewaretoken: '{{ csrf_token }}'} ,
+                                                            success: function(data) {
+                                                                  map.removeLayer(geojson);
+                                                                var d_1 = data.maxim;
+                                                                var d_2 = ( ( data.maxim - data.minim ) / 4 ) * 3
+                                                                var d_3 = ( ( data.maxim - data.minim ) / 4 ) * 2
+                                                                var d_4 = ( ( data.maxim - data.minim ) / 4 )
+                                                                var d_5 = data.minim;
+                                                                valores_colores = color_define(d_1,d_2,d_3,d_4,d_5);
+                                legend_info.addTo(map);
+                                                              geojson = L.geoJson(manzanas, {
+                                                               style: style_red, onEachFeature: onEachFeature 
+                                                              })
+                                                              .addTo(map);
+                                                                geojson.bringToBack();
+                                                              console.log("en getColor");
+
+                                                              function style_red(feature) { 
+                                                                  var manzana_redcode = feature.properties.MANZENT;
+                                                                   for (i = 0; i < data.cantidad.length; i++){
+                                                                      if (manzana_redcode == data.cantidad[i].redcode){
+                                                                          var manzana_color = data.cantidad[i].agua_1; 
+                                                                          
+                                                                          break;
+                                                                      }
+                                                                  }
+                                                                  return { 
+                                                                  fillColor: getColor_hog(manzana_color, d_1, d_2 , d_3, d_4, d_5), 
+                                                                  weight: 2, 
+                                                                  opacity: 0.7, 
+                                                                  color: 'white', 
+                                                                  dashArray: '3', 
+                                                                  fillOpacity: 0.5
+                                                                  }; 
+                                                                  }
+                                                              },
+                                                            failure: function(data) {
+                                                                alert('Error de conexión');
+                                                            },
+                                                            crossDomain: true
+                                                        });
+                                                }
+                                                
+                                            else{
+                                               if (val == 'agua_pozo'){
+                                                  console.log("en pozo");
+                                                  $.ajax({
+                                                      url: "{% url 'index' %}" , 
+                                                      type: 'POST',
+                                                      data:{  nuevoMapa_pozo: val,
+                                                              csrfmiddlewaretoken: '{{ csrf_token }}'} ,
+                                                            success: function(data) {
+                                                                  map.removeLayer(geojson);
+                                                                var d_1 = data.maxim;
+                                                                var d_2 = ( ( data.maxim - data.minim ) / 4 ) * 3
+                                                                var d_3 = ( ( data.maxim - data.minim ) / 4 ) * 2
+                                                                var d_4 = ( ( data.maxim - data.minim ) / 4 )
+                                                                var d_5 = data.minim;
+                                                                valores_colores = color_define(d_1,d_2,d_3,d_4,d_5);
+                                legend_info.addTo(map);
+                                                              geojson = L.geoJson(manzanas, {
+                                                               style: style_pozo, onEachFeature: onEachFeature 
+                                                              })
+                                                              .addTo(map);
+                                                                geojson.bringToBack();
+
+                                                              console.log("en getColor");
+
+                                                              function style_pozo(feature) { 
+                                                                  var manzana_redcode = feature.properties.MANZENT;
+                                                                   for (i = 0; i < data.cantidad.length; i++){
+                                                                      if (manzana_redcode == data.cantidad[i].redcode){
+                                                                          var manzana_color = data.cantidad[i].agua_2; 
+                                                                         
+                                                                          break;
+                                                                      }
+                                                                  }
+                                                                  return { 
+                                                                  fillColor: getColor_hog(manzana_color, d_1, d_2 , d_3, d_4, d_5), 
+                                                                  weight: 2, 
+                                                                  opacity: 0.7, 
+                                                                  color: 'white', 
+                                                                  dashArray: '3', 
+                                                                  fillOpacity: 0.5
+                                                                  }; 
+                                                                  }
+                                                              },
+                                                            failure: function(data) {
+                                                                alert('Error de conexión');
+                                                            },
+                                                            crossDomain: true
+                                                        });
+                                                }
+                                                else{ 
+                                                   if (val == 'agua_rio'){
+                                                      console.log("en rio");
+                                                      $.ajax({
+                                                          url: "{% url 'index' %}" , 
+                                                          type: 'POST',
+                                                          data:{  nuevoMapa_rio: val,
+                                                                  csrfmiddlewaretoken: '{{ csrf_token }}'} ,
+                                                                success: function(data) {
+                                                                      map.removeLayer(geojson);
+                                                                    var d_1 = data.maxim;
+                                                                    var d_2 = ( ( data.maxim - data.minim ) / 4 ) * 3
+                                                                    var d_3 = ( ( data.maxim - data.minim ) / 4 ) * 2
+                                                                    var d_4 = ( ( data.maxim - data.minim ) / 4 )
+                                                                    var d_5 = data.minim;
+                                                                   valores_colores =[
+                                                                      {'valor': d_1 + ' - ' + (d_2 -1) , 'col': '#BC006E'},
+                                                                      {'valor': d_2 + ' - ' + (d_3 -1), 'col': '#FE0006'},
+                                                                      {'valor': d_3 + ' - ' + (d_4 -1) , 'col': '#FF9B2A'},
+                                                                      {'valor': d_4 + ' - ' + (d_5 + 1), 'col': '#FFCB2A'},
+                                                                      {'valor': d_5 , 'col': '#FFFF64'},
+                                                                      {'valor': 'Sin información' , 'col': '#FFFFFF'},
+                                                                       ] ;
+                                                                  legend_info.addTo(map);
+                                                                  geojson = L.geoJson(manzanas, {
+                                                                   style: style_rio, onEachFeature: onEachFeature 
+                                                                  })
+                                                                  .addTo(map);
+                                                                geojson.bringToBack();
+                                                                  console.log("en getColor");
+
+                                                                  function style_rio(feature) { 
+                                                                      var manzana_redcode = feature.properties.MANZENT;
+                                                                       for (i = 0; i < data.cantidad.length; i++){
+                                                                          if (manzana_redcode == data.cantidad[i].redcode){
+                                                                              var manzana_color = data.cantidad[i].agua_3; 
+                                                                              
+                                                                              break;
+                                                                          }
+                                                                      }
+                                                                      return { 
+                                                                      fillColor: getColor_hog(manzana_color, d_1, d_2 , d_3, d_4, d_5), 
+                                                                      weight: 2, 
+                                                                      opacity: 0.7, 
+                                                                      color: 'white', 
+                                                                      dashArray: '3', 
+                                                                      fillOpacity: 0.5
+                                                                      }; 
+                                                                      }
+                                                                  },
+                                                                failure: function(data) {
+                                                                    alert('Error de conexión');
+                                                                },
+                                                                crossDomain: true
+                                                            });
+                                                    }
+                                                    else{
+                                                      if (val == 'carencia_alcantarillado'){
+                                                          console.log("en carencia_alcantarillado");
+                                                          $.ajax({
+                                                              url: "{% url 'index' %}" , 
+                                                              type: 'POST',
+                                                              data:{  nuevoMapa_alcantarillado: val,
+                                                                      csrfmiddlewaretoken: '{{ csrf_token }}'} ,
+                                                                    success: function(data) {
+                                                                          map.removeLayer(geojson);
+                                                                        var d_1 = data.maxim;
+                                                                        var d_2 = ( ( data.maxim - data.minim ) / 4 ) * 3
+                                                                        var d_3 = ( ( data.maxim - data.minim ) / 4 ) * 2
+                                                                        var d_4 = ( ( data.maxim - data.minim ) / 4 )
+                                                                        var d_5 = data.minim;
+                                                                         valores_colores = color_define(d_1,d_2,d_3,d_4,d_5);
+                                legend_info.addTo(map);
+                                                                      geojson = L.geoJson(manzanas, {
+                                                                       style: style_alcantarillado, onEachFeature: onEachFeature 
+                                                                      })
+                                                                      .addTo(map);
+                                                                      geojson.bringToBack();
+                                                                      console.log("en getColor");
+
+                                                                      function style_alcantarillado(feature) { 
+                                                                          var manzana_redcode = feature.properties.MANZENT;
+                                                                           for (i = 0; i < data.cantidad.length; i++){
+                                                                              if (manzana_redcode == data.cantidad[i].redcode){
+                                                                                  var manzana_color = data.cantidad[i].wc_6; 
+                                                                              
+                                                                                  break;
+                                                                              }
+                                                                          }
+                                                                          return { 
+                                                                          fillColor: getColor_hog(manzana_color, d_1, d_2 , d_3, d_4, d_5), 
+                                                                          weight: 2, 
+                                                                          opacity: 0.7, 
+                                                                          color: 'white', 
+                                                                          dashArray: '3', 
+                                                                          fillOpacity: 0.5
+                                                                          }; 
+                                                                          }
+                                                                      },
+                                                                    failure: function(data) {
+                                                                        alert('Error de conexión');
+                                                                    },
+                                                                    crossDomain: true
+                                                                });
+                                                              }
+                                                            }
+                                                          }
+                                                        }
+                                                      }
+                                                    }
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                            CambiarIndicadorRuta();
+                            }
+
+    $('.indicadores_select').on('hidden.bs.select', function () {
+      //info.update();
+     //valor_select = "ninguno";
+      console.log("no cierra");
+       $('.indicadores_select')
+      .selectpicker({title: "Escoge uno de los siguientes..."})
+      .selectpicker('render');
+      var Value = $(".indicadores_select option:selected").text();
+
+      $('.indicadores_select').selectpicker('val', Value);
+      $('.indicadores_select').selectpicker('refresh');
+      
+  
+
+
+    return false; 
+  });
+if (valor_select == "normal") {
+    var datos_info = {"titulo": $('.indicadores_select option[value="normal"]').text(), "descripcion" : $('select option[value="normal"]').attr('descripcion') };
+    info.update(datos_info);
+
+} 
+      $('#Rutas').on('changed.bs.select', function (event, clickedIndex, newValue, oldValue) {
+          console.log("newValue");
+          console.log(newValue);
+          console.log("clickedIndex");
+          console.log(clickedIndex);
+          console.log("oldValue");
+          console.log(oldValue);
+          var valor_seleccionado_traza = $("#Rutas option").eq(clickedIndex).val();
+          var todas_trazas = $("#Rutas").val();
+          console.log("valor_seleccionado_traza");
+          console.log(valor_seleccionado_traza);
+          console.log("todas_trazas");
+          console.log(todas_trazas);
+          
+
+          if (newValue == undefined && clickedIndex  == undefined && oldValue == undefined ){ //se seleccionó uno de los botones. 
+
+            if (todas_trazas.length > 0){ //Se selecciono "Select All"
+              todas_trazas.forEach(function(traza){
+
+              function estaPintada(element) {
+                  return element == traza;
+                }
+              pintada = rutas_pintadas.find(estaPintada);
+              pintada == undefined  ? ShowRoute(traza) : (console.log(traza), console.log("traza no pintada"));
+                });
+
+              }
+            else{ //Se selecciono "Deselect All"
+            
+              $('[class^="leaflet-routing"]').remove();
+              deleteRoute();
+
+            }
+
+
+
+          }
+
+
+          if (newValue){
+          todas_trazas.forEach(function(traza){
+
+            function estaPintada(element) {
+                return element == traza;
+              }
+            pintada = rutas_pintadas.find(estaPintada);
+            pintada == undefined  ? ShowRoute(traza) : (console.log(traza), console.log("traza no pintada"));
+             
+
+          });
+          }
+          if (oldValue ){
+
+            //map.removeControl(route);
+            $('[class^="leaflet-routing"]').remove();
+            deleteRoute();
+
+            //CambiarMapa(valor_select);
+
+
+            
+            //console.log(L.control)
+           // console.log(Routing._map);
+
+          } 
+
+          
+
+
+      });
+
+function deleteRoute () {
+//elimando todas las rutas creadas. 
+  d3.selectAll(".leaflet-interactive").remove();
+
+  geojson = L.geoJson(manzanas, {
+          style: style, onEachFeature: onEachFeature 
+          }).addTo(map);
+  valor_select = "normal";
+  var desc_mas =$('select option[value="normal"]').attr('descripcion') ;
+  var titulo_mas =$('select option[value="normal"]').text() ;
+
+  var datos_info = {"titulo": titulo_mas, "descripcion" :desc_mas};
+  info.update(datos_info);
+  $('#Rutas')
+  .selectpicker({title: "Escoge las trazas..."})
+  .selectpicker('val', '')
+  .selectpicker('render');
+  rutas_pintadas = []; 
+  map.setView([-39.81, -73.24],13);
+  d3.selectAll(".info_rutas").remove();
+
+  // body...
+}
+
+function CambiarIndicadorRuta() {
+//Cambiando la ruta marcada, ya que cambia el indicador. 
+  //d3.selectAll(".leaflet-interactive").remove();
+  $('[class^="circle_"]').remove();
+  rutas_pintadas = []; 
+  d3.selectAll(".info_rutas").remove();
+  todas_trazas = $("#Rutas").val();
+  console.log("todas_trazas en CambiarIndicadorRuta");
+  console.log(todas_trazas);
+  todas_trazas.forEach(function(traza){
+    ShowRoute(traza);
+/*
+      function estaPintada(element) {
+          return element == traza;
+        }
+      pintada = rutas_pintadas.find(estaPintada);
+      pintada == undefined  ? ShowRoute(traza) : (console.log(traza), console.log("traza no pintada"));
+   */    });
+
+}
+
+      $('.indicadores_select').on('changed.bs.select', function (event, clickedIndex, newValue, oldValue) {
+
+      var desc_mas;
+      var titulo_mas;
+      var Value = $(".indicadores_select option:selected").text();
+      var valor_seleccionado = $(".indicadores_select option:selected").val();
+
+      var valores_seleccionados = $("#mySelect_Personas").val().length > 0 ? $("#mySelect_Personas").val() : $("#mySelect_HyV").val() ;
+
+      if (valores_seleccionados && valores_seleccionados.length>1){
+        desc_mas =[];
+        titulo_mas = [];
+        for ( var i =0 ;  i<valores_seleccionados.length; i++){  //var i = 0; i < data_valor.datos.length; i++
+          desc_mas.push($('select option[value="'+valores_seleccionados[i]+'"]').attr('descripcion')) ;
+          titulo_mas.push($('.indicadores_select option[value="'+valores_seleccionados[i]+'"]').text() );
+          console.log(desc_mas);
+          console.log(titulo_mas);
+          var datos_info = {"titulo": titulo_mas, "descripcion" :desc_mas, "cant": valores_seleccionados.length };
+          info.update(datos_info);
+          console.log(datos_info);
+        }
+
+      }
+      else{
+        var desc = $('select option[value="'+valor_seleccionado+'"]').attr('descripcion');
+        if(desc) {
+
+          var datos_info = {"titulo": Value, "descripcion" :desc };
+
+          info.update(datos_info);
+        }
+        else{
+    
+          var datos_info = {"titulo": Value, "descripcion" :"" };
+        }
+
+
+      }
+
+     
+      
+      $(this).selectpicker({title: Value}).selectpicker('render');
+
+
+     // $('.selectpicker').selectpicker('val', Value);
+      //valor_select =  $(".selectpicker").val() ;
+      $("#mySelect_HyV").val().length > 0 ? valor_select = $("#mySelect_HyV").val() : valor_select = $("#mySelect_Personas").val();
+      
+
+
+
+      $('.selectpicker').selectpicker('refresh');
+
+
+
+    return false; 
+  });
+
+
+    var layer_prim = 0;
+    var latlngPoint = new L.LatLng(-39.79475442976456, -73.22567939758302);
+    //Funcion que automatiza un click en un layer. 
+    function cliclingMap(coord, prim, hora) {
+      var valor_ruta;
+      
+      var layer_point = map.latLngToLayerPoint(coord);
+       geojson.eachLayer(function(layer) {
+        
+          if (layer.getBounds().contains(coord)) {
+            console.log("layer.MANZENT");
+            console.log(layer.feature.properties.MANZENT);
+
+            
+            var manzana_redcode = layer.feature.properties.MANZENT.toString();
+         
+            // var str_valorSelect
+            !(typeof valor_select === 'string') ? valor_select = valor_select.join() : console.log(valor_select);
+              $.ajax({
+
+                    url: "{% url 'index' %}" , 
+                    type: 'POST',
+                    data:{  redcode_valor : manzana_redcode,
+                            valor_seleccion : valor_select,
+                            csrfmiddlewaretoken: '{{ csrf_token }}'} ,
+                          success: function(data) {
+                            console.log("data");
+                            console.log(data);
+                            valor_ruta = data.respuesta;
+                            console.log(valor_ruta);
+
+
+                           
+                            },
+                          failure: function(data) {
+
+                              alert('Error de conexión');
+                          },
+                          crossDomain: true,
+                          async: false
+                      });
+              console.log("valor_ruta final");
+              console.log(valor_ruta);
+
+            if (layer_prim == 0) {
+
+              prim ? (layer.fire("dblclick"),
+                    layer_prim = layer,
+                    layer.off('mouseout'),
+                     layer.off('mouseover')) : (layer.fire("mouseover"), layer.off('mouseout')) ;
+            }
+            else{
+              layer.fire("mouseover");
+              layer.off('mouseout');
+        }
+
+        } 
+        
+
+
+
+}); 
+      return valor_ruta;
+    }
+/*
+    function cliclingMap(coord, data) {
+      console.log(coord);
+      var layer_point = map.latLngToLayerPoint(coord);
+
+      console.log(map.latLngToLayerPoint(coord));
+      console.log(map.latLngToContainerPoint(coord));
+
+       geojson.eachLayer(function(layer) {
+
+        layer.getBounds().contains(coord) ? (layer.fire("mouseover"), layer.off('mouseout')): i =0 ; 
+
+}); 
+      
+
+    }
+    */
+
+function CreateRoute(puntos_ruta,numa, hora){ 
+  //Funcion que establece una ruta entre dos antenas en una traza. La antena se simboliza con 2 circulos,
+  //En el círculo se muestra la información de la conexión a través de una "bindTooltip".
+
+ puntos_ruta.forEach(function(punto, count){
+  
+  var circle_int = L.circle(punto, {
+    color: '#f03',
+    opacity: 0.3,
+    radius: 100,
+    className : 'circle_'+ numa
+}).addTo(map);
+  var hora_sep = (hora[count].hora[0]).toString() + (hora[count].hora[1]).toString() + ':'+ (hora[count].hora[2]).toString() + (hora[count].hora[3]).toString();
+  var texto = '<b>Número conexión:</b> '+ count.toString() + '</br> <b>Hora:</b> '+ hora_sep +'</br> <b>Torre:</b> '+ (hora[count].torre).toString();
+
+    var circle = L.circle(punto, {
+    color: '#f03',
+    opacity: 0.3,
+    fillColor: '#f03',
+    fillOpacity: 0.2,
+    radius: 250,
+    className : 'circle_'+ numa
+}).bindTooltip(texto).addTo(map);
+    // Agregamos información al control lateral, creado para cada ruta. 
+  
+
+  });
+
+
+var route =  L.Routing.control({
+    clase : numa,
+    waypoints: puntos_ruta,
+    routeWhileDragging: true,
+    lineOptions: {
+      styles: [
+        {color: 'black', opacity: 0.15, weight: 9},
+        {color: 'white', opacity: 0.8, weight: 6},
+        {color: 'red', opacity: 0.5, weight: 2}
+      ]
+    }
+})
+ 
+    route.addTo(map);
+
+    route.hide();
+
+    d3.selectAll(".leaflet-marker-pane").remove();
+    d3.selectAll(".leaflet-routing-container-hide").remove();
+    d3.selectAll(".leaflet-shadow-pane").remove();
+  //  alert('Distance: ' + route._routes[0].summary.totalDistance );
+  var distance_route;
+  var time_route;
+     
+   
+//Información de control de la ruta, se agrega a la derecha del mapa
+L.Control.Watermark = L.Control.extend({  
+  
+    onAdd: function(map) {
+      console.log(numa); 
+      puntos_ruta.length > 1 ? console.log(puntos_ruta.length) : console.log("puntos ruta < 1 ");
+      var info_ruta = L.DomUtil.create('div', 'info_contenido info_rutas numa_'+ numa); //se crea siempre....
+
+
+
+      if (puntos_ruta.length  == 1 ){ // cunado la ruta es de un punto, se ingresa la informacion directamente en el L.Control
+          info_ruta.innerHTML = '<b>ID ruta: </b>'+ numa+ '</br>' ;
+          var hora_sep = (hora[0].hora[0]).toString() + (hora[0].hora[1]).toString() + ':'+ (hora[0].hora[2]).toString() + (hora[0].hora[3]).toString();
+          var texto = '</br> <b>Número conexión:</b> 0 </br> <b>Hora:</b> '+ hora_sep +'</br> <b>Torre:</b> '+ (hora[0].torre).toString();
+          texto += hora[0].valor ? '</br>' + (hora[0].valor).toString() : '</br>';
+          info_ruta.innerHTML += texto;
+
+
+       }
+       else{
+
+          route.on('routesfound', function(e) {
+
+          var routes = e.routes;
+          distance_route = routes[0].summary.totalDistance;
+          time_route = routes[0].summary.totalTime;
+          distance_route ? console.log("con distancia") : console.log("sin distancia");
+          //alert('Distance: ' + distance_route + 'm.   Time: ' + time_route+ 's.');
+          console.log("distance_route");
+          console.log(distance_route);
+      
+          info_ruta.innerHTML = '<b>ID ruta: </b>'+ numa+ '</br> <b>Distancia Total: </b>' +distance_route + 'm.  <b>Tiempo: </b>' + time_route + 's. </br>' ;
+          puntos_ruta.forEach(function(punto, count){
+          var hora_sep = (hora[count].hora[0]).toString() + (hora[count].hora[1]).toString() + ':'+ (hora[count].hora[2]).toString() + (hora[count].hora[3]).toString();
+          var texto = '</br> <b>Número conexión:</b> '+ count.toString() + '</br> <b>Hora:</b> '+ hora_sep +'</br> <b>Torre:</b> '+ (hora[count].torre).toString();
+          texto += hora[count].valor ? '</br>' + (hora[count].valor).toString()  + '</br>' : '</br>' ;
+
+          info_ruta.innerHTML += texto;
+
+       });
+
+      }); 
+
+       }
+
+       
+        return info_ruta;
+    },
+
+    onRemove: function(map) {
+        // Nothing to do here
+    }
+  //  collapsed: true,
+});
+
+L.control.watermark = function(opts) {
+    return new L.Control.Watermark(opts);
+}
+
+
+ 
+
+L.control.watermark().addTo(map);
+
+
+    //markers.clearLayers();
+}  // Fin CreateRoute
+
+
+
+
+
+    function plotTracks(){
+
+      d3.json( "{% static 'js/valdivia_100_0315.json' %}" , function(data) {
+        data.forEach(function(d){
+         // if (d.numa == '4b489984c6024c762750cd1119b3655b'){
+
+             var lines = [];
+             var primera = true;
+             var puntos = [];
+
+            d.path.forEach(function(p){  // for each path   
+                lines.push( [ p.lat, p.lon ] );
+                puntos.push( L.latLng(p.lat, p.lon));
+               
+                var antPoint = new L.LatLng(p.lat, p.lon);
+               // primera ?  cliclingMap(antPoint, true) : cliclingMap(antPoint, false) ;
+                primera = false;
+
+
+              //  console.log(lines); // add to 'lines' the point [ lat , lon ]
+            
+            }); // end for each path
+           
+            CreateRoute(puntos);
+
+  /*          var track = new L.Polyline(lines, { 
+                color : '#5A8380',
+                weight : 2,
+                opacity : 1,
+                smoothFactor : 1,
+                fillColor: '#ff0000'
+            }); 
+            layer_prim = 0;
+            
+            track.addTo(map); // add track to map 
+            track.bringToFront();
+
+*/
+          //}
+           
+
+        }); // end for each data d
+
+    }); // end read data
+
+}; // end function
+
+
+
+ 
+    </script>
+
+  </body>
+</html>
+
+

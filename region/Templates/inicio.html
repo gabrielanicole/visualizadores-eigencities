@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+{% load static %}
+<html>
+<head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+	<title>Visualizadores - Ecoinformática Laboratorio</title>
+
+<style type="text/css">
+	.saturate {-webkit-filter: saturate(3); filter: saturate(3);}
+	.grayscale {-webkit-filter: grayscale(100%); filter: grayscale(100%);}
+	.contrast {-webkit-filter: contrast(160%); filter: contrast(160%);}
+	.brightness {-webkit-filter: brightness(0.25); filter: brightness(0.25);}
+	.blur {-webkit-filter: blur(3px); filter: blur(3px);}
+	.invert {-webkit-filter: invert(100%); filter: invert(100%);}
+	.sepia {-webkit-filter: sepia(100%); filter: sepia(100%);}
+	.huerotate {-webkit-filter: hue-rotate(180deg); filter: hue-rotate(180deg);}
+	.rss.opacity {-webkit-filter: opacity(50%); filter: opacity(50%);}
+h1, h2 {
+	color: #FFFFFF;
+	text-align: center;
+	font-family: verdana;
+
+}
+body {
+	background :black;
+}
+
+.container {
+  position: relative;
+  width: 100%;
+}
+
+.image {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.overlay {
+	width: 100%;
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	background-color: #000;
+	overflow: hidden;
+	height: 0;
+	transition: .5s ease;
+	font-size: 20px;
+	opacity:0.8;
+	font-family: verdana;
+}
+
+.container:hover .overlay {
+	width: 100%;
+  height: 100%;
+}
+
+.text {
+  color: white;
+  font-size: 90%;
+  position: absolute;
+  overflow: hidden;
+  top: 50%;
+  left: 50%;
+  text-align: justify;
+  transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+}
+
+
+
+#imagen {
+			width:100%;
+			position:relative;
+		}
+
+#divimagen
+		{
+			width:99.5%;
+			position: relative;
+			color:#fff;
+			background-color:#000;
+			bottom: 30px;
+			font-size: 150%;
+
+  			padding-right: 0px;
+  			padding-left: 0px;
+			opacity:0.8;
+			font-family: verdana;
+
+		}
+
+</style>
+</head>
+<body>
+
+
+
+ <h1> <img src="{% static 'img/Logotipo_fondoblanco.png' %}" alt="cluster" ></div> </h1>
+<div>
+ <table align="center">
+ 	<td>
+		<div id="imagen" class="container"  >
+			<a href="{% url 'cluster' %}">  <img src="{% static '/img/clusterCuadrado.png' %}" alt="cluster" class="contrast image" width="100%" >
+			
+
+			<div id="divimagen" > Comunidades y Ranking de Centralidad 
+			</div>
+			<div class="overlay">
+			    <div class="text"> Visualizador de regiones segmentadas por una teleselación de voronoi de las antenas de coneccion telefónica de Chile. Se muestra el nivel de centralidad de cada antena y también las comunidades que se forman através de la implmenteación de un algoritmo de detección de comunidades del trabajo "Fast unfolding of communities in large networks" de Vincent D Blondel, Jean-Loup Guillaume, Renaud Lambiotte, Etienne Lefebvre. </div>
+			</div>
+		
+			</a>
+		</div>
+
+ 		
+ 	</td>
+ 	<td>
+
+		<div id="imagen" class="container" width="100%">
+			<a href="{% url 'index' %}" >  <img src="{% static 'img/manzanasZoomColores.png' %}" alt="manzanas" class="contrast image" width="100%">
+			
+
+			<div id="divimagen" > Observatorio de Manzanas </div>
+			<div class="overlay">
+			    <div class="text"> Visualizador de la interacción de habitantes de las capitales de Chile desde la escala de las manzanas urbanas. Relacionando datos sociales demográficos y de movilidad</div>
+			</div>
+			</a>
+		</div>
+
+ 		
+ 	</td>
+
+ </table>
+</div> 
+
+
+
+<script type="text/javascript">
+
+
+
+</script>
+
+</body>
+</html>

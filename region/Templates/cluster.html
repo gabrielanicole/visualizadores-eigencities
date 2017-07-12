@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+{% load static %}
+
+<html>
+<head>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css"
+   integrity="sha512-07I2e+7D8p6he1SIM+1twR5TIrhUQn9+I6yjqD53JQjFiMf8EtC93ty0/5vJTZGF8aAocvHYNEDJajGdNx1IsQ=="
+   crossorigin=""/>
+  <link rel="stylesheet" href="{% static 'css/visualizador_style.css' %}">
+
+   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+   <script src="https://cdn.datatables.net/1.10.15/js/jquery.dataTables.min.js"></script>
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
+<script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js"
+   integrity="sha512-A7vV8IFfih/D732iSSKi20u/ooOfj/AGehOKq0f4vLT1Zr2Y+RX7C+w8A1gaSasGtRUZpF/NZgzSAu4/Gc41Lg=="
+   crossorigin=""></script>
+
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/0.4.2/leaflet.draw.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/0.4.2/leaflet.draw.js"></script>
+
+     <!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+ <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+  <script src="{% static 'voronoi.json' %}"></script>
+
+ <!--   <script src="voronoi.json"></script> var torres --> 
+   <!-- <script src="comunidades.json"></script>  var com_ant -->
+<style type="text/css">
+
+#slider{
+  margin-right: 10%;
+  margin-left: 10%;
+
+}
+ #custom-handle {
+    width: 3em;
+    height: 1.6em;
+    top: 50%;
+    margin-top: -.8em;
+  
+    text-align: center;
+    line-height: 1.6em;
+  }
+
+    #mapid { height:100vh; }
+    h4 {margin-left: 50px}
+    p {margin-left: 50px;
+      width: 50% }
+      table {margin-left:  50px}
+    h1 {text-align: center}
+
+.info {
+    width: 150px;   
+    
+}
+
+</style>
+</head>
+<body>
+    
+    <br/>
+    <h1>Ranking de Centralidad y Comunidades</h1>
+    <br/>
+     <div class="row">
+     
+<div class = "col-md-6">
+      <h4> 1. Subir Comunidades:   <label class="btn btn-default btn-file">
+            Cargar... <input type='file' id='files1' style="display: none; " onchange="handleFiles(this.files, processFileComunidad, files1,files1label)" />
+      </label>  <label id='files1label'> </label> </h4>
+
+ <p><label id='resultado'> carga las comunidades para conocer su orden </label>  </p>
+        <p><table id = "tableResul"class="table" style= "display:none">
+          <tr id = "Numero">
+            <td class="name"><b> # </b></td>
+          </tr>
+          <tr id = "rowCom">
+            <td class="name"><b> Comunidad </b></td>
+          </tr>
+          <tr id = "rowNum" >
+            <td class="name"><b> Cantidad </b> </td>
+          </tr>
+        </table>
+       </p>
+<!--
+       <div id = "botTable" style="display: none">
+        <h4> <label class="btn btn-default">
+        Recargar tabla <input type='submit' style="display: none"  onclick="handleFiles(this.files, readTextFile, files2, files2label)" />
+      </label>   </label> </h4>
+    </div> -->
+
+      <h4> 2. Definir el Numero de  Comunidades: 
+      <input type="number" id ="quantity" name="quantity" min="1" max="8"> </h4>
+  <div id = "generarVisualizacionComunidades" style="display: none">
+       <h4> <label class="btn btn-default">
+        Generar Visualizacion Comunidades <input type='submit' style="display: none"  onclick="pintarArchivo('comunidades')" />
+      </label>   </label> </h4>
+
+  </div>
+  
+ </div>
+    
+
+
+
+
+<div class = "col-md-6">
+      <h4>Subir Ranking de Centralidad:   <label class="btn btn-default btn-file">
+         Cargar... <input type='file' id='files2' style="display: none"  onchange="handleFiles(this.files, readRankingFile, files2, files2label)" />
+      </label>  <label id='files2label'> </label> </h4> 
+
+      <div id="slider" margin-right="30px">
+        <div id="custom-handle" class="ui-slider-handle"></div>
+      </div>
+
+     
+
+  <div class="row" id = "generarVisualizacionRanking" >
+    <div class = "col-md-6">
+      <h4> <label class="btn btn-default">
+        Guardar Visualizacion Ranking <input type='submit' style="display: none"  onclick="pintarArchivo('ranking')" />
+      </label>   </label> </h4>
+    </div>
+    <div class = "col-md-6" align = "left">
+      <h4> <label class="btn btn-default">
+        Visualizar con colores <input type='submit' style="display: none"  onclick="pintarArchivo('rankingColores')" />
+      </label>   </label> </h4>
+    </div>
+    <br/>
+
+  </div>
+  </div>
+  </div>
+    <br/>
+    <div id="mapid"></div>
+
+    <script type="text/javascript">
+
+
+      var mapURL = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw'
+      var grayscale = L.tileLayer(mapURL, {id: 'mapbox.light', attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors,'})
+       
+      var mapURL_OSM_BW = 'http://{s}.www.toolserver.org/tiles/bw-mapnik/{z}/{x}/{y}.png'
+      var blanco_negro  = L.tileLayer(mapURL_OSM_BW, {attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors,'})
+      var mymap = L.map('mapid', {
+              center: [-33.399613389893275, -70.61239171079704 ],
+              zoom: 13,
+              layers: [grayscale]
+      });
+
+
+
+
+
+    var editableLayers = new L.FeatureGroup();
+    mymap.addLayer(editableLayers);
+    
+    var MyCustomMarker = L.Icon.extend({
+        options: {
+            shadowUrl: null,
+            iconAnchor: new L.Point(12, 12),
+            iconSize: new L.Point(24, 24),
+            iconUrl: 'link/to/image.png'
+        }
+    });
+    
+    var options = {
+        position: 'topright',
+        draw: {
+            polyline: false,
+            polygon: false,
+            circle: false, // Turns off this drawing tool
+            rectangle: {
+                shapeOptions: {
+                    //clickable: true,
+                    color: 'black',
+                    weight: 5,
+                    opacity:0.8
+                },
+                repeatMode: false,
+                showRadius: false
+            },
+            marker: false 
+        },
+        edit: {
+            featureGroup: editableLayers, //REQUIRED!!
+            remove: true
+        }
+    };
+    var torresRect = [];
+    var drawControl = new L.Control.Draw(options);
+    
+    mymap.addControl(drawControl);
+                 
+
+    var layer;
+    mymap.on(L.Draw.Event.CREATED, function (e) {
+        var type = e.layerType;
+        layer = e.layer;
+        //rectCreated.push(layer);
+        //console.log(rectCreated);
+        //layer.setPopupContent("content");
+
+        console.log(layer.getLatLngs());  
+        console.log(layer.getBounds());  
+        coordRect = layer.getLatLngs();  
+        if (type === 'marker') {
+            layer.bindPopup('A popup!');
+        }
+        editableLayers.addLayer(layer);
+        selectTorres(layer);
+        console.log(torresRect);
+        var stringTorres = torresRect.toString();
+        console.log("stringTorres");
+        console.log(stringTorres);
+        enviarSubRed(stringTorres);
+        
+
+
+    });
+
+ mymap.on(L.Draw.Event.EDITSTOP, function (e) {
+        console.log(layer.getLatLngs());
+        coordRect = layer.getLatLngs();
+        console.log(coordRect[0]);
+        selectTorres(layer);
+        console.log(torresRect);
+        console.log(torresRect);
+        var stringTorres = torresRect.toString();
+        console.log("stringTorres");
+        console.log(stringTorres);
+        enviarSubRed(stringTorres);
+    });
+
+
+  
+  function enviarSubRed(stringTorres) {
+
+    ranking = [];
+
+        $.ajax({
+            url: "{% url 'cluster' %}" , 
+            type: 'POST',
+            data: {
+              torres : stringTorres,
+              csrfmiddlewaretoken: '{{ csrf_token }}'},
+              success: function(data) {
+                console.log("antenas salida");
+                antenas = data.salida; 
+                console.log(antenas);
+                antenas.forEach(function (antena_rank) {
+                  ranking.push([Math.abs(antena_rank[0]), antena_rank[1]] )
+                  // body...  
+                });
+
+                ranking.sort(function(a, b){return b[0]-a[0]});
+                console.log(ranking);
+
+                largo = ranking.length;
+                indice = (largo / 100) * porcentaje;
+                degrade = largo/10;
+                d_1 = degrade*2;
+                d_2 = degrade*4;
+                d_3 = degrade*5;
+                d_4 = degrade*8;
+                d_5 = degrade*10;
+                console.log("d_1, d_2, d_3, d_4, d_5");
+                console.log(d_1, d_2, d_3, d_4, d_5);
+
+                pintarArchivo('ranking');
+                //antenas.forEach
+
+
+              },
+              failure: function(data) {
+                alert('Error de conexión');
+              },
+              crossDomain: true
+            });
+
+
+    }
+
+
+   
+    function selectTorres (layer) {
+      torresRect = [];
+      for (var Cod_torre in torres){
+            //torres[key] --> son las coordenadas de la antena. 
+            inRect = false;
+            torres[Cod_torre].forEach(function(d){
+              layer.getBounds().contains([d[1],d[0]]) ? inRect = true : null;
+              return inRect
+            });
+            inRect ? torresRect.push(Cod_torre): null;
+
+        }
+    }
+
+
+      var ord_com =[]; // [[comunidad, cantidad],[comunidad, cantidad],... ]
+      var ranking = [];
+     // var rectCreated = [];
+      var overlayMaps,
+          antenasBor,
+          capasControl,
+          antenasRell;
+
+      var com_ant;
+      var colores_comunidades = ['#CCFFCC','#FFCC33',
+      '#000000', '#FF6699',
+      '#FF33CC', '#B69C3D', 
+      '#6633CC', '#666699', 
+      '#669966', '#660066',
+      '#66FFFF', '#990000', 
+      '#FF9966', '#0000FF'];
+      var cantidad_colores = colores_comunidades.length;
+
+      var porcentaje = 10; // cambiar el porcenjate aquí 
+
+      var indice, 
+          d_1 ,
+          d_2 ,
+          d_3 ,
+          d_4 ,
+          d_5 ;
+
+
+      function handleFiles(file, processFile, nombre, nomLabel) {
+        //Funcion que abre el archivo subido y lo envía al proceso correspondiente 
+        //Se envía en forma de FileReader;
+         var fileInput = $(nombre);
+         //nombre del archivo cargado:
+         var archivo = fileInput.val().replace(/\\/g, '/').replace(/.*\//, '');
+         //cargar el nombre del archivo en el label *******
+          $(nomLabel).html(archivo); 
+         var input = fileInput.get(0);
+          
+          // Create a reader object
+          var reader = new FileReader();
+          if (input.files.length) {
+              var textFile = input.files[0];
+              reader.readAsText(textFile);
+              $(reader).on('load', processFile);
+          } else {
+              alert('Please upload a file before continuing')
+          }
+
+          
+
+
+      }
+
+
+        
+      function processFileComunidad(e) {
+        //Función que procesa el archivo de comunidades
+        //rellena com_ant con un JSON de comunidades de la forma {"COD_ANT1" : 0, "COD_ANT2" : 4, ...}
+        //genera ord_com con las comunidades ordenas y las muestra en una tabla para que el usuario conosca el máximo a pintar.  
+        ord_com =[]; //reinicializamos el orden de las comunidades 
+        var file = e.target.result,
+            results;
+        if (file && file.length) {
+
+          /* $.ajax({
+            url: "{% url 'cluster' %}" , 
+            type: 'POST',
+            data: {
+              input : file,
+              csrfmiddlewaretoken: '{{ csrf_token }}'},
+              success: function(data) {
+                console.log("data");
+                console.log(data);
+              },
+              failure: function(data) {
+                alert('Error de conexión');
+              },
+              crossDomain: true
+            });
+*/
+
+            results = file.split("\n");
+
+            //indice de name y modularity_class
+            var name = 0;
+            var comunidad = -1;
+            var header = results[0].split(",");
+
+            header.forEach(function(columna, count){
+              
+              columna == "name" ? name = count : null ;
+              columna == 'modularity_class' ? comunidad = count : null;
+            })
+
+            comunidad == -1 ? comunidad = header.length -1 : null;
+           
+            //creación del json 
+            var array_json = "{";
+            results.forEach( function(antena, count){
+              antena_array = antena.split(",");
+             
+              
+              if(count > 0 && count < results.length - 1) {
+                var json_antena = results[count +1 ].length > 0 ? '"'+antena_array[name]+'"' + ": "+ antena_array[comunidad] + "," : '"'+antena_array[name]+'"' + ": "+ antena_array[comunidad] ; //{"COD_ANT1" : 0, "COD_ANT2" : 4, ...}
+                json_antena ? array_json += json_antena : null ;
+                
+              }
+              else{
+              
+                count == results.length - 1 ? ( antena_array[0] != "" ? array_json += '"'+antena_array[0]+'"' + ": "+ antena_array[antena_array.length - 1] : null ) : null;
+              }
+            });
+
+            array_json = array_json + "}";
+            com_ant = JSON.parse(array_json);
+            //generé el JSON de comunidades. 
+
+            ord_com = []; // [[comunidad, cantidad],[comunidad, cantidad],... ]
+
+            for (var key in com_ant){
+              //Recorrer cada antena y la comunidad a la que pertenece.
+              
+              var encontrado = false;
+              var numComunidad = com_ant[key];
+
+              ord_com.forEach(function(cuenta){
+                cuenta[0] == numComunidad ? (cuenta[1] = cuenta[1] + 1, encontrado = true) : null;
+
+              }); 
+              encontrado ? null : ord_com.push([numComunidad, 1]);
+
+            }
+            
+           
+            ord_com.sort(function(a, b){return b[1]-a[1]});
+
+            $('#resultado').hide(); 
+            $( "td" ).remove( ".tableElem" );
+
+
+            ord_com.some( function(d, count) {
+                if (d[1] != 1) {
+                $("#Numero").append($('<td>').attr('class', 'tableElem').text(count + 1));
+                $("#rowCom").append($('<td>').attr('class', 'tableElem').text(d[0]));
+                $("#rowNum").append($('<td>').attr('class', 'tableElem').text(d[1]));}
+                return d[1] === 1;
+            });
+
+            $("#tableResul").show();
+
+            cantidad_colores > ord_com.length ? $('#quantity').attr('max', ord_com.length) : $('#quantity').attr('max', cantidad_colores) ;
+            $('#generarVisualizacionComunidades').show();
+           // $("#botTable").show();
+
+
+        }
+      }
+
+      function getColorFill(d) {
+
+        return d < d_1 ? '#800026' :
+               d < d_2  ? '#E31A1C' :
+               d < d_3  ? '#FC4E2A' :
+               d < d_4  ? '#FD8D3C' :
+               d < d_5  ? '#FEB24C' :
+                          '#FFEDA0' ;
+      }
+
+      function getColor(d, max_colores) {
+        for( i = 0; i <max_colores; i++){
+          if ( d == ord_com[i][0]) {
+            return colores_comunidades[i]; 
+          }
+        }
+        return '#FFFFFF';
+      }
+
+      function pintarArchivo(tipo) {
+        var relleno_antenas = [];
+        var borde_antenas = [];
+
+
+        if (tipo == "comunidades"){
+          for (var Cod_torre in torres){
+            //torres[key] --> son las coordenadas de la antena. 
+            var latlngArray = [];
+            torres[Cod_torre].forEach(function(d){
+              latlngArray.push([d[1],d[0]]);
+            });
+
+            var numComunidad = com_ant[Cod_torre] || com_ant[Cod_torre] == 0 ? com_ant[Cod_torre] : null ;
+            var antena_popup = com_ant[Cod_torre] || com_ant[Cod_torre]  == 0 ? "Nombre: "+ Cod_torre.toString() +" comunidad: "+ numComunidad :
+               "Nombre: "+ Cod_torre.toString() ;
+
+            var max_col = $('#quantity').val(); 
+                
+            var polyBor = L.polygon(latlngArray, {color:getColor(numComunidad, max_col), fillOpacity: 0}).bindPopup(antena_popup);
+            
+            var polyRell = L.polygon(latlngArray, {opacity: 0, fillColor: getColor(numComunidad, max_col), fillOpacity: 0.5}).bindPopup(antena_popup);
+
+            borde_antenas.push(polyBor);
+            relleno_antenas.push(polyRell);
+          }
+
+          var antenasBorCom = L.layerGroup(borde_antenas); //grupo de antenas voronoi;
+          var antenasRellCom = L.layerGroup(relleno_antenas); //grupo de comunidades voronoi;
+
+          var overlayMapsCom = {
+              Relleno: antenasRellCom,
+              Borde: antenasBorCom
+          };
+
+          L.control.layers(null, overlayMapsCom, {collapsed:false} ).addTo(mymap);
+
+          
+
+          antenasRellCom.addTo(mymap);
+          antenasBorCom.addTo(mymap);
+        }
+
+        else if (tipo == "rankingColores"){
+
+          ranking.forEach( function(antena, count){
+            if (torres[antena[1]]){
+              var latlngArray = [];
+              torres[antena[1]].forEach(function(d){
+                  latlngArray.push([d[1],d[0]]);
+            });
+
+            var numComunidad = com_ant && (com_ant[antena[1]] || com_ant[antena[1]] == 0 )? com_ant[antena[1]] : null;
+            var antena_popup = numComunidad || numComunidad == 0 ? "ranking :"+antena[0].toString() +" nombre:"+ antena[1].toString() +" comunidad: "+ numComunidad :
+                " ranking :"+antena[0].toString() +" nombre:"+ antena[1].toString();
+            
+            var polyBor = L.polygon(latlngArray, {color:getColorFill(count), fillOpacity: 0}).bindPopup(antena_popup);
+            var polyRell = L.polygon(latlngArray, {opacity: 0, fillColor: getColorFill(count), fillOpacity: 0.5}).bindPopup(antena_popup);
+
+            borde_antenas.push(polyBor);
+            relleno_antenas.push(polyRell);
+          }
+        });
+
+          var antenasBorCom = L.layerGroup(borde_antenas); //grupo de antenas voronoi;
+          var antenasRellCom = L.layerGroup(relleno_antenas); //grupo de comunidades voronoi;
+
+          var overlayMapsCom = {
+              Relleno: antenasRellCom,
+              Borde: antenasBorCom
+          };
+
+          L.control.layers(null, overlayMapsCom, {collapsed:false} ).addTo(mymap);
+
+          
+
+          antenasRellCom.addTo(mymap);
+          antenasBorCom.addTo(mymap);
+
+        }
+        else{
+           
+          ranking.some( function(antena, count){
+            if (torres[antena[1]]){
+              var latlngArray = [];
+              torres[antena[1]].forEach(function(d){
+                  latlngArray.push([d[1],d[0]]);
+            });
+
+            var numComunidad = com_ant && (com_ant[antena[1]] || com_ant[antena[1]] == 0 )? com_ant[antena[1]] : null;
+            var antena_popup = numComunidad || numComunidad == 0 ? "ranking :"+antena[0].toString() +" nombre:"+ antena[1].toString() +" comunidad: "+ numComunidad :
+                " ranking :"+antena[0].toString() +" nombre:"+ antena[1].toString();
+            
+            var polyBor = L.polygon(latlngArray, {color:'#800026', fillOpacity: 0}).bindPopup(antena_popup);
+            console.log("polyBor");
+            console.log(polyBor);
+            var geoPoly = polyBor.toGeoJSON();
+            console.log(geoPoly);
+            var polyRell = L.polygon(latlngArray, {opacity: 0, fillColor: '#800026', fillOpacity: 0.5}).bindPopup(antena_popup);
+
+            borde_antenas.push(polyBor);
+            relleno_antenas.push(polyRell);
+          }
+          return count > indice;
+        });
+
+
+
+          antenasBor = L.layerGroup(borde_antenas); //grupo de antenas voronoi;
+          antenasRell = L.layerGroup(relleno_antenas); //grupo de comunidades voronoi;
+
+          overlayMaps = {
+              Relleno: antenasRell,
+              Borde: antenasBor
+          };
+
+          capasControl = L.control.layers(null, overlayMaps, {collapsed:false} ).addTo(mymap);
+
+          antenasRell.addTo(mymap);
+          antenasBor.addTo(mymap);
+         
+      }
+
+
+        
+
+        //$(".leaflet-control-layers-selector").attr('checked', 'true'); //checked="checked"
+
+        fileInput = (tipo == "comunidades" ? $("#files1") : (tipo == "ranking" ? $("#files2") : null )  );
+         //nombre del archivo cargado:
+        var titulo = fileInput ? fileInput.val().replace(/\\/g, '/').replace(/.*\//, '') : "" ;
+        $(".leaflet-control-layers-overlays:last").append($('<label>').text(titulo));
+
+        }
+
+
+
+        function readRankingFile(e){
+          //Lee el ranking de centralidad y define los rangos a pintar. 
+          ranking = []; // [valor, COD_antena]
+          var file = e.target.result,
+              antena;
+
+          if (file && file.length) {
+            console.log("file");
+            console.log(file);
+            antena = file.split("\n");
+            antena.forEach(function(ant){
+                var antena_rank = ant.split(" ");
+               
+                ranking.push([Math.abs(antena_rank[0]), antena_rank[1]] );
+            });
+            ranking.sort(function(a, b){return b[0]-a[0]});
+            console.log("ranking");
+            console.log(ranking);
+
+
+            largo = ranking.length;
+            indice = (largo / 100) * porcentaje;
+            degrade = largo/10;
+            d_1 = degrade*2;
+            d_2 = degrade*4;
+            d_3 = degrade*5;
+            d_4 = degrade*8;
+            d_5 = degrade*10;
+            console.log("d_1, d_2, d_3, d_4, d_5");
+            console.log(d_1, d_2, d_3, d_4, d_5);
+           
+          }
+
+           $('#generarVisualizacionRanking').show();    
+        }
+
+
+
+
+
+         $( function() {
+            var handle = $( "#custom-handle" );
+            $( "#slider" ).slider({
+              value: 10,
+              create: function() {
+                handle.text( $( this ).slider( "value" ) );
+              },
+              slide: function( event, ui ) {
+                handle.text( ui.value );
+              },
+              change: function( event, ui ) {
+                console.log($( this ).slider( "value" ));
+                porcentaje = $( this ).slider( "value" );
+                if(ranking && ranking.length > 0){
+                 indice = (largo / 100) * porcentaje;
+                 capasControl ? mymap.removeControl(capasControl) : null;
+                 antenasBor ? antenasBor.clearLayers() : null;
+                 antenasRell ? antenasRell.clearLayers() : null;
+                 pintarArchivo('ranking');
+                }
+                
+
+              }
+            });
+          } );
+
+         function loadNet() {
+
+            var info = L.control();
+              info.onAdd = function (mymap){
+                this._div = L.DomUtil.create('div', 'info'); // create a div with a class "info"
+                this._div.innerHTML = "Cargando red...";
+                return this._div;
+              };
+            info.addTo(mymap);
+
+            $.ajax({
+              url: "{% url 'cluster' %}" , 
+              type: 'POST',
+              data: {
+                inicio_red: "red inicial",
+                csrfmiddlewaretoken: '{{ csrf_token }}'},
+                success: function(data) {
+                  console.log("red lista");
+                  console.log(data);
+                  mymap.addControl(drawControl);
+                  mymap.removeControl(info);
+                  
+
+                },
+                failure: function(data) {
+                  alert('Error de conexión');
+                },
+                crossDomain: true
+              });
+        }
+       // window.onload = loadNet;
+
+    </script>
+
+
+</body>
+</html>

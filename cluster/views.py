@@ -9,6 +9,7 @@ import numpy as np
 from scipy import linalg, optimize
 import datetime
 from pymongo import MongoClient
+import community as comu
 
 
 
@@ -28,8 +29,6 @@ net = nx.Graph()
 # Create your views here.
 def index(request):
 	#print('Timestamp: {:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now()))
-		
-
 	if request.method == 'POST':
 		resp = ""
 
@@ -40,20 +39,27 @@ def index(request):
 
 		elif 'torres' in request.POST:
 			
-			torres = request.POST['torres'] 
+			torres = request.POST['torres']
+			algoritmo = request.POST['algoritmo'] 
 
 			# lista de torres seleccionadas
 			l_torres = torres.split(",")
 			print(l_torres)
 			
 			net = loadNet(l_torres)
+			if (algoritmo == "rectangle"):
+				eigenArray = saveEigenValues(net)
+				
+				print("eigenArray")
+				print(eigenArray)
 
-			eigenArray = saveEigenValues(net)
-			
-			print("eigenArray")
-			print(eigenArray)
+				salida = eigenArray.tolist()
 
-			salida = eigenArray.tolist()
+			else:
+				salida = comu.best_partition(net)
+				print('Timestamp particion: {:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now()))
+				
+
 
 			resp = { 'salida': salida}
 			
@@ -103,29 +109,30 @@ def loadNet(l_torres):
 	#global net 
 	net=nx.Graph()
 
-	logging.debug('en_loadNet')
-	
+	print('Timestamp red vacia: {:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now()))
 	client = MongoClient()
 	db = client.django_example
 	coll = db.redRanking
+	print('Timestamp conectados: {:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now()))
 	net_mongo = coll.find(
 		{
 		"nodoi": { '$in': l_torres},
 		"nodoj": { '$in': l_torres}
 		}
 		)
+	print('Timestamp consulta lista: {:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now()))
 
 	net.add_nodes_from(l_torres)
+	print('Timestamp red con nodos: {:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now()))
 	red_array = []
 	
-	logging.debug('creando red')
 
-	for nodo in net_mongo:
-		red_array.append((nodo["nodoi"],nodo["nodoj"],nodo["peso"]))
-	
+	for enlace in net_mongo:
+		#net.add_weighted_edges_from([(enlace["nodoi"],enlace["nodoj"],enlace["peso"])])
+		red_array.append((enlace["nodoi"],enlace["nodoj"],enlace["peso"]))
+	print('Timestamp listo el for: {:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now()))
 	net.add_weighted_edges_from(red_array)
-	
-	logging.debug('termino')
+	print('Timestamp net lista: {:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now()))
 
 	return net
 

@@ -149,7 +149,7 @@
       var blanco_negro  = L.tileLayer(mapURL_OSM_BW, {attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors,'})
       var mymap = L.map('mapid', {
               center: [-33.399613389893275, -70.61239171079704 ],
-              zoom: 13,
+              zoom: 7,
               layers: [grayscale]
       });
 
@@ -173,7 +173,16 @@
         position: 'topright',
         draw: {
             polyline: false,
-            polygon: false,
+            polygon: {
+                shapeOptions: {
+                    //clickable: true,
+                    color: 'black',
+                    weight: 5,
+                    opacity:0.8
+                },
+                repeatMode: false,
+                showRadius: false
+            },
             circle: false, // Turns off this drawing tool
             rectangle: {
                 shapeOptions: {
@@ -199,47 +208,45 @@
                  
 
     var layer;
+    var type;
     mymap.on(L.Draw.Event.CREATED, function (e) {
-        var type = e.layerType;
+        type = e.layerType;
         layer = e.layer;
-        //rectCreated.push(layer);
-        //console.log(rectCreated);
-        //layer.setPopupContent("content");
+        
 
-        console.log(layer.getLatLngs());  
-        console.log(layer.getBounds());  
+        console.log("type");
+        console.log(type);
         coordRect = layer.getLatLngs();  
-        if (type === 'marker') {
-            layer.bindPopup('A popup!');
-        }
+
         editableLayers.addLayer(layer);
         selectTorres(layer);
-        console.log(torresRect);
+        
         var stringTorres = torresRect.toString();
-        console.log("stringTorres");
-        console.log(stringTorres);
-        enviarSubRed(stringTorres);
+       
+        enviarSubRed(stringTorres, type);
+
+        
+        
         
 
 
     });
 
  mymap.on(L.Draw.Event.EDITSTOP, function (e) {
-        console.log(layer.getLatLngs());
+        /*console.log("e");
+        console.log(e);*/
         coordRect = layer.getLatLngs();
-        console.log(coordRect[0]);
+       
         selectTorres(layer);
-        console.log(torresRect);
-        console.log(torresRect);
+        
         var stringTorres = torresRect.toString();
-        console.log("stringTorres");
-        console.log(stringTorres);
-        enviarSubRed(stringTorres);
+        
+        enviarSubRed(stringTorres, type);
     });
 
 
   
-  function enviarSubRed(stringTorres) {
+  function enviarSubRed(stringTorres, tipo_alg) {
 
     ranking = [];
 
@@ -248,32 +255,42 @@
             type: 'POST',
             data: {
               torres : stringTorres,
+              algoritmo : tipo_alg,
               csrfmiddlewaretoken: '{{ csrf_token }}'},
               success: function(data) {
                 console.log("antenas salida");
                 antenas = data.salida; 
-                console.log(antenas);
-                antenas.forEach(function (antena_rank) {
-                  ranking.push([Math.abs(antena_rank[0]), antena_rank[1]] )
-                  // body...  
-                });
+                if (tipo_alg === "rectangle"){
+                  console.log(antenas);
+                  antenas.forEach(function (antena_rank) {
+                    ranking.push([Math.abs(antena_rank[0]), antena_rank[1]] )
+                  });
+                
+                  ranking.sort(function(a, b){return b[0]-a[0]});
+                  console.log(ranking);
 
-                ranking.sort(function(a, b){return b[0]-a[0]});
-                console.log(ranking);
+                  largo = ranking.length;
+                  indice = (largo / 100) * porcentaje;
+                  degrade = largo/10;
+                  d_1 = degrade*2;
+                  d_2 = degrade*4;
+                  d_3 = degrade*5;
+                  d_4 = degrade*8;
+                  d_5 = degrade*10;
+                  console.log("d_1, d_2, d_3, d_4, d_5");
+                  console.log(d_1, d_2, d_3, d_4, d_5);
 
-                largo = ranking.length;
-                indice = (largo / 100) * porcentaje;
-                degrade = largo/10;
-                d_1 = degrade*2;
-                d_2 = degrade*4;
-                d_3 = degrade*5;
-                d_4 = degrade*8;
-                d_5 = degrade*10;
-                console.log("d_1, d_2, d_3, d_4, d_5");
-                console.log(d_1, d_2, d_3, d_4, d_5);
+                  pintarArchivo('ranking');
 
-                pintarArchivo('ranking');
-                //antenas.forEach
+                }
+               else{
+                //ord_comunidad();
+                console.log("data.salida");
+                console.log(data.salida);
+                com_ant = data.salida;
+                ord_comunidad();
+               } 
+               
 
 
               },
@@ -367,23 +384,6 @@
             results;
         if (file && file.length) {
 
-          /* $.ajax({
-            url: "{% url 'cluster' %}" , 
-            type: 'POST',
-            data: {
-              input : file,
-              csrfmiddlewaretoken: '{{ csrf_token }}'},
-              success: function(data) {
-                console.log("data");
-                console.log(data);
-              },
-              failure: function(data) {
-                alert('Error de conexión');
-              },
-              crossDomain: true
-            });
-*/
-
             results = file.split("\n");
 
             //indice de name y modularity_class
@@ -419,12 +419,18 @@
             array_json = array_json + "}";
             com_ant = JSON.parse(array_json);
             //generé el JSON de comunidades. 
-            console.log("com_ant");
-            console.log(com_ant);
-            console.log("array_json");
-            console.log(array_json);
 
-            ord_com = []; // [[comunidad, cantidad],[comunidad, cantidad],... ]
+            ord_comunidad();
+
+           
+
+        }
+      }
+
+
+      function ord_comunidad(){
+
+         ord_com = []; // [[comunidad, cantidad],[comunidad, cantidad],... ]
 
             for (var key in com_ant){
               //Recorrer cada antena y la comunidad a la que pertenece.
@@ -462,7 +468,7 @@
            // $("#botTable").show();
 
 
-        }
+
       }
 
       function getColorFill(d) {
@@ -490,7 +496,10 @@
 
 
         if (tipo == "comunidades"){
-          for (var Cod_torre in torres){
+          console.log("com_ant");
+          console.log(com_ant);
+          for (var Cod_torre in com_ant){
+            if (torres[Cod_torre]){ 
             //torres[key] --> son las coordenadas de la antena. 
             var latlngArray = [];
             torres[Cod_torre].forEach(function(d){
@@ -509,6 +518,7 @@
 
             borde_antenas.push(polyBor);
             relleno_antenas.push(polyRell);
+            }
           }
 
           var antenasBorCom = L.layerGroup(borde_antenas); //grupo de antenas voronoi;

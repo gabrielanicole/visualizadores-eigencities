@@ -1,8 +1,8 @@
+Django==1.10.4
 networkx
 numpy
 scipy
 datetime
 pymongo>=2.7.1
 six>=1.10.0
-dateutil>=2.1.0
 Pillow>=2.0.0

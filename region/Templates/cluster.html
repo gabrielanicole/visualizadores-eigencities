@@ -240,7 +240,7 @@
         selectTorres(layer);
         
         var stringTorres = torresRect.toString();
-        
+      
         enviarSubRed(stringTorres, type);
     });
 
@@ -307,17 +307,52 @@
    
     function selectTorres (layer) {
       torresRect = [];
+      vertxy = layer.getLatLngs();
+      vertxy = vertxy[0];
+      nvert = vertxy.length;
+    
+      var vertx = [];
+      var verty = [];
+      for ( i=0; i< nvert; i++ ){
+        vertx.push(vertxy[i]["lat"]);
+        verty.push(vertxy[i]["lng"]);
+
+      }
+
       for (var Cod_torre in torres){
-            //torres[key] --> son las coordenadas de la antena. 
+            //torres[Cod_torre] --> son las coordenadas de la antena. 
             inRect = false;
-            torres[Cod_torre].forEach(function(d){
-              layer.getBounds().contains([d[1],d[0]]) ? inRect = true : null;
-              return inRect
+
+            torres[Cod_torre].some(function(d){
+                
+                if (pnpoly(nvert, vertx, verty, d[1], d[0]) == 1) {
+                  inRect = true;
+                  console.log("1");
+                  console.log(Cod_torre);
+                }
+                
+                //layer.getBounds().contains([d[1],d[0]]) ? inRect = true : null;
+                return inRect === true;
             });
             inRect ? torresRect.push(Cod_torre): null;
 
         }
+        console.log("torresRect");
+        console.log(torresRect);
+
+
     }
+
+    function pnpoly(nvert, vertx, verty, testx, testy)
+    {
+      var i, j, c = 0;
+      for (i = 0, j = nvert-1; i < nvert; j = i++) {
+       if ( ((verty[i]>testy) != (verty[j]>testy)) &&
+       (testx < (vertx[j]-vertx[i]) * (testy-verty[i]) / (verty[j]-verty[i]) + vertx[i]) )
+        c = !c;
+    }
+    return c;
+  }
 
 
       var ord_com =[]; // [[comunidad, cantidad],[comunidad, cantidad],... ]
@@ -496,8 +531,6 @@
 
 
         if (tipo == "comunidades"){
-          console.log("com_ant");
-          console.log(com_ant);
           for (var Cod_torre in com_ant){
             if (torres[Cod_torre]){ 
             //torres[key] --> son las coordenadas de la antena. 
@@ -638,8 +671,6 @@
               antena;
 
           if (file && file.length) {
-            console.log("file");
-            console.log(file);
             antena = file.split("\n");
             antena.forEach(function(ant){
                 var antena_rank = ant.split(" ");
@@ -647,9 +678,7 @@
                 ranking.push([Math.abs(antena_rank[0]), antena_rank[1]] );
             });
             ranking.sort(function(a, b){return b[0]-a[0]});
-            console.log("ranking");
-            console.log(ranking);
-
+        
 
             largo = ranking.length;
             indice = (largo / 100) * porcentaje;
@@ -659,8 +688,6 @@
             d_3 = degrade*5;
             d_4 = degrade*8;
             d_5 = degrade*10;
-            console.log("d_1, d_2, d_3, d_4, d_5");
-            console.log(d_1, d_2, d_3, d_4, d_5);
            
           }
 
@@ -682,7 +709,6 @@
                 handle.text( ui.value );
               },
               change: function( event, ui ) {
-                console.log($( this ).slider( "value" ));
                 porcentaje = $( this ).slider( "value" );
                 if(ranking && ranking.length > 0){
                  indice = (largo / 100) * porcentaje;

@@ -27,7 +27,11 @@ SECRET_KEY = '(8n)h@t-rsfgp_1frpy7ywmb36moi(m=!(^5tkb-dj%*!21lxo'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+#production
+#ALLOWED_HOSTS = ['200.9.201.50', '146.83.216.227']
+
+#local
+ALLOWED_HOSTS = ['localhost', '200.9.201.50', '146.83.216.227']
 
 
 # Application definition
@@ -46,7 +50,6 @@ INSTALLED_APPS = [
 
 
 MIDDLEWARE = [
-    'django.middleware.cache.UpdateCacheMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -54,7 +57,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django.middleware.cache.FetchFromCacheMiddleware',
 
 ]
 
@@ -63,7 +65,9 @@ ROOT_URLCONF = 'manzanas.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+        BASE_DIR + '/Templates/',
+],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

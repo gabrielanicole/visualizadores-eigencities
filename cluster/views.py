@@ -19,7 +19,7 @@ VERIFIER = None
 
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s %(levelname)s %(message)s',
-                    #filename='/var/www/html/visualizador/visualizador_opencensus/manzanas_django/cluster.log',
+                    #filename='/var/www/html/visualizador/visualizador_opencensus/django/cluster.log',
                     filename='cluster.log',
                     filemode='w')
 logging.debug('A debug message')
@@ -57,7 +57,6 @@ def index(request):
 
 			else:
 				salida = comu.best_partition(net)
-				print('Timestamp particion: {:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now()))
 				
 
 
@@ -109,30 +108,24 @@ def loadNet(l_torres):
 	#global net 
 	net=nx.Graph()
 
-	print('Timestamp red vacia: {:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now()))
 	client = MongoClient()
 	db = client.django_example
 	coll = db.redRanking
-	print('Timestamp conectados: {:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now()))
 	net_mongo = coll.find(
 		{
 		"nodoi": { '$in': l_torres},
 		"nodoj": { '$in': l_torres}
 		}
 		)
-	print('Timestamp consulta lista: {:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now()))
 
 	net.add_nodes_from(l_torres)
-	print('Timestamp red con nodos: {:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now()))
 	red_array = []
 	
 
 	for enlace in net_mongo:
 		#net.add_weighted_edges_from([(enlace["nodoi"],enlace["nodoj"],enlace["peso"])])
 		red_array.append((enlace["nodoi"],enlace["nodoj"],enlace["peso"]))
-	print('Timestamp listo el for: {:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now()))
 	net.add_weighted_edges_from(red_array)
-	print('Timestamp net lista: {:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now()))
 
 	return net
 

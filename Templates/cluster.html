@@ -72,6 +72,12 @@
   float: right;
 
 }
+#sliderRank{
+  margin-right: 0px;
+  margin-left: 10%;
+  float: right;
+
+}
  #custom-handle {
     width: 3em;
     height: 1.6em;
@@ -82,34 +88,58 @@
     line-height: 1.6em;
   }
 
-    #mapid { height:100vh; }
+ #custom-handleRank {
+    width: 3em;
+    height: 1.6em;
+    top: 50%;
+    margin-top: -.8em;
+  
+    text-align: center;
+    line-height: 1.6em;
+  }
+
+    #mapid { height:99vh; }
     h4 {margin-left: 50px}
     p {margin-left: 50px;
       width: 50% }
-      table {margin-left:  50px}
+    table {margin-left:  50px}
     h1 {text-align: center}
 
 .info {
-    width: 150px;   
+    width: 100%;   
     
 }
+
+.butCom {
+    display: none;   
+    
+}
+
+.butFile {
+    margin-right: 0px;
+    margin-left: 10%;
+    margin-bottom: 5%;
+    float: right; 
+    
+}
+
+
 
 </style>
 </head>
 <body>
     
-    <br/>
+   <!--  <br/>
     <h1>Ranking de Centralidad y Comunidades</h1>
     <br/>
      <div class="row">
      
-<div class = "col-md-6">
-      <h4> 1. Subir Comunidades:   <label class="btn btn-default btn-file">
+<div class = "col-md-6"> -->
+<!--       <h4> Subir Comunidades:   <label class="btn btn-default btn-file">
             Cargar... <input type='file' id='files1' style="display: none; " onchange="handleFiles(this.files, processFileComunidad, files1,files1label)" />
-      </label>  <label id='files1label'> </label> </h4>
+      </label>  <label id='files1label'> </label> </h4> -->
 
- <p><label id='resultado'> carga las comunidades para conocer su orden </label>  </p>
-        <p><table id = "tableResul"class="table" style= "display:none">
+       <!--  <p><table id = "tableResul"class="table" style= "display:none">
           <tr id = "Numero">
             <td class="name"><b> # </b></td>
           </tr>
@@ -121,16 +151,16 @@
           </tr>
         </table>
        </p>
-<!--
+
        <div id = "botTable" style="display: none">
         <h4> <label class="btn btn-default">
         Recargar tabla <input type='submit' style="display: none"  onclick="handleFiles(this.files, readTextFile, files2, files2label)" />
       </label>   </label> </h4>
-    </div> -->
+    </div> 
 
       <h4> 2. Definir el Numero de  Comunidades: 
       <input type="number" id ="quantity" name="quantity" min="1" max="8"> </h4>
-  <div id = "generarVisualizacionComunidades" style="display: none">
+  <div id = "generarVisualizacionComunidades" >
        <h4> <label class="btn btn-default">
         Generar Visualizacion Comunidades <input type='submit' style="display: none"  onclick="pintarArchivo('comunidades')" />
       </label>   </label> </h4>
@@ -138,19 +168,19 @@
   </div>
   
  </div>
-    
+     -->
 
 
 
-
+<!-- 
 <div class = "col-md-6">
       <h4>Subir Ranking de Centralidad:   <label class="btn btn-default btn-file">
          Cargar... <input type='file' id='files2' style="display: none"  onchange="handleFiles(this.files, readRankingFile, files2, files2label)" />
       </label>  <label id='files2label'> </label> </h4> 
 
-     <!--  <div id="slider" margin-right="30px">
+      <div id="slider" margin-right="30px">
         <div id="custom-handle" class="ui-slider-handle"></div>
-      </div> -->
+      </div>
 
      
 
@@ -170,7 +200,7 @@
   </div>
   </div>
   </div>
-    <br/>
+    <br/>  -->
     <div id="mapid"></div>
 
     <script type="text/javascript">
@@ -188,12 +218,160 @@
               layers: [grayscale]
       });
 
+      var loadInfo = L.control({position:'bottomright'});
+
+       loadInfo.onAdd = function (mymap){
+        //Control para cargar archivos 
+        this.div = L.DomUtil.create('div'); // create a div with a class "info"
+        this.div.float = "right";
+
+        
+        var fileIcon = L.DomUtil.create('span', "glyphicon glyphicon-resize-full");
+        var butFile = L.DomUtil.create('button', "btn btn-default btn-sm butFile");
+        butFile.type = "button";
+
+        butFile.onclick =  function(){
+          divLoading.style.display =  (divLoading.style.display == "block" ? "none" : "block" );
+          fileIcon.className =  (divLoading.style.display == "block" ? "glyphicon glyphicon-resize-small" : "glyphicon glyphicon-resize-full" );
+          console.log(fileIcon.classList);
+        }
+        var separadorBot = L.DomUtil.create('div', "row");
+        //separadorBot.innerHTML = "</br>";
+
+        //but.innerHTML = "Cargar Archivos"
+        //fileIcon.aria-hidden = "true";
+
+        butFile.append(fileIcon);
+        butFile.append("  Archivos");
+        this.div.append(butFile);
+        this.div.append(separadorBot);
+
+
+//         <button type="button" class="btn btn-default btn-lg">
+//   <span class="glyphicon glyphicon-star" aria-hidden="true"></span> Star
+// </button>
+        var divLoading = L.DomUtil.create('div', 'info'); // create a div with a class "info"
+        divLoading.style.display = "none";
+
+        var CargarCom = L.DomUtil.create('h4', "");
+        CargarCom.innerHTML = "Subir Comunidades: ";
+        
+        var labelCom = L.DomUtil.create('label', "btn btn-default btn-file");
+        labelCom.innerHTML = "Cargar ... ";
+        
+        var butCom = L.DomUtil.create('input', "butCom");
+        butCom.type = "file";
+        butCom.id = "files1";
+        butCom.style.display = "none";
+        
+        var labelNomCom = L.DomUtil.create('label');
+        labelNomCom.id = "files1label";
+
+        butCom.onchange =  function(){
+          handleFiles(this.files,processFileComunidad,"#files1","#files1label");
+        }
+
+        labelCom.append(butCom);
+        CargarCom.append(labelCom);
+        CargarCom.append("  ");
+        CargarCom.append(labelNomCom);
+
+        var CargarRank = L.DomUtil.create('h4', "");
+        CargarRank.innerHTML = "Subir Centralidad: ";
+
+        var labelRank = L.DomUtil.create('label', "btn btn-default btn-file");
+        labelRank.innerHTML = "Cargar ... ";
+
+        var butRank = L.DomUtil.create('input', "butCom");
+        butRank.type = "file";
+        butRank.id = "files2";
+        butRank.style.display = "none";
+
+        var labelNomRank = L.DomUtil.create('label');
+        labelNomRank.id = "files2label";
+        
+        butRank.onchange =  function(){
+          handleFiles(this.files,readRankingFile,"#files2","#files2label");
+          divVisRank.style.display = "block";
+        }
+
+        //Botones de visualizacion 
+        var divVisRank = L.DomUtil.create('div', "row ");
+        divVisRank.id = "generarVisualizacionRanking"
+        divVisRank.style.display = "none";
+
+        var divVisRankMid1 = L.DomUtil.create('div', "col-md-6");
+        var divVisRankMid2 = L.DomUtil.create('div', "col-md-6");
+
+        var labelVisRank = L.DomUtil.create('label', "btn btn-default");
+        labelVisRank.innerHTML = "Guardar Visualizacion Ranking ";
+
+        var butVisRank = L.DomUtil.create('input', "butCom");
+        butVisRank.type = "submit";
+        butVisRank.style.display = "none";
+
+        butVisRank.onclick =  function(){
+          pintarArchivo('ranking');
+        }
+
+        var labelVisRankCol = L.DomUtil.create('label', "btn btn-default");
+        labelVisRankCol.innerHTML = "Guardar Visualizacion Colores ";
+
+        var butVisRankCol = L.DomUtil.create('input', "butCom");
+        butVisRankCol.type = "submit";
+        butVisRankCol.style.display = "none";
+
+        butVisRankCol.onclick =  function(){
+          pintarArchivo('rankingColores');
+        }
+
+        //Slider de carga archivo:
+        var separadorDiv = L.DomUtil.create('div', "row");
+        separadorDiv.innerHTML = "</br>";
+
+        var separador = L.DomUtil.create('div', "row");
+        separador.innerHTML = "</br>";
+
+
+        var rankingSliderRank = L.DomUtil.create('div', "info");
+        rankingSliderRank.id = 'sliderRank'; 
+
+        var rankingSliderChild = L.DomUtil.create('div','ui-slider-handle');
+        rankingSliderChild.id = 'custom-handleRank'; 
+        rankingSliderRank.append(rankingSliderChild);
+
+       
+        labelVisRank.append(butVisRank);
+        labelVisRankCol.append(butVisRankCol);
+
+        divVisRankMid1.append(labelVisRank);
+        divVisRankMid1.append(separadorDiv);
+        divVisRankMid1.append(rankingSliderRank);
+        divVisRankMid2.append(labelVisRankCol);
+        divVisRank.append(separador);
+
+        divVisRank.append(divVisRankMid1);
+        divVisRank.append(divVisRankMid2);
+
+        labelRank.append(butRank);
+        CargarRank.append(labelRank);
+        CargarRank.append("  ");
+        CargarRank.append(labelNomRank);
+        //CargarRank.append(separador);
+        CargarRank.append(divVisRank);
+
+        divLoading.append(CargarCom);
+        divLoading.append(CargarRank);
+        this.div.append(divLoading);
+
+        return this.div;
+      }
+
+      loadInfo.addTo(mymap);
+
 
       var info = L.control({position:'topright'});
-      info.onAdd = function (mymap){
-        this.div = L.DomUtil.create('div', 'widget');
-        return this.div;
-      };
+
 
       info.onAdd = function (mymap){
         this.div = L.DomUtil.create('div', 'widget'); // create a div with a class "info"
@@ -207,9 +385,10 @@
         // boton.onclick = "alert(1)";
         rankingButton.onclick = function(){
           console.log('RANKING');
-          enviarSubRed(stringTorres, "rectangle");
-          
+          enviarSubRed(stringTorres, "rectangle", false); 
         }
+
+        //pintarArchivo('rankingColores')
 
         var CommuButton = L.DomUtil.create('input', 'btn btn-default');
         CommuButton.type="button";
@@ -220,10 +399,7 @@
         // boton.onclick = "alert(1)";
         CommuButton.onclick = function(){
           console.log('COMUNIDAD');
-          enviarSubRed(stringTorres, "polygon");
-
-
-          
+          enviarSubRed(stringTorres, "polygon", false);
 
         }
         var rankingSlider = L.DomUtil.create('div', 'info');
@@ -235,8 +411,21 @@
 
 
 
-        var textCom = L.DomUtil.create('div');
-        textCom.text = "Comunidades";
+        var rankColores = L.DomUtil.create('input','btn btn-default');
+        rankColores.type="button";
+        rankColores.title="En colores";
+        rankColores.value = "Centralidad en colores";
+        rankColores.id = 'command'; 
+
+        rankColores.onclick = function(){
+          console.log('RANKINGCOLORES');
+          enviarSubRed(stringTorres, "rectangle", true);
+          //pintarArchivo('rankingColores');
+
+        }
+
+        //pintarArchivo('rankingColores')
+
 
         // boton = '<label class="btn btn-default"> Guardar Visualizacion Ranking <input type="submit" style="display: none"/></label>';
         // boton.onclick = "alert('hola')";
@@ -245,6 +434,7 @@
         this.div.append(CommuButton);
         this.div.append(rankingButton);
         this.div.append(rankingSlider);
+        this.div.append(rankColores);
 
         return this.div;
       };
@@ -263,24 +453,15 @@
             polygon: {
                 shapeOptions: {
                     //clickable: true,
-                    color: 'black',
-                    weight: 5,
-                    opacity:0.8
+                    color: 'gray',
+                    weight: 3,
+                    opacity:0.5
                 },
                 repeatMode: false,
                 showRadius: false
             },
             circle: false, // Turns off this drawing tool
-            rectangle: false, /*{
-                shapeOptions: {
-                    //clickable: true,
-                    color: 'black',
-                    weight: 5,
-                    opacity:0.8
-                },
-                repeatMode: false,
-                showRadius: false
-            },*/
+            rectangle: false, 
             marker: false 
         },
         edit: {
@@ -330,7 +511,7 @@
 
               }
             });
-          } );
+          });
 
 
         console.log("type");
@@ -361,7 +542,7 @@
 
 
   
-  function enviarSubRed(stringTorres, tipo_alg) {
+  function enviarSubRed(stringTorres, tipo_alg, colores) {
 
     ranking = [];
 
@@ -382,21 +563,26 @@
                   });
                 
                   ranking.sort(function(a, b){return b[0]-a[0]});
-                  console.log(ranking);
-
                   largo = ranking.length;
-                  indice = (largo / 100) * porcentaje;
-                  degrade = largo/10;
-                  d_1 = degrade*2;
-                  d_2 = degrade*4;
-                  d_3 = degrade*5;
-                  d_4 = degrade*8;
-                  d_5 = degrade*10;
-                  console.log("d_1, d_2, d_3, d_4, d_5");
-                  console.log(d_1, d_2, d_3, d_4, d_5);
+                  //console.log(ranking);
+                  if (colores){
+                    degrade = largo/10;
+                    d_1 = degrade*2;
+                    d_2 = degrade*4;
+                    d_3 = degrade*5;
+                    d_4 = degrade*8;
+                    d_5 = degrade*10;
+                    console.log("d_1, d_2, d_3, d_4, d_5");
+                    console.log(d_1, d_2, d_3, d_4, d_5);
 
-                  pintarArchivo('ranking');
+                    pintarArchivo('rankingColores');
+                  }
+                  else{
+                    indice = (largo / 100) * porcentaje;
+                    pintarArchivo('ranking');
 
+                  }
+                  
                 }
                else{
                 //ord_comunidad();
@@ -503,11 +689,15 @@
         //Se envía en forma de FileReader;
          var fileInput = $(nombre);
          //nombre del archivo cargado:
+         console.log("fileInput");
+         console.log(fileInput);
          var archivo = fileInput.val().replace(/\\/g, '/').replace(/.*\//, '');
+
          //cargar el nombre del archivo en el label *******
           $(nomLabel).html(archivo); 
-         var input = fileInput.get(0);
-          
+
+         var input = fileInput.get(0) ? fileInput.get(0) : file ;
+          console.log(input);
           // Create a reader object
           var reader = new FileReader();
           if (input.files.length) {
@@ -595,27 +785,22 @@
               encontrado ? null : ord_com.push([numComunidad, 1]);
 
             }
-            
-           
             ord_com.sort(function(a, b){return b[1]-a[1]});
 
-            $('#resultado').hide(); 
-            $( "td" ).remove( ".tableElem" );
+            // $('#resultado').hide(); 
+            // $( "td" ).remove( ".tableElem" );
+            // ord_com.some( function(d, count) {
+            //     if (d[1] != 1) {
+            //     $("#Numero").append($('<td>').attr('class', 'tableElem').text(count + 1));
+            //     $("#rowCom").append($('<td>').attr('class', 'tableElem').text(d[0]));
+            //     $("#rowNum").append($('<td>').attr('class', 'tableElem').text(d[1]));}
+            //     return d[1] === 1;
+            // });
+           // $("#tableResul").show();
 
-
-            ord_com.some( function(d, count) {
-                if (d[1] != 1) {
-                $("#Numero").append($('<td>').attr('class', 'tableElem').text(count + 1));
-                $("#rowCom").append($('<td>').attr('class', 'tableElem').text(d[0]));
-                $("#rowNum").append($('<td>').attr('class', 'tableElem').text(d[1]));}
-                return d[1] === 1;
-            });
-
-           //  $("#tableResul").show();
-
-           //  cantidad_colores > ord_com.length ? $('#quantity').attr('max', ord_com.length) : $('#quantity').attr('max', cantidad_colores) ;
-           //  $('#generarVisualizacionComunidades').show();
-           // // $("#botTable").show();
+            // cantidad_colores > ord_com.length ? $('#quantity').attr('max', ord_com.length) : $('#quantity').attr('max', cantidad_colores) ;
+            // $('#generarVisualizacionComunidades').show();
+           // $("#botTable").show();
            pintarArchivo('comunidades');
 
 
@@ -644,6 +829,7 @@
         var relleno_antenas = [];
         var borde_antenas = [];
 
+        //$(".leaflet-control-layers-overlays:last").append($('<label>').text(titulo));
 
         if (tipo == "comunidades"){
           for (var Cod_torre in com_ant){
@@ -679,7 +865,7 @@
               Borde: antenasBorCom
           };
 
-          L.control.layers(null, overlayMapsCom, {collapsed:false} ).addTo(mymap);
+          L.control.layers(null, overlayMapsCom, {collapsed:false, position: "topleft"} ).addTo(mymap);
 
           
 
@@ -716,7 +902,7 @@
               Borde: antenasBorCom
           };
 
-          L.control.layers(null, overlayMapsCom, {collapsed:false} ).addTo(mymap);
+          L.control.layers(null, overlayMapsCom, {collapsed:false, position: "topleft" } ).addTo(mymap);
 
           
 
@@ -760,10 +946,12 @@
               Borde: antenasBor
           };
 
-          capasControl = L.control.layers(null, overlayMaps, {collapsed:false} ).addTo(mymap);
+          capasControl = L.control.layers(null, overlayMaps, {collapsed:false, position: "topleft"} ).addTo(mymap);
 
           antenasRell.addTo(mymap);
           antenasBor.addTo(mymap);
+
+         // $(".leaflet-control-layers-overlays:last").append($('<label>').text(tipo));
          
       }
 
@@ -774,7 +962,8 @@
 
         fileInput = (tipo == "comunidades" ? $("#files1") : (tipo == "ranking" ? $("#files2") : null )  );
          //nombre del archivo cargado:
-        var titulo = fileInput ? fileInput.val().replace(/\\/g, '/').replace(/.*\//, '') : "" ;
+        var titulo = fileInput ? fileInput.val().replace(/\\/g, '/').replace(/.*\//, '') : tipo.toString();
+        titulo != "" ? console.log("distinto de vacio") : titulo = tipo.toString();
         $(".leaflet-control-layers-overlays:last").append($('<label>').text(titulo));
 
         }
@@ -811,32 +1000,32 @@
            $('#generarVisualizacionRanking').show();    
         }
 
-         // $( function() {
-         //    var handle = $( "#custom-handle" );
-         //    $( "#slider" ).slider({
-         //      value: 10,
-         //      create: function() {
-         //        handle.text( $( this ).slider( "value" ) );
-         //      },
-         //      slide: function( event, ui ) {
-         //        handle.text( ui.value );
+         $( function() {
+            var handle = $( "#custom-handleRank" );
+            $( "#sliderRank" ).slider({
+              value: 10,
+              create: function() {
+                handle.text( $( this ).slider( "value" ) );
+              },
+              slide: function( event, ui ) {
+                handle.text( ui.value );
 
-         //      },
-         //      change: function( event, ui ) {
-         //        porcentaje = $( this ).slider( "value" );
-         //        console.log(porcentaje);
-         //        if(ranking && ranking.length > 0){
-         //         indice = (largo / 100) * porcentaje;
-         //         capasControl ? mymap.removeControl(capasControl) : null;
-         //         antenasBor ? antenasBor.clearLayers() : null;
-         //         antenasRell ? antenasRell.clearLayers() : null;
-         //         pintarArchivo('ranking');
-         //        }
+              },
+              change: function( event, ui ) {
+                porcentaje = $( this ).slider( "value" );
+                console.log(porcentaje);
+                if(ranking && ranking.length > 0){
+                 indice = (largo / 100) * porcentaje;
+                 capasControl ? mymap.removeControl(capasControl) : null;
+                 antenasBor ? antenasBor.clearLayers() : null;
+                 antenasRell ? antenasRell.clearLayers() : null;
+                 pintarArchivo('ranking');
+                }
                 
 
-         //      }
-         //    });
-         //  } );
+              }
+            });
+          } );
 
          function loadNet() {
 

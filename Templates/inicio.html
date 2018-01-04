@@ -50,19 +50,19 @@ body {
 	overflow: hidden;
 	height: 0;
 	transition: .5s ease;
-	font-size: 20px;
+	font-size: 100%;
 	opacity:0.8;
 	font-family: verdana;
 }
 
 .container:hover .overlay {
 	width: 100%;
-  height: 100%;
+  	height: 100%;
 }
 
 .text {
   color: white;
-  font-size: 90%;
+  font-size: 100%;
   position: absolute;
   overflow: hidden;
   top: 50%;
@@ -106,10 +106,10 @@ body {
  <table align="center">
  	<td>
 		<div id="imagen" class="container"  >
-			<a href="{% url 'cluster' %}">  <img src="{% static '/img/clusterCuadrado.png' %}" alt="cluster" class="contrast image" width="100%" >
+			<a href="{% url 'cluster' %}">  <img src="{% static '/img/clusterCuadrado.png' %}" alt="cluster" class="opacity image" width="100%" >
 			
 
-			<div id="divimagen" > Comunidades y Ranking de Centralidad 
+			<div id="divimagen" > Comunidades y Centralidad 
 			</div>
 			<div class="overlay">
 			    <div class="text"> Visualizador de regiones segmentadas por una teleselación de voronoi de las antenas de coneccion telefónica de Chile. Se muestra el nivel de centralidad de cada antena y también las comunidades que se forman através de la implmenteación de un algoritmo de detección de comunidades del trabajo "Fast unfolding of communities in large networks" de Vincent D Blondel, Jean-Loup Guillaume, Renaud Lambiotte, Etienne Lefebvre. </div>
@@ -123,12 +123,27 @@ body {
  	<td>
 
 		<div id="imagen" class="container" width="100%">
-			<a href="{% url 'index' %}" >  <img src="{% static 'img/manzanasZoomColores.png' %}" alt="manzanas" class="contrast image" width="100%">
+			<a href="{% url 'index' %}" >  <img src="{% static 'img/manzanasZoomColores.png' %}" alt="manzanas" class="opacity image" width="100%">
 			
 
 			<div id="divimagen" > Observatorio de Manzanas </div>
 			<div class="overlay">
 			    <div class="text"> Visualizador de la interacción de habitantes de las capitales de Chile desde la escala de las manzanas urbanas. Relacionando datos sociales demográficos y de movilidad</div>
+			</div>
+			</a>
+		</div>
+
+ 		
+ 	</td>
+ 	<td>
+
+		<div id="imagen" class="container" width="100%">
+			<a href="{% url 'trayect' %}" >  <img src="{% static 'img/manzanasZoomColores.png' %}" alt="manzanas" class="opacity image" width="100%">
+			
+
+			<div id="divimagen" > Analizador de Trayectorias </div>
+			<div class="overlay">
+			    <div class="text"> Analiza el desplazamiento de los habitantes en distintas ciudades de Chile</div>
 			</div>
 			</a>
 		</div>

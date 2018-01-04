@@ -19,8 +19,8 @@ VERIFIER = None
 
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s %(levelname)s %(message)s',
-                    filename='/var/www/html/visualizador/visualizador_opencensus/django/cluster.log',
-                    #filename='cluster.log',
+                    #filename='/var/www/html/visualizador/visualizador_opencensus/django/cluster.log',
+                    filename='cluster.log',
                     filemode='w')
 logging.debug('A debug message')
 logging.info('Some information')

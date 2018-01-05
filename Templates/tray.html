@@ -1,1 +1,284 @@
-TRAYECTORIAS
+<!DOCTYPE html>
+{% load static %}
+<html>
+<head>
+
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+	<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/css/bootstrap-select.min.css">
+
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/js/bootstrap-select.min.js"></script>
+
+ <link rel="stylesheet" href="https://unpkg.com/leaflet@1.2.0/dist/leaflet.css"
+   integrity="sha512-M2wvCLH6DSRazYeZRIm1JnYyh22purTM+FDB5CsyxtQJYeKq83arPe5wgbNmcFXGqiSH2XR8dT/fJISVA1r/zQ=="
+   crossorigin=""/>
+
+    <!-- Make sure you put this AFTER Leaflet's CSS -->
+ <script src="https://unpkg.com/leaflet@1.2.0/dist/leaflet.js"
+   integrity="sha512-lInM/apFSqyy1o6s89K4iQUKg6ppXEgsVxT35HbzUupEVRh2Eu9Wdl4tHj7dZO0s1uvplcYGmt3498TtHq+log=="
+   crossorigin=""></script>
+
+	<title>Visualizadores - Ecoinformática Laboratorio</title>
+
+<style type="text/css">
+	.saturate {-webkit-filter: saturate(3); filter: saturate(3);}
+	.grayscale {-webkit-filter: grayscale(100%); filter: grayscale(100%);}
+	.contrast {-webkit-filter: contrast(160%); filter: contrast(160%);}
+	.brightness {-webkit-filter: brightness(0.25); filter: brightness(0.25);}
+	.blur {-webkit-filter: blur(3px); filter: blur(3px);}
+	.invert {-webkit-filter: invert(100%); filter: invert(100%);}
+	.sepia {-webkit-filter: sepia(100%); filter: sepia(100%);}
+	.huerotate {-webkit-filter: hue-rotate(180deg); filter: hue-rotate(180deg);}
+	.rss.opacity {-webkit-filter: opacity(50%); filter: opacity(50%);}
+h1, h2 {
+	color: #FFFFFF;
+	text-align: center;
+	font-family: verdana;
+
+}
+body {
+	background :black;
+	color: #FFFFFF;
+}
+
+.list-group-item{
+	color: #000000;
+	margin-right:10px;
+
+}
+
+#mapid { height: 300px; }
+
+
+</style>
+</head>
+<body>
+
+<div class = "container" >
+	<div class = "row" id= "titulo">
+		<h1> Trayectorias de Chile </h1>
+	</div>
+
+	
+	<div class = "col-md-8" id= "mapaResultados">
+		<div clas= "row" id = "mapa">
+			 <div id="mapid"></div>
+
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+.
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
+.
+
+
+
+
+
+
+
+
+
+
+			.
+
+
+
+
+
+
+
+
+
+
+
+			ñ
+
+
+
+
+
+
+
+
+
+
+
+
+
+			ñ
+
+
+
+
+
+
+
+
+
+
+
+
+			.
+
+
+
+
+
+
+
+
+
+
+			.
+			jksndfghkjdnfk
+		</div>
+		<div clas= "row" id = "resultados">
+			resultados 
+		</div>
+ 
+	</div>
+	<div class= "col-md-4 " id ="opciones">
+		<!-- <div class = "affix"  data-spy="affix" data-offset-top="205"> -->
+		<div class="list-group affix" >
+			
+			<div class= "list-group-item" > 
+				<div class = "row">
+					<div class= "col-md-6" > Seleccione Ciudad: </div> 
+					<div class=" col-md-6" >
+
+						<select class="selectpicker show-tick form-control" id ="SelectCiudad" data-width="150px" >
+						  {% for ciudad in ciudades %}
+					  		<option value= "{{ciudad.id}}">{{ciudad.nombre}}</option>
+					  	{% endfor %}
+						</select>
+
+
+					</div>
+				</div>
+			</div>
+			<div class= "list-group-item"> 
+				<div class = "row">
+					<div class= "col-md-6" > Mostrar Antenas: </div> 
+					  <div class=" col-md-6 ">
+				        Si <input type="radio" name="checkAntenas">
+				        No <input type="radio" name="checkAntenas">
+				      </div>
+				</div>
+			</div>
+			<div class= "list-group-item"> 
+				<div class = "row">
+					<div class= "col-md-6" > Seleccione Indicadores: </div> 
+					<div class=" col-md-6  " >
+
+						<select class="selectpicker form-control " id ="SelectIndicadores" data-width="150px" multiple data-selected-text-format="count">
+						  {% for indicador in indicadores  %}
+					  		<option value= "{{indicador.id}}">{{indicador.nombre}}</option>
+					  	{% endfor %}
+						</select>
+
+
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	</div>
+</div>
+
+
+<script>
+
+	var mymap = L.map('mapid').setView([-35.505, -73.09], 13);
+
+	L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
+		maxZoom: 18,
+		attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
+			'<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+			'Imagery © <a href="http://mapbox.com">Mapbox</a>',
+		id: 'mapbox.streets'
+	}).addTo(mymap);
+
+	$('#SelectCiudad').on('hidden.bs.select', function (e) {
+		var idCiudad = $('#SelectCiudad').val();
+
+		console.log($('#SelectCiudad').val());
+	  // do something...
+	});
+
+	$('#SelectIndicadores').on('hidden.bs.select', function (e) {
+		var idIndicador = $('#SelectIndicadores').val();
+
+		console.log(idIndicador);
+	  // do something...
+	});
+
+</script>
+
+
+
+</body>
+</html>

@@ -86,17 +86,18 @@ WSGI_APPLICATION = 'manzanas.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
-DATABASE_ROUTERS = ['trayect.router.TrayectDatabaseRouter']
+#DATABASE_ROUTERS = ['trayect.router.TrayectDatabaseRouter']
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'CENSO02_final.db'),
     }
-    'trayactoria_db':{
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'trayectoria.db'),
+    
+    # 'trayactoria_db':{
+    #     'ENGINE': 'django.db.backends.sqlite3',
+    #     'NAME': os.path.join(BASE_DIR, 'trayectoria.db'),
         
-    }
+    # }
     #opcion con default en mongo
     # 'default': {}
     # 'sqlite' : {'ENGINE': 'django.db.backends.sqlite3',

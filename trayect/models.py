@@ -31,6 +31,8 @@ class Antena(models.Model):
     lat = models.DecimalField(max_digits=9, decimal_places=4) 
     lon = models.DecimalField(max_digits=9, decimal_places=4)
     voronoi = models.CharField(max_length=200, blank= True)
+    residentesTotal = models.IntegerField(blank= True, null = True)
+    habitantesTotal = models.IntegerField(blank= True, null = True )
     def __unicode__(self): # __unicode__ on Python 2
         return self.nombre
 
@@ -69,6 +71,7 @@ class Desplazamiento(models.Model):
     p25 = models.IntegerField()
     p50 = models.IntegerField()
     p75 = models.IntegerField()
+    
     def __unicode__(self): # __unicode__ on Python 2
         return self.hora
 

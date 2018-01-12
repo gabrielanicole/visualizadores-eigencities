@@ -23,6 +23,8 @@
  <script src="https://unpkg.com/leaflet@1.2.0/dist/leaflet.js"
    integrity="sha512-lInM/apFSqyy1o6s89K4iQUKg6ppXEgsVxT35HbzUupEVRh2Eu9Wdl4tHj7dZO0s1uvplcYGmt3498TtHq+log=="
    crossorigin=""></script>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
 
 	<title>Visualizadores - Ecoinformática Laboratorio</title>
 
@@ -37,23 +39,78 @@
 	.huerotate {-webkit-filter: hue-rotate(180deg); filter: hue-rotate(180deg);}
 	.rss.opacity {-webkit-filter: opacity(50%); filter: opacity(50%);}
 h1, h2 {
-	color: #FFFFFF;
+	/*#color: #00FFFF;*/
 	text-align: center;
 	font-family: verdana;
 
 }
-body {
-	background :black;
-	color: #FFFFFF;
-}
+/*body {
+	#background :#000000;
+	#color: #00FFFF;
 
+}
+*/
 .list-group-item{
 	color: #000000;
 	margin-right:10px;
 
 }
 
-#mapid { height: 300px; }
+#mapid { height: 500px; }
+
+
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.bar {
+  fill: orange;
+}
+
+.bar:hover {
+  fill: orangered ;
+}
+
+.x.axis path {
+  display: none;
+}
+
+.d3-tip {
+  line-height: 1;
+  font-weight: bold;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #000;
+  border-radius: 2px;
+  font: 10px sans-serif;
+
+}
+
+/* Creates a small triangle extender for the tooltip */
+.d3-tip:after {
+  box-sizing: border-box;
+  display: inline;
+  font-size: 10px;
+  width: 100%;
+  line-height: 1;
+  color: rgba(0, 0, 0, 0.8);
+  /*content: "\25BC";*/
+  position: absolute;
+  text-align: center;
+}
+
+/* Style northward tooltips differently */
+.d3-tip.n:after {
+  margin: -1px 0 0 0;
+  top: 100%;
+  left: 0;
+}
+
+
 
 
 </style>
@@ -70,134 +127,12 @@ body {
 		<div clas= "row" id = "mapa">
 			 <div id="mapid"></div>
 
-</br>
-</br>
-</br>
-</br>
-</br>
-</br>
-</br>
-</br>
-</br>
-</br>
-</br>
-</br>
-</br>
-</br>
-</br>
-</br>
-</br>
-</br>
-</br>
-</br>
-</br>
-</br>
-</br>
-</br>
-</br>
-</br>
-</br>
-</br>
-</br>
-</br>
-</br>
-</br>
-</br>
-</br>
-</br>
-</br>
-</br>
-</br>
-</br>
-</br>
-</br>
-.
-</br>
-</br>
-</br>
-</br>
-</br>
-</br>
-</br>
-</br>
-</br>
-</br>
-</br>
-</br>
-</br>
-</br>
-</br>
-</br>
-</br>
-</br>
-</br>
-</br>
-.
-
-
-
-
-
-
-
-
-
-
-			.
-
-
-
-
-
-
-
-
-
-
-
-			ñ
-
-
-
-
-
-
-
-
-
-
-
-
-
-			ñ
-
-
-
-
-
-
-
-
-
-
-
-
-			.
-
-
-
-
-
-
-
-
-
-
-			.
-			jksndfghkjdnfk
 		</div>
-		<div clas= "row" id = "resultados">
+		<div class= "row" id = "resultados">
 			resultados 
+		</div>
+		<div class= "row" id = "resultadosTabla" >
+			
 		</div>
  
 	</div>
@@ -210,9 +145,9 @@ body {
 					<div class= "col-md-6" > Seleccione Ciudad: </div> 
 					<div class=" col-md-6" >
 
-						<select class="selectpicker show-tick form-control" id ="SelectCiudad" data-width="150px" >
+						<select class="selectpicker show-tick form-control" id ="SelectCiudad" data-width="150px" title="...">
 						  {% for ciudad in ciudades %}
-					  		<option value= "{{ciudad.id}}">{{ciudad.nombre}}</option>
+					  		<option value= "{{ciudad.id}}" lat="{{ciudad.lat}}" lon="{{ciudad.lon}}" zoom="{{ciudad.zoom}}" >{{ciudad.nombre}}</option>
 					  	{% endfor %}
 						</select>
 
@@ -224,8 +159,8 @@ body {
 				<div class = "row">
 					<div class= "col-md-6" > Mostrar Antenas: </div> 
 					  <div class=" col-md-6 ">
-				        Si <input type="radio" name="checkAntenas">
-				        No <input type="radio" name="checkAntenas">
+				        Si <input type="radio" value="si" name="checkAntenas">
+				        No <input type="radio" value="no" name="checkAntenas">
 				      </div>
 				</div>
 			</div>
@@ -234,10 +169,25 @@ body {
 					<div class= "col-md-6" > Seleccione Indicadores: </div> 
 					<div class=" col-md-6  " >
 
-						<select class="selectpicker form-control " id ="SelectIndicadores" data-width="150px" multiple data-selected-text-format="count">
+						<select class="selectpicker form-control " id ="SelectIndicadores" data-width="150px" multiple data-selected-text-format="count" title="...">
 						  {% for indicador in indicadores  %}
 					  		<option value= "{{indicador.id}}">{{indicador.nombre}}</option>
 					  	{% endfor %}
+						</select>
+
+
+					</div>
+				</div>
+			</div>
+			<div class= "list-group-item"> 
+				<div class = "row">
+					<div class= "col-md-6" > Seleccione Análisis: </div> 
+					<div class=" col-md-6  " >
+
+						<select class="selectpicker show-tick form-control" id ="SelectAnalisis" data-width="150px" title="...">
+					  		<option value= "DT">Despazamiento Acumulado en el Tiempo </option>
+					  		<option value= "DH">Despazamiento Por Hora </option>
+					  		<option value= "tray"> Ver Trayectoria </option>
 						</select>
 
 
@@ -264,9 +214,69 @@ body {
 
 	$('#SelectCiudad').on('hidden.bs.select', function (e) {
 		var idCiudad = $('#SelectCiudad').val();
+        //$('select option[value="'+valores_seleccionados[i]+'"]').attr('descripcion')) ;
+		var latitud = $('#SelectCiudad option[value= "'+idCiudad+'"]' ).attr('lat');
+		var longitud = $('#SelectCiudad option[value= "'+idCiudad+'"]' ).attr('lon');
+		var zoom = $('#SelectCiudad option[value= "'+idCiudad+'"]' ).attr('zoom');
+  		mymap.setView([latitud, longitud],zoom );
+  		//Cargar todas las torres. 
+  		$.ajax({
+        url: "{% url 'trayect' %}" , 
+        type: 'POST',
+        data: {
+          cidadTorres : idCiudad,
+          csrfmiddlewaretoken: '{{ csrf_token }}'} ,
+          success: function(data) {
+            console.log(data);
+            createTowers(data.results, data.antIndic);
+          },
+          failure: function(data) {
+            alert('Error de conexión');
+          },
+          crossDomain: true
+        });
+		
+	});
 
-		console.log($('#SelectCiudad').val());
-	  // do something...
+	$('#SelectAnalisis').on('hidden.bs.select', function (e) {
+		var analisis = $('#SelectAnalisis').val();
+		var idCiudad = $('#SelectCiudad').val();
+		var indicadores = $('#SelectIndicadores').val();
+        //$('select option[value="'+valores_seleccionados[i]+'"]').attr('descripcion')) ;
+  		//Cargar todas las torres. 
+  		$.ajax({
+        url: "{% url 'trayect' %}" , 
+        type: 'POST',
+        data: {
+          analisis : analisis,
+          ciudadAnalisis : idCiudad,
+          indicadoresAnalisis : JSON.stringify(indicadores),
+          csrfmiddlewaretoken: '{{ csrf_token }}'} ,
+          success: function(data) {
+            console.log(data);
+            if (analisis == "DT"){
+            	createTable(data);
+            }
+            
+          },
+          failure: function(data) {
+            alert('Error de conexión');
+          },
+          crossDomain: true
+        });
+		
+	});
+
+
+	$( "input[name=checkAntenas]:radio" ).change(function (e) {
+		if (this.value == 'si') {
+            torresCiudad ? torresCiudad.addTo(mymap) : alert("Selecciona Ciudad") ;
+        }
+        else if (this.value == 'no') {      
+            torresCiudad ? mymap.removeLayer(torresCiudad): null  ;
+        }
+
+		console.log($('input:radio'));
 	});
 
 	$('#SelectIndicadores').on('hidden.bs.select', function (e) {
@@ -275,6 +285,186 @@ body {
 		console.log(idIndicador);
 	  // do something...
 	});
+
+
+var torresList = [];
+var torresCiudad;
+function createTowers(torres, indicadoresTorres){
+	torres.forEach(function(torre){
+		function esTorre(element) {
+		  return element.antena == torre.id;
+		}
+		console.log(torre.id);
+		var datosAntena = indicadoresTorres.filter(esTorre); // 130
+		var stringPopUp = "<div class = 'popuptorre'>" + torre.nombre + "</br> ";
+		var total = 0 ;
+		 datosAntena.forEach( function(d){ 
+		 	//stringPopUp = stringPopUp.concat(d.indicador__nombre + ": ").concat(d.cantidad+ "</br>");
+		 	total +=  Number(d.cantidad);
+		 });
+		stringPopUp = stringPopUp +" Total: " +total.toString() + " <svg/></div>";
+		stringPopUp = $(stringPopUp)[0];
+
+		//var stringPopUp = datosAntena.toString().concat(torre.nombre); 
+		var popup = L.popup().setContent(stringPopUp);
+            
+
+		var circle = L.circle([torre.lat, torre.lon], {
+		    color: 'red',
+		    fillColor: 'red',
+		    fillOpacity: 0.5,
+		    radius: 50
+		}).bindPopup(popup);
+
+		torresList.push(circle);
+		
+		total > 0 ? createBarCharIND(datosAntena, stringPopUp, total) : null;
+
+
+	});
+
+	torresCiudad = L.layerGroup(torresList);
+
+}
+
+function createBarCharIND(datosAntena, stringPopUp,total) {
+var margin = {top: 15, right: 0, bottom: 50, left: 30},
+    width = 260 - margin.left - margin.right,
+    height = 180 - margin.top - margin.bottom;
+
+//var formatPercent = d3.format(".0%");
+
+var x = d3.scale.ordinal()
+    .rangeRoundBands([0, width], .1);
+
+var y = d3.scale.linear()
+    .range([height, 0]);
+
+var xAxis = d3.svg.axis()
+    .scale(x)
+    .orient("bottom");
+
+var yAxis = d3.svg.axis()
+    .scale(y)
+    .orient("left");
+    //.tickFormat(formatPercent);
+
+var tip = d3.tip()
+  .attr('class', 'd3-tip info')
+  .offset([-10, 0])
+  .html(function(d) {
+    return "<strong>Porcentaje:</strong> <span style='color:red'>" + d.cantidad + "</span>";
+  })
+console.log(d3.select(stringPopUp).select("svg"))
+var svg = d3.select(stringPopUp).select("svg").append("svg")
+//var svg = d3.select("body").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+svg.call(tip);
+
+ingresa(datosAntena, total);
+//d3.tsv("data.tsv", type, 
+function ingresa(data, total) {
+  x.domain(data.map(function(d) { return d.indicador__nombre; }));
+  y.domain([0, d3.max(data, function(d) { return d.cantidad *100 /total; })]);
+
+  svg.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + height + ")")
+      .call(xAxis);
+
+  svg.append("g")
+      .attr("class", "y axis")
+      .call(yAxis)
+    .append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 6)
+      .attr("dy", ".71em")
+      .style("text-anchor", "end")
+      .text("Porcentaje");
+
+  svg.selectAll(".bar")
+      .data(data)
+    .enter().append("rect")
+      .attr("class", "bar")
+      .attr("x", function(d) { return x(d.indicador__nombre); })
+      .attr("width", x.rangeBand())
+      .attr("y", function(d) { return y(d.cantidad *100 /total); })
+      .attr("height", function(d) { return height - y(d.cantidad *100 /total); })
+      .on('mouseover', tip.show)
+      .on('mouseout', tip.hide)
+
+};
+
+function type(d) {
+  d.frequency = +d.frequency;
+  return d;
+}
+
+}
+
+function showTable(indicadores, ind){
+	console.log(indicadores);
+	console.log(indicadores.results);
+	console.log(indicadores[0]);
+	var table = d3.select("#resultadosTabla")
+				.append("table")
+				.attr("class", "resTable " + ind )
+				// .attr("width", "3")
+				.append("thead")
+				.append("tr");
+	var bodyTable = d3.select(".resTable" + ind ).append("tbody");
+	console.log(d3.select(".resTable").select("thead"));
+
+	var thead = d3.select(".resTable " + ind).select("thead").select("tr").selectAll("th")
+					.data(d3.keys(indicadores[0]))
+					.enter().append("th")
+					.text(function(d){return d});
+
+	var tr = d3.select(".resTable " + ind).select("tbody").selectAll("tr")
+				.data(indicadores)
+				.enter()
+				.append("tr")
+
+	var td = tr.selectAll("td")
+				.data(function (d) {return d3.values(d) })
+				.enter()
+				.append("td")
+				.text(function(d){return d});
+
+
+}
+
+function createTable(indicadores){
+	console.log(indicadores);
+	(["ABC1", "C2", "C3", "D", "E"]).forEach(function (ind){
+		function desplIndicador(element) {
+		  return element.indicador__nombre == ind;
+		}
+	var datosIncador = indicadores.results.filter(desplIndicador); // 130
+
+	showTable(datosIncador, ind);
+	});
+	 //UNA TABLA POR CADA INDICADOR, PARA PODER OCULTARLAS. 
+
+	// // create the table header
+ //      var thead = d3.select("thead").selectAll("th")
+	// 	.data(d3.keys(sessions[0]))
+	// 	.enter().append("th").text(function(d){return d});
+	// 	// fill the table
+	// 	// create rows
+	// 	var tr = d3.select("tbody").selectAll("tr")
+	// 	.data(sessions).enter().append("tr")
+	// 	// cells
+	// 	var td = tr.selectAll("td")
+	// 	  .data(function(d){return d3.values(d)})
+	// 	  .enter().append("td")
+	// 	  .text(function(d) {return d})
+
+}
 
 </script>
 

@@ -1,0 +1,147 @@
+mysql> select count(ping.id), antena from (select id, lat, lon from Antena where zona_u ="gran puerto montt") as lu, ping where lu.id = ping.antena and (hora > 50000 and hora < 130000) group by antena;
++----------------+---------+
+| count(ping.id) | antena  |
++----------------+---------+
+|         128127 | 4TERF10 |
+|          27433 | AERPVU1 |
+|          77473 | ALER2U1 |
+|          10581 | ALERAU1 |
+|         107419 | ALERF3A |
+|          63002 | ALORIU1 |
+|          75679 | ALTTEU1 |
+|          35440 | AV4TEU1 |
+|          44445 | AVAUSA  |
+|          82911 | AVIAF6A |
+|          27539 | BILAGU1 |
+|         134804 | BINDF9A |
+|         175178 | CAARF10 |
+|          84198 | CAGC2A  |
+|          93209 | CARNEU1 |
+|          19568 | CHALTU1 |
+|          26020 | CHAMIU1 |
+|          35636 | CHINQU1 |
+|          66197 | CLAF2A  |
+|          23587 | DMRC1A  |
+|           3558 | DRPVAU1 |
+|          48659 | ESPAFU1 |
+|          73683 | HCOLF6A |
+|          60209 | HDAPMU1 |
+|          44730 | ITENF3A |
+|          35963 | LVARAU1 |
+|         119236 | MNTG1A  |
+|          56754 | MPPM1U1 |
+|          36628 | MPPM2U1 |
+|          23256 | MPPVA10 |
+|          16100 | PARQIU1 |
+|          50732 | PCOSF10 |
+|          44665 | PLLOF3A |
+|          88752 | PMVTRA  |
+|          42095 | PUPEF10 |
+|          49268 | PVOENU1 |
+|          15803 | R5VARU1 |
+|          65323 | RAYSAAA |
+|          86672 | SSURF9A |
+|          93873 | VRSCF6A |
+|         133360 | VRSG1A  |
+|         134521 | VVOLF9A |
++----------------+---------+
+42 rows in set (2 min 14.84 sec)
+
+mysql> select count(ping.id), antena from (select id, lat, lon from Antena where zona_u ="gran puerto montt") as lu, ping where lu.id = ping.antena and (hora > 130000 and hora < 210000) group by antena;
++----------------+---------+
+| count(ping.id) | antena  |
++----------------+---------+
+|         127067 | 4TERF10 |
+|          26403 | AERPVU1 |
+|          88736 | ALER2U1 |
+|          12430 | ALERAU1 |
+|         120068 | ALERF3A |
+|          62198 | ALORIU1 |
+|          69599 | ALTTEU1 |
+|          37922 | AV4TEU1 |
+|          41861 | AVAUSA  |
+|         101372 | AVIAF6A |
+|          29848 | BILAGU1 |
+|         157381 | BINDF9A |
+|         185859 | CAARF10 |
+|         104229 | CAGC2A  |
+|         101805 | CARNEU1 |
+|          22248 | CHALTU1 |
+|          28254 | CHAMIU1 |
+|          44243 | CHINQU1 |
+|          71800 | CLAF2A  |
+|          41786 | DMRC1A  |
+|           4111 | DRPVAU1 |
+|          79015 | ESPAFU1 |
+|         151048 | HCOLF6A |
+|          75886 | HDAPMU1 |
+|          50215 | ITENF3A |
+|          34840 | LVARAU1 |
+|         141822 | MNTG1A  |
+|          79296 | MPPM1U1 |
+|          43192 | MPPM2U1 |
+|          31471 | MPPVA10 |
+|          18470 | PARQIU1 |
+|          98079 | PCOSF10 |
+|          50773 | PLLOF3A |
+|         109786 | PMVTRA  |
+|          43991 | PUPEF10 |
+|          51011 | PVOENU1 |
+|          18237 | R5VARU1 |
+|         106122 | RAYSAAA |
+|          89560 | SSURF9A |
+|          98921 | VRSCF6A |
+|         140221 | VRSG1A  |
+|         124883 | VVOLF9A |
++----------------+---------+
+42 rows in set (1 min 27.15 sec)
+
+select count(ping.id), antena from (select id, lat, lon from Antena where zona_u ="gran puerto montt") as lu, ping where lu.id = ping.antena and (hora > 210000 OR  hora < 50000) group by antena;
+
++----------------+---------+
+| count(ping.id) | antena  |
++----------------+---------+
+|         133564 | 4TERF10 |
+|          30465 | AERPVU1 |
+|          91482 | ALER2U1 |
+|          12580 | ALERAU1 |
+|         125763 | ALERF3A |
+|          76683 | ALORIU1 |
+|          78862 | ALTTEU1 |
+|          35310 | AV4TEU1 |
+|          49490 | AVAUSA  |
+|          69499 | AVIAF6A |
+|          26787 | BILAGU1 |
+|         116763 | BINDF9A |
+|         182831 | CAARF10 |
+|          81231 | CAGC2A  |
+|         107379 | CARNEU1 |
+|          20738 | CHALTU1 |
+|          29398 | CHAMIU1 |
+|          29925 | CHINQU1 |
+|          64555 | CLAF2A  |
+|          11835 | DMRC1A  |
+|           4922 | DRPVAU1 |
+|          29699 | ESPAFU1 |
+|          39880 | HCOLF6A |
+|          37676 | HDAPMU1 |
+|          40059 | ITENF3A |
+|          38508 | LVARAU1 |
+|         113455 | MNTG1A  |
+|          39316 | MPPM1U1 |
+|          35100 | MPPM2U1 |
+|          16336 | MPPVA10 |
+|          13390 | PARQIU1 |
+|          33710 | PCOSF10 |
+|          45217 | PLLOF3A |
+|          76676 | PMVTRA  |
+|          36233 | PUPEF10 |
+|          52102 | PVOENU1 |
+|          11269 | R5VARU1 |
+|          35081 | RAYSAAA |
+|          89600 | SSURF9A |
+|          94572 | VRSCF6A |
+|         124061 | VRSG1A  |
+|         144125 | VVOLF9A |
++----------------+---------+
+42 rows in set (1 min 42.24 sec)

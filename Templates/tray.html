@@ -23,7 +23,14 @@
  <script src="https://unpkg.com/leaflet@1.2.0/dist/leaflet.js"
    integrity="sha512-lInM/apFSqyy1o6s89K4iQUKg6ppXEgsVxT35HbzUupEVRh2Eu9Wdl4tHj7dZO0s1uvplcYGmt3498TtHq+log=="
    crossorigin=""></script>
-<script src="http://d3js.org/d3.v3.min.js"></script>
+<!-- <script src="http://d3js.org/d3.v3.min.js"></script> -->
+<script src="https://d3js.org/d3.v4.min.js"></script>
+
+<!-- <script src="https://d3js.org/d3.v4.min.js"></script> -->
+<!-- <script src="https://d3js.org/d3-path.v1.min.js"></script>
+<script src="https://d3js.org/d3-shape.v1.min.js"></script>
+<script src="https://d3js.org/d3-axis.v1.min.js"></script> -->
+
 <script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
 
 	<title>Visualizadores - Ecoinformática Laboratorio</title>
@@ -110,6 +117,35 @@ h1, h2 {
   left: 0;
 }
 
+.toolTip {
+  pointer-events: none;
+  position: absolute;
+  display: none;
+  min-width: 50px;
+  height: auto;
+  background: none repeat scroll 0 0 #ffffff;
+  padding: 9px 14px 6px 14px;
+  border-radius: 4px;
+  text-align: left;
+  line-height: 1.3;
+  color: #5B6770;
+  box-shadow: 0px 3px 9px rgba(0, 0, 0, .15);
+}
+.toolTip:after {
+  content: "";
+  width: 0;
+  height: 0;
+  border-left: 12px solid transparent;
+  border-right: 12px solid transparent;
+  border-top: 12px solid white;
+  position: absolute;
+  bottom: 0px;
+  left: 50%;
+  margin-left: -12px;
+}  
+.toolTip span {
+font-weight: 500;
+  color: #081F2C;}
 
 
 
@@ -129,7 +165,7 @@ h1, h2 {
 
 		</div>
 		<div class= "row" id = "resultados">
-			resultados 
+			 
 		</div>
 		<div class= "row" id = "resultadosTabla" >
 			
@@ -181,6 +217,25 @@ h1, h2 {
 			</div>
 			<div class= "list-group-item"> 
 				<div class = "row">
+					<div class= "col-md-6" > Seleccione día: </div> 
+					<div class=" col-md-6  " >
+
+						<select class="selectpicker show-tick form-control" id ="SelectDia" data-width="150px" title="...">
+					  		<option value= "150316">Lunes </option>
+					  		<option value= "150317">Martes </option>
+					  		<option value= "150318">Miercoles </option>
+					  		<option value= "150319">Jueves </option>
+					  		<option value= "150320">Viernes </option>
+					  		<option value= "150321">Sabado </option>
+					  		<option value= "150315">Domingo </option>
+						</select>
+
+
+					</div>
+				</div>
+			</div>
+			<div class= "list-group-item"> 
+				<div class = "row">
 					<div class= "col-md-6" > Seleccione Análisis: </div> 
 					<div class=" col-md-6  " >
 
@@ -201,7 +256,14 @@ h1, h2 {
 
 
 <script>
-
+	var torresList = [];
+	var torresCiudad;
+	var DTindicador = [];
+	var DTHecho = false;
+	var analisis,
+		idCiudad,
+		diaSelect,
+		idindicadores;
 	var mymap = L.map('mapid').setView([-35.505, -73.09], 13);
 
 	L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
@@ -213,7 +275,7 @@ h1, h2 {
 	}).addTo(mymap);
 
 	$('#SelectCiudad').on('hidden.bs.select', function (e) {
-		var idCiudad = $('#SelectCiudad').val();
+		idCiudad = $('#SelectCiudad').val();
         //$('select option[value="'+valores_seleccionados[i]+'"]').attr('descripcion')) ;
 		var latitud = $('#SelectCiudad option[value= "'+idCiudad+'"]' ).attr('lat');
 		var longitud = $('#SelectCiudad option[value= "'+idCiudad+'"]' ).attr('lon');
@@ -227,7 +289,6 @@ h1, h2 {
           cidadTorres : idCiudad,
           csrfmiddlewaretoken: '{{ csrf_token }}'} ,
           success: function(data) {
-            console.log(data);
             createTowers(data.results, data.antIndic);
           },
           failure: function(data) {
@@ -235,37 +296,101 @@ h1, h2 {
           },
           crossDomain: true
         });
+
+  		(analisis != null & idCiudad != null & idindicadores != null ) ? doAnalisis() : null;
+
 		
 	});
 
-	$('#SelectAnalisis').on('hidden.bs.select', function (e) {
-		var analisis = $('#SelectAnalisis').val();
-		var idCiudad = $('#SelectCiudad').val();
-		var indicadores = $('#SelectIndicadores').val();
+	$('#SelectDia').on('hidden.bs.select', function (e) {
+
+		diaSelect = $('#SelectDia').val();
         //$('select option[value="'+valores_seleccionados[i]+'"]').attr('descripcion')) ;
   		//Cargar todas las torres. 
-  		$.ajax({
-        url: "{% url 'trayect' %}" , 
-        type: 'POST',
-        data: {
-          analisis : analisis,
-          ciudadAnalisis : idCiudad,
-          indicadoresAnalisis : JSON.stringify(indicadores),
-          csrfmiddlewaretoken: '{{ csrf_token }}'} ,
-          success: function(data) {
-            console.log(data);
-            if (analisis == "DT"){
-            	createTable(data);
-            }
-            
-          },
-          failure: function(data) {
-            alert('Error de conexión');
-          },
-          crossDomain: true
-        });
+  		(analisis != null & idCiudad != null & idindicadores != null ) ? doAnalisis() : null;
+		
+	});	
+
+
+	$('#SelectAnalisis').on('hidden.bs.select', function (e) {
+
+		analisis = $('#SelectAnalisis').val();
+		idCiudad = $('#SelectCiudad').val();
+        //$('select option[value="'+valores_seleccionados[i]+'"]').attr('descripcion')) ;
+  		//Cargar todas las torres. 
+  		(analisis != null & idCiudad != null & idindicadores != null ) ? doAnalisis() : null;
 		
 	});
+
+	var dataAnalisisDHT ;
+
+	function doAnalisis(){
+		var dia = diaSelect != null ? diaSelect : "150316";  
+
+		$.ajax({
+	        url: "{% url 'trayect' %}" , 
+	        type: 'POST',
+	        data: {
+	          analisis : analisis,
+	          diaAnalisis : dia,
+	          ciudadAnalisis : idCiudad,
+	          indicadoresAnalisis : JSON.stringify(idindicadores),
+	          csrfmiddlewaretoken: '{{ csrf_token }}'} ,
+	          success: function(data) {
+	          	dataAnalisisDHT = data;
+	            if (analisis == "DT"){
+	            	console.log("data");
+	            	console.log(data);
+	            	console.log("idindicadores");
+	            	console.log(idindicadores);
+	            	data = transAcumulado(data);
+	            	createTable(data, idindicadores);
+	            }
+	            else if (analisis == "DH"){
+	            	createTable(data, idindicadores);
+
+	            }
+	            else {
+	            	dataAnalisisDHT = null;
+
+	            }
+	            
+	          },
+	          failure: function(data) {
+	            alert('Error de conexión');
+	          },
+	          crossDomain: true
+	    });
+		
+	}
+
+	function transAcumulado(data){
+		console.log(data);
+		idindicadores.forEach( function (ind){ //acumulo los datos en el mismo arreglo. 
+			function datoHoraInd(element,i){
+				return element.hora == i & element.indicador == ind;
+			}
+
+			var acumP = 0;
+			var acumS = 0;
+			for (var i = 0; i < 24 ; i++) {
+				dato = data.results.find( function(element){
+						return element.hora == i & element.indicador == ind;
+					});
+				dato ? acumP += dato.promedio : null;
+				dato ? dato.promedio = acumP: null;
+				dato ? acumS += dato.suma: null;
+				dato ? dato.suma = acumS: null; 
+			}
+
+
+		});
+		console.log("dataListoo Acumulado");
+		console.log(data);
+
+		return data;
+
+	}
 
 
 	$( "input[name=checkAntenas]:radio" ).change(function (e) {
@@ -276,25 +401,25 @@ h1, h2 {
             torresCiudad ? mymap.removeLayer(torresCiudad): null  ;
         }
 
-		console.log($('input:radio'));
 	});
 
 	$('#SelectIndicadores').on('hidden.bs.select', function (e) {
-		var idIndicador = $('#SelectIndicadores').val();
+		idindicadores = $('#SelectIndicadores').val();
 
-		console.log(idIndicador);
-	  // do something...
+  		(analisis != null & idCiudad != null & idindicadores != null ) ? doAnalisis() : null;
+		
+
+
 	});
 
 
-var torresList = [];
-var torresCiudad;
+
+
 function createTowers(torres, indicadoresTorres){
 	torres.forEach(function(torre){
 		function esTorre(element) {
 		  return element.antena == torre.id;
 		}
-		console.log(torre.id);
 		var datosAntena = indicadoresTorres.filter(esTorre); // 130
 		var stringPopUp = "<div class = 'popuptorre'>" + torre.nombre + "</br> ";
 		var total = 0 ;
@@ -328,141 +453,271 @@ function createTowers(torres, indicadoresTorres){
 }
 
 function createBarCharIND(datosAntena, stringPopUp,total) {
-var margin = {top: 15, right: 0, bottom: 50, left: 30},
-    width = 260 - margin.left - margin.right,
-    height = 180 - margin.top - margin.bottom;
+	var margin = {top: 15, right: 0, bottom: 50, left: 30},
+	    width = 260 - margin.left - margin.right,
+	    height = 180 - margin.top - margin.bottom;
 
-//var formatPercent = d3.format(".0%");
+	var x = d3.scaleBand()
+	    .rangeRound([0, width], .1);
 
-var x = d3.scale.ordinal()
-    .rangeRoundBands([0, width], .1);
+	var y = d3.scaleLinear()
+	    .rangeRound([height, 0]);
 
-var y = d3.scale.linear()
-    .range([height, 0]);
+	var xAxis = d3.axisBottom(x);
+	var yAxis = d3.axisLeft(y);
 
-var xAxis = d3.svg.axis()
-    .scale(x)
-    .orient("bottom");
+	var svg = d3.select(stringPopUp).select("svg").append("svg")
+	    .attr("width", width + margin.left + margin.right)
+	    .attr("height", height + margin.top + margin.bottom)
+	  .append("g")
+	    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-var yAxis = d3.svg.axis()
-    .scale(y)
-    .orient("left");
-    //.tickFormat(formatPercent);
+	// svg.call(tip);
 
-var tip = d3.tip()
-  .attr('class', 'd3-tip info')
-  .offset([-10, 0])
-  .html(function(d) {
-    return "<strong>Porcentaje:</strong> <span style='color:red'>" + d.cantidad + "</span>";
+	ingresa(datosAntena, total);
+	//d3.tsv("data.tsv", type, 
+	function ingresa(data, total) {
+		x.domain(data.map(function(d) { return d.indicador__nombre; }));
+		y.domain([0, d3.max(data, function(d) { return d.cantidad *100 /total; })]);
+
+
+		svg.append("g")
+		  .attr("class", "x axis")
+		  .attr("transform", "translate(0," + height + ")")
+		  .call(xAxis);
+
+		svg.append("g")
+		  .attr("class", "y axis")
+		  .call(yAxis)
+		.append("text")
+		  .attr("fill", "#000")
+		  .attr("transform", "rotate(-90)")
+		  .attr("y", 3)
+		  .attr("dy", ".71em")
+		  .attr("text-anchor", "end")
+		  .text("Porcentaje");
+
+		//   g.append("g")
+		//   .attr("class", "y axis")
+		//   .call(d3.axisLeft(y))
+		// .append("text")
+		//   .attr("fill", "#000")
+		//   .attr("transform", "rotate(-90)")
+		//   .attr("y",3)
+		//   .attr("dy", "0.71em")
+		//   .attr("text-anchor", "end")
+		//   .text("Km");
+
+		svg.selectAll(".bar")
+		  .data(data)
+		.enter().append("rect")
+		  .attr("class", "bar")
+		  .attr("x", function(d) { return x(d.indicador__nombre); })
+		  .attr("width", x.bandwidth() * 0.9)
+		  .attr("transform", "translate("+x.bandwidth() * 0.1+",0)")
+		  .attr("y", function(d) { return y(d.cantidad *100 /total); })
+		  .attr("height", function(d) { return height - y(d.cantidad *100 /total); })
+		  .on("mousemove", function(d){
+    				d3.select(this).attr("fill", "#588C73");
+    				tooltip
+              .style("left", d3.event.pageX - 50 + "px")
+              .style("top", d3.event.pageY - 50 + "px")
+              .style("z-index", 1000)
+              .style("display", "block")
+      				.html("Porcentaje: " + parseFloat(Math.round((d.cantidad *100 / total ) * 100) / 100).toFixed(2)  + "% </br> Total:" + d.cantidad);
+        
   })
-console.log(d3.select(stringPopUp).select("svg"))
-var svg = d3.select(stringPopUp).select("svg").append("svg")
-//var svg = d3.select("body").append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-  .append("g")
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    		    .on("mouseout", function(d, i) { tooltip.style("display", "none");d3.select(this).attr("fill", function(d) {return "#bd0026"}
+            );});
+		  // .on('mouseover', tip.show)
+		  // .on('mouseout', tip.hide)
 
-svg.call(tip);
+		  var tooltip =d3.select("body").append("div").attr("class", "toolTip");
+		};
 
-ingresa(datosAntena, total);
-//d3.tsv("data.tsv", type, 
-function ingresa(data, total) {
-  x.domain(data.map(function(d) { return d.indicador__nombre; }));
-  y.domain([0, d3.max(data, function(d) { return d.cantidad *100 /total; })]);
-
-  svg.append("g")
-      .attr("class", "x axis")
-      .attr("transform", "translate(0," + height + ")")
-      .call(xAxis);
-
-  svg.append("g")
-      .attr("class", "y axis")
-      .call(yAxis)
-    .append("text")
-      .attr("transform", "rotate(-90)")
-      .attr("y", 6)
-      .attr("dy", ".71em")
-      .style("text-anchor", "end")
-      .text("Porcentaje");
-
-  svg.selectAll(".bar")
-      .data(data)
-    .enter().append("rect")
-      .attr("class", "bar")
-      .attr("x", function(d) { return x(d.indicador__nombre); })
-      .attr("width", x.rangeBand())
-      .attr("y", function(d) { return y(d.cantidad *100 /total); })
-      .attr("height", function(d) { return height - y(d.cantidad *100 /total); })
-      .on('mouseover', tip.show)
-      .on('mouseout', tip.hide)
-
-};
-
-function type(d) {
-  d.frequency = +d.frequency;
-  return d;
-}
+	function type(d) {
+	  d.frequency = +d.frequency;
+	  return d;
+	}
 
 }
 
-function showTable(indicadores, ind){
+function tabulate(ind, data, columns) {
+	d3.select('#resultadosTabla').append('h1').text(data[0]['indicador__nombre']);
+	var table = d3.select('#resultadosTabla').append('table').attr("class", "table " + ind)
+	var thead = table.append('thead').attr("class", "thead-dark " + ind)
+	var	tbody = table.append('tbody');
+
+	// append the header row
+	thead.append('tr')
+	  .selectAll('th')
+	  .data(columns).enter()
+	  .append('th')
+	  	.attr("scope", "col")
+	    .text(function (column) { return column; });
+
+	// create a row for each object in the data
+	var rows = tbody.selectAll('tr')
+	  .data(data)
+	  .enter()
+	  .append('tr');
+
+	// create a cell in each row for each column
+	var cells = rows.selectAll('td')
+	  .data(function (row) {
+	    return columns.map(function (column) {
+	      return {column: column, value: row[column]};
+	    });
+	  })
+	  .enter()
+	  .append('td')
+	    .text(function (d) { return d.value; });
+
+  return table;
+}
+
+function createTable(indicadores, indSelect){
+	//Elimino el gráfico y tablas anteriores.
+	d3.select("#resultados").select("svg").remove()
+	d3.select("#resultadosTabla").selectAll("h1").remove()
+	d3.select("#resultadosTabla").selectAll("table").remove()
+
+	DTHecho = true;
+	// maximo = Math.max(indicadores['maximo']);
 	console.log(indicadores);
-	console.log(indicadores.results);
-	console.log(indicadores[0]);
-	var table = d3.select("#resultadosTabla")
-				.append("table")
-				.attr("class", "resTable " + ind )
-				// .attr("width", "3")
-				.append("thead")
-				.append("tr");
-	var bodyTable = d3.select(".resTable" + ind ).append("tbody");
-	console.log(d3.select(".resTable").select("thead"));
-
-	var thead = d3.select(".resTable " + ind).select("thead").select("tr").selectAll("th")
-					.data(d3.keys(indicadores[0]))
-					.enter().append("th")
-					.text(function(d){return d});
-
-	var tr = d3.select(".resTable " + ind).select("tbody").selectAll("tr")
-				.data(indicadores)
-				.enter()
-				.append("tr")
-
-	var td = tr.selectAll("td")
-				.data(function (d) {return d3.values(d) })
-				.enter()
-				.append("td")
-				.text(function(d){return d});
-
-
-}
-
-function createTable(indicadores){
-	console.log(indicadores);
-	(["ABC1", "C2", "C3", "D", "E"]).forEach(function (ind){
+	console.log("maximo");
+	if (indicadores.results.length > 0 ){
+		maximo_graph = d3.max(indicadores['results'], function(d) { return d.promedio /1000; });
+	// console.log(a);
+	(indSelect).forEach(function (ind){
 		function desplIndicador(element) {
-		  return element.indicador__nombre == ind;
+		  return element.indicador == ind;
 		}
-	var datosIncador = indicadores.results.filter(desplIndicador); // 130
+		var datosIncador = indicadores.results.filter(desplIndicador); // 130
+		//showTable(datosIncador, ind);
 
-	showTable(datosIncador, ind);
+
+		createPlot(datosIncador, maximo_graph);
+
+		tabulate(ind, datosIncador, ['dia','hora','personasTotal','movimientoTotal','suma','mediana','moda','promedio','desviacionSt','minimo','maximo','varianza','p25','p50','p75']);
+
 	});
-	 //UNA TABLA POR CADA INDICADOR, PARA PODER OCULTARLAS. 
+		DTindicador = indSelect; //arreglo de indicadores seleccionados por medio de Análisis. 
 
-	// // create the table header
- //      var thead = d3.select("thead").selectAll("th")
-	// 	.data(d3.keys(sessions[0]))
-	// 	.enter().append("th").text(function(d){return d});
-	// 	// fill the table
-	// 	// create rows
-	// 	var tr = d3.select("tbody").selectAll("tr")
-	// 	.data(sessions).enter().append("tr")
-	// 	// cells
-	// 	var td = tr.selectAll("td")
-	// 	  .data(function(d){return d3.values(d)})
-	// 	  .enter().append("td")
-	// 	  .text(function(d) {return d})
+
+
+	} 
+	
+
+}
+
+function createPlot(dataIndicadores, maximo_graph){
+
+
+	var create = d3.select("#resultados").select("svg").empty(); // T: no hay gráfico 
+	// console.log(d3.select("#resultados").selectAll("g.y axis"));
+	var svg,
+	 	g,
+	 	margin = {top: 20, right: 20, bottom: 30, left: 50}
+	 	init_width = $( "#mapid" ).width(),
+	 	init_height = 600;
+		width = +init_width - margin.left - margin.right;
+		height = +init_height - margin.top - margin.bottom;
+
+	var x = d3.scaleBand()
+    	.rangeRound([0, width]);
+
+	var y = d3.scaleLinear()
+	    .range([height, 0]);
+
+	var z = d3.scaleOrdinal(d3.schemeCategory10);
+	curveForm = analisis == "DT" ? d3.curveMonotoneX : d3.curveStep;
+
+	// var line = d3.line()
+	// 	.curve(curveForm)
+	//     .x(function(d) { return x(d.hora); })
+ //    	.y(function(d) { return y(d.promedio /1000); });
+ 	lineForm = analisis == "DT" ? d3.line().y(function(d) { return y(d.promedio /1000); }) : d3.area().y1(function(d) { return y(d.promedio /1000); });
+
+	var line = lineForm
+		.curve(curveForm)
+	    .x(function(d) { return x(d.hora); });
+
+    // var area = d3.area()
+	   //  .x(function(d) { return x(d.date); })
+	   //  .y1(function(d) { return y(d.close); });
+
+
+
+    x.domain(dataIndicadores.map(function(d) { return d.hora; }));
+    // maxY = d3.max(dataIndicadores, function(d) { return d.promedio; })
+	y.domain([0, maximo_graph]);
+	analisis == "DH" ? line.y0(y(0)) : null ;
+	z.domain([1,2,3,4,5]);
+
+	if (create) { //no hay gráfico. 
+
+		//el maximo de todos los seleccionados, eso está en indicadores. 
+		svg = d3.select("#resultados").append("svg").attr("width", init_width).attr("height", init_height);
+		g = svg.append("g").attr("class", "gResult").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+		g.append("g")
+			.attr("class", "x axis")
+		  .attr("transform", "translate(0," + height + ")")
+		  .call(d3.axisBottom(x))
+		.select(".domain")
+		  .remove();
+		
+		g.append("g")
+		  .attr("class", "y axis")
+		  .call(d3.axisLeft(y))
+		.append("text")
+		  .attr("fill", "#000")
+		  .attr("transform", "rotate(-90)")
+		  .attr("y",3)
+		  .attr("dy", "0.71em")
+		  .attr("text-anchor", "end")
+		  .text("Km");
+
+	} 
+	else{
+		// d3.select("#resultados").selectAll(".y axis").remove();
+		svg = d3.select("#resultados").select("svg");
+		g = d3.select("#resultados").select("g");
+
+	}
+
+		fill = analisis == "DT" ? "none" : function(d) { return z(d[0].indicador); } ;
+		g.append("path")
+		  .datum(dataIndicadores)
+		  .style("fill-opacity", .2)
+		  .attr("fill", fill )
+		  // .attr("stroke", "steelblue")
+		  .attr("stroke-linejoin", "round")
+		  .attr("stroke-linecap", "round")
+		  .attr("stroke-width", 1.5)
+		  .attr("d", line)
+		  .style("stroke", function(d) { return z(d[0].indicador); });
+		  
+		g.append("text")
+		  .datum(dataIndicadores)
+		  .attr("transform", function(d) { return "translate(" + x(d[23].hora) + "," + y(d[23].promedio /1000) + ")"; })
+	      .attr("x", 3)
+	      .attr("dy", "0.35em")
+	      .style("font", "10px sans-serif")
+	      .style("stroke", function(d) { return z(d[0].indicador); })
+	      .text(function(d) { return d[0].indicador__nombre; });
+
+
+
+	
+
+
+
+
+
+
+
 
 }
 

@@ -25,15 +25,19 @@ def index(request):
 			tipo_analisis  = request.POST['analisis']
 			ciudadAn  = request.POST['ciudadAnalisis']
 			indicadores  = request.POST['indicadoresAnalisis']
+			diaAnalisis  = request.POST['diaAnalisis']
 			indicadores = json.loads(indicadores)
 			#indicadores = map(int, indicadores)
 
 			print(indicadores)
-			if tipo_analisis == "DT" :
+			if tipo_analisis == "DT" or tipo_analisis == "DH":
 				indicadoresCiudad = CiudIndic.objects.filter(ciudad = ciudadAn).values() 
-				desplazamiento = Desplazamiento.objects.filter(ciudad = ciudadAn, indicador__in = indicadores).values(
-					'dia','ciudad__nombre','indicador__nombre','hora','personasTotal','movimientoTotal','suma','mediana','moda','promedio','desviacionSt','minimo','maximo','varianza','p25','p50','p75',) 
+				desplazamiento = Desplazamiento.objects.filter(ciudad = ciudadAn, indicador__in = indicadores, dia = diaAnalisis).values(
+					'dia','ciudad__nombre','indicador','indicador__nombre','hora','personasTotal','movimientoTotal','suma','mediana','moda','promedio','desviacionSt','minimo','maximo','varianza','p25','p50','p75',) 
 				return JsonResponse({'results': list(desplazamiento)}, safe=False)
+			else:
+				return JsonResponse({'results': list([])}, safe=False)
+
 
 
 	ciudades = Ciudad.objects.all()

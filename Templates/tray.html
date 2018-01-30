@@ -429,7 +429,7 @@ font-weight: 500;
 
 	$( "input[name=checkAntenas]:radio" ).change(function (e) {
 		if (this.value == 'si') {
-            torresCiudad ? torresCiudad.addTo(mymap).on("click",circleClick) : alert("Selecciona Ciudad") ;
+            torresCiudad ? torresCiudad.addTo(mymap) : alert("Selecciona Ciudad") ;
         }
         else if (this.value == 'no') {      
             torresCiudad ? mymap.removeLayer(torresCiudad): null  ;
@@ -474,9 +474,12 @@ function createTowers(torres, indicadoresTorres){
 		    fillColor: 'red',
 		    fillOpacity: 0.5,
 		    radius: 50
-		}).bindPopup(popup)
+		}).bindPopup(popup).on('click', function (){ 
+			console.log('Clicked on a member of the group!', torre); 
+			buscaTrayectorias(torre.nombre)
+		})
 
-		// circle.on("click", circleClick);
+
 
 		torresList.push(circle);
 		
@@ -489,8 +492,45 @@ function createTowers(torres, indicadoresTorres){
 
 }
 
-function circleClick(e) {
-	console.log("click en ", e);
+function buscaTrayectorias(torre) {
+	var dia = diaSelect != null ? diaSelect : "150316";  
+
+	console.log("click en ", torre);
+	$.ajax({
+        url: "{% url 'trayect' %}" , 
+        type: 'POST',
+        data: {
+          torreTray : torre,
+          diaAnalisis : dia,
+          csrfmiddlewaretoken: '{{ csrf_token }}'} ,
+          success: function(data) {
+            console.log(data);
+            createMove(data);
+          },
+          failure: function(data) {
+            alert('Error de conexión');
+          },
+          crossDomain: true
+        });
+}
+
+function createMove(data){
+		
+	data.forEach(function (persona){
+		print(persona.moves) 
+		// create a red polyline from an array of LatLng points
+		var latlngs = [
+		    [45.51, -122.68],
+		    [37.77, -122.43],
+		    [34.04, -118.2]
+		];
+		var polyline = L.polyline(latlngs, {color: 'red'}).addTo(map);
+		// zoom the map to the polyline
+		map.fitBounds(polyline.getBounds());
+
+	})
+
+
 
 }
 

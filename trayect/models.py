@@ -42,15 +42,24 @@ class AntIndic(models.Model):
     indicador = models.ForeignKey(Indicador, on_delete=models.CASCADE) 
     cantidad = models.DecimalField(max_digits=9, decimal_places=4) 
 
+class Persona(models.Model):
+    numa = models.CharField(max_length=50, unique = True) 
+    residencia = models.ForeignKey(Antena, on_delete=models.CASCADE)
+
+    def __unicode__(self): # __unicode__ on Python 2
+        return self.numa
 
 class Estadia(models.Model):
-    numa = models.CharField(max_length=50) 
-    horai = models.IntegerField()
-    horaf = models.IntegerField()
+    numa = models.ForeignKey(Persona, on_delete=models.CASCADE) 
+    horaP = models.IntegerField()
+    #horaf = models.IntegerField()
     dia = models.CharField(max_length=50)
     antena = models.ForeignKey(Antena, on_delete=models.CASCADE) 
     def __unicode__(self): # __unicode__ on Python 2
-        return self.numa
+        return self.antena
+
+    class Meta:
+        unique_together = ('numa', 'horaP', 'dia', )
      
 
 class Desplazamiento(models.Model):

@@ -56,6 +56,7 @@ h1, h2 {
 }
 
 #mapid { height: 500px; }
+body { height: 1000px; }
 
 
 
@@ -234,7 +235,7 @@ font-weight: 500;
 						<select class="selectpicker show-tick form-control" id ="SelectAnalisis" data-width="150px" title="...">
 					  		<option value= "DT">Despazamiento Acumulado en el Tiempo </option>
 					  		<option value= "DH">Despazamiento Por Hora </option>
-					  		<option value= "tray"> Ver Trayectoria </option>
+					  		<option value= "TR"> Ver Trayectoria </option>
 						</select>
 
 
@@ -250,6 +251,7 @@ font-weight: 500;
 <script>
 	var torresList = [];
 	var torresCiudad;
+	var torreSelect;
 	var DTindicador = [];
 	var DTHecho = false;
 	var analisis,
@@ -310,7 +312,15 @@ font-weight: 500;
 		idCiudad = $('#SelectCiudad').val();
         //$('select option[value="'+valores_seleccionados[i]+'"]').attr('descripcion')) ;
   		//Cargar todas las torres. 
-  		(analisis != null & idCiudad != null & idindicadores != null ) ? doAnalisis() : null;
+  		if (analisis == "DT" || analisis == "DH"){
+  			(analisis != null & idCiudad != null & idindicadores != null ) ? doAnalisis() : null;
+  		}
+  		else{
+  			(analisis != null & idCiudad != null & idindicadores != null & torreSelect != null) ? console.log("en TR con torre", torreSelect) : null;
+  		}
+
+
+
 		
 	});
 
@@ -329,13 +339,17 @@ font-weight: 500;
 	          indicadoresAnalisis : JSON.stringify(idindicadores),
 	          csrfmiddlewaretoken: '{{ csrf_token }}'} ,
 	          success: function(data) {
+	          	
 	          	dataAnalisisDHT = data;
+
 	            if (analisis == "DT"){
 	            	console.log("data");
 	            	console.log(data);
 	            	console.log("idindicadores");
 	            	console.log(idindicadores);
-	            	data = transAcumulado(data);
+	            	if (data.results.length > 0) {
+						data = transAcumulado(data);
+	            	}
 	            	createTable(data, idindicadores);
 	            }
 	            else if (analisis == "DH"){
@@ -415,7 +429,7 @@ font-weight: 500;
 
 	$( "input[name=checkAntenas]:radio" ).change(function (e) {
 		if (this.value == 'si') {
-            torresCiudad ? torresCiudad.addTo(mymap) : alert("Selecciona Ciudad") ;
+            torresCiudad ? torresCiudad.addTo(mymap).on("click",circleClick) : alert("Selecciona Ciudad") ;
         }
         else if (this.value == 'no') {      
             torresCiudad ? mymap.removeLayer(torresCiudad): null  ;
@@ -447,7 +461,8 @@ function createTowers(torres, indicadoresTorres){
 		 	//stringPopUp = stringPopUp.concat(d.indicador__nombre + ": ").concat(d.cantidad+ "</br>");
 		 	total +=  Number(d.cantidad);
 		 });
-		stringPopUp = stringPopUp +" Total: " +total.toString() + " <svg/></div>";
+		stringPopUp += " Total Habitantes: " +total.toString() + " </br>";
+		torre.residentesTotal ? stringPopUp += " Total Residentes: " +(torre.residentesTotal).toString() + " <svg/></div>": stringPopUp +=  " <svg/></div>";
 		stringPopUp = $(stringPopUp)[0];
 
 		//var stringPopUp = datosAntena.toString().concat(torre.nombre); 
@@ -459,7 +474,9 @@ function createTowers(torres, indicadoresTorres){
 		    fillColor: 'red',
 		    fillOpacity: 0.5,
 		    radius: 50
-		}).bindPopup(popup);
+		}).bindPopup(popup)
+
+		// circle.on("click", circleClick);
 
 		torresList.push(circle);
 		
@@ -469,6 +486,11 @@ function createTowers(torres, indicadoresTorres){
 	});
 
 	torresCiudad = L.layerGroup(torresList);
+
+}
+
+function circleClick(e) {
+	console.log("click en ", e);
 
 }
 
@@ -630,6 +652,7 @@ function createTable(indicadores, indSelect){
 	d3.select("#resultados").select("svg").remove()
 	d3.select("#resultadosTabla").selectAll("h1").remove()
 	d3.select("#resultadosTabla").selectAll("table").remove()
+	d3.select("#resultadosTabla").selectAll("button").remove()
 
 	DTHecho = true;
 	// maximo = Math.max(indicadores['maximo']);

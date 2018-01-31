@@ -27,25 +27,25 @@ def index(request):
 				print(user['numa_id'])
 				persona = Persona.objects.get(id = user['numa_id'])
 				resd = persona.residencia
-				indicadores = AntIndic.objects.filter(antena = resd).values('indicador__nombre', 'cantidad')
+				indicadores = AntIndic.objects.filter(antena = resd).values_list('indicador__nombre', 'cantidad')
 				print("indicadores")
 				print(indicadores)
 				# mydict.keys()[mydict.values().index(16)]
-				ABC1 = [x['cantidad'] for x in indicadores if x['indicador__nombre'] == 'ABC1']
-				print(ABC1)
-				nse = {"ABC1": 0, "C2":0 , "C3": 0, "D": 0, "E": 0}
-				for key in nse:
-					print(key)
-					ind = [x['cantidad'] for x in indicadores if x['indicador__nombre'] == key]
-					nse[key] = ind[0] if len(ind) == 1 else 0 
-				print("nse")
-				print(nse)
+				# ABC1 = [x['cantidad'] for x in indicadores if x['indicador__nombre'] == 'ABC1']
+				# print(ABC1)
+				# nse = {"ABC1": 0, "C2":0 , "C3": 0, "D": 0, "E": 0}
+				# for key in nse:
+				# 	print(key)
+				# 	ind = [x['cantidad'] for x in indicadores if x['indicador__nombre'] == key]
+				# 	nse[key] = ind[0] if len(ind) == 1 else 0 
+				# print("nse")
+				# print(nse)
 
 				
-				estadiasPersona = Estadia.objects.filter(numa = persona, dia = diaAnalisis).values_list('antena__lat', 'antena__lon', 'horaP',).order_by('horaP')
+				estadiasPersona = Estadia.objects.filter(numa = persona, dia = diaAnalisis).values_list('antena__lat', 'antena__lon', 'horaP', 'antena__nombre').order_by('horaP')
 				# print("estadiasPersona")
 				# print(list(estadiasPersona))
-				tray.append({ "numa":persona.numa, "moves": list(estadiasPersona), "NSE" : nse })
+				tray.append({ "numa":persona.numa, "moves": list(estadiasPersona), "NSE" : list(indicadores) })
  
 			# print(tray)
 			return JsonResponse({'results': tray}, safe=False)

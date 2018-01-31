@@ -241,6 +241,21 @@ font-weight: 500;
 
 					</div>
 				</div>
+				<div class= "list-group-item"> 
+				<div class = "row">
+					<div class= "col-md-6" > Cantidad de Trayectorias Max: </div> 
+					<div class=" col-md-6  " >
+
+						<select class="selectpicker show-tick form-control" id ="SelectAnalisis" data-width="150px" title="...">
+					  		<option value= "DT">Despazamiento Acumulado en el Tiempo </option>
+					  		<option value= "DH">Despazamiento Por Hora </option>
+					  		<option value= "TR"> Ver Trayectoria </option>
+						</select>
+
+
+					</div>
+				</div>
+			</div>
 			</div>
 		</div>
 	</div>
@@ -343,10 +358,7 @@ font-weight: 500;
 	          	dataAnalisisDHT = data;
 
 	            if (analisis == "DT"){
-	            	console.log("data");
-	            	console.log(data);
-	            	console.log("idindicadores");
-	            	console.log(idindicadores);
+	            	
 	            	if (data.results.length > 0) {
 						data = transAcumulado(data);
 	            	}
@@ -371,7 +383,6 @@ font-weight: 500;
 	}
 
 	function transAcumulado(data){
-		console.log(data);
 		idindicadores.forEach( function (ind){ //acumulo los datos en el mismo arreglo. 
 			function datoHoraInd(element,i){
 				return element.hora == i & element.indicador == ind;
@@ -419,8 +430,7 @@ font-weight: 500;
 
 
 		});
-		console.log("dataListoo Acumulado");
-		console.log(data);
+
 
 		return data;
 
@@ -462,8 +472,9 @@ function createTowers(torres, indicadoresTorres){
 		 	total +=  Number(d.cantidad);
 		 });
 		stringPopUp += " Total Habitantes: " +total.toString() + " </br>";
-		torre.residentesTotal ? stringPopUp += " Total Residentes: " +(torre.residentesTotal).toString() + " <svg/></div>": stringPopUp +=  " <svg/></div>";
+		torre.residentesTotal ? stringPopUp += " Total Residentes: " +(torre.residentesTotal).toString() + " </div>": stringPopUp +=  " </div>";
 		stringPopUp = $(stringPopUp)[0];
+
 
 		//var stringPopUp = datosAntena.toString().concat(torre.nombre); 
 		var popup = L.popup().setContent(stringPopUp);
@@ -475,7 +486,6 @@ function createTowers(torres, indicadoresTorres){
 		    fillOpacity: 0.5,
 		    radius: 50
 		}).bindPopup(popup).on('click', function (){ 
-			console.log('Clicked on a member of the group!', torre); 
 			buscaTrayectorias(torre.nombre)
 		})
 
@@ -505,7 +515,7 @@ function buscaTrayectorias(torre) {
           csrfmiddlewaretoken: '{{ csrf_token }}'} ,
           success: function(data) {
             console.log(data);
-            createMove(data);
+            createMove(data.results);
           },
           failure: function(data) {
             alert('Error de conexión');
@@ -514,21 +524,205 @@ function buscaTrayectorias(torre) {
         });
 }
 
-function createMove(data){
-		
-	data.forEach(function (persona){
-		print(persona.moves) 
-		// create a red polyline from an array of LatLng points
-		var latlngs = [
-		    [45.51, -122.68],
-		    [37.77, -122.43],
-		    [34.04, -118.2]
-		];
-		var polyline = L.polyline(latlngs, {color: 'red'}).addTo(map);
-		// zoom the map to the polyline
-		map.fitBounds(polyline.getBounds());
+function createPlotPersona(indicadores,popupPersona, setColor){
+	console.log(indicadores);
+	
+	var margin = {top: 15, right: 0, bottom: 30, left: 30},
+	    width = 200 - margin.left - margin.right,
+	    height = 150 - margin.top - margin.bottom;
 
-	})
+	var x = d3.scaleBand()
+	    .rangeRound([0, width], .1);
+
+	var y = d3.scaleLinear()
+	    .rangeRound([height, 0]);
+
+	var xAxis = d3.axisBottom(x);
+	var yAxis = d3.axisLeft(y);
+
+	var svg = d3.select(popupPersona).select("#graficoPersona").append("svg")
+	    .attr("width", width + margin.left + margin.right)
+	    .attr("height", height + margin.top + margin.bottom)
+	  .append("g")
+	    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+		
+
+	x.domain(indicadores.map(function(d) { return d[0]; }));
+
+
+	y.domain([0, d3.max(indicadores, function(d) { return d[1]; })]);
+
+	svg.append("g")
+	  .attr("class", "x axis")
+	  .attr("transform", "translate(0," + height + ")")
+	  .call(xAxis);
+
+	svg.append("g")
+	  .attr("class", "y axis")
+	  .call(yAxis)
+	.append("text")
+	  .attr("fill", "#000")
+	  .attr("transform", "rotate(-90)")
+	  .attr("y", 3)
+	  .attr("dy", ".71em")
+	  .attr("text-anchor", "end")
+	  .text("Porcentaje");
+	
+	g = svg.append("g"); 
+	// .attr("transform", "translate(" + margin.left  + "," + margin.top + ")");
+
+	curveForm = d3.curveMonotoneX ;
+
+ 	lineForm = d3.line().y(function(d) { 
+ 		console.log("y(d.cantidad)");
+ 		console.log(y(d[1]));
+ 		return y(d[1]); }) ;
+
+	var line = lineForm
+		.curve(curveForm)
+	    .x(function(d) {
+	    	console.log("d");
+	    	console.log(x(d[0]));
+	    	 return x(d[0]); });
+
+	// fill = analisis == "DT" ? "none" : function(d) { return z(d[0].indicador); } ;
+	g.append("path")
+	  .datum(indicadores)
+	  .style("fill-opacity", .2)
+	  .attr("fill", 'none' )
+	  .attr("stroke-width", 2)
+	  .attr("transform", "translate("+x.bandwidth() *0.5 +",0)")
+	  .attr("stroke", setColor)
+	  // .attr("transform", "translate("+x.bandwidth() +",0)")
+	  .attr("d", line);
+
+
+}
+function getcolor(d){
+	console.log("getColor");
+	console.log(d);
+	return 	d === "ABC1" ? 'red':
+			d === "C2" ? 'orange':
+			d === "C3" ? 'yellow':
+			d === "D" ? 'green':
+			d === "E" ? 'blue' : 'white';
+
+
+} 
+
+function createMove(data){
+	console.log(data)
+	data2 = []
+	data2.push(data[0])
+	data2.forEach(function (persona){
+		if (persona.NSE.length > 0 ) {
+			console.log("persona.NSE–");
+			console.log(persona.NSE);
+			total = persona.NSE.map(el => +parseFloat(el[1]).toFixed(2) )
+							   .reduce( (prev, curr) => prev + curr , 0);
+
+			indicadores = persona.NSE.map(el=> [el[0],+(parseFloat(el[1])/total).toFixed(2)] );
+			console.log(indicadores);
+			console.log("total");
+			console.log(total);
+			popupPersona = "<div id='popupPersona' >";
+
+			var mode = indicadores.reduce( (prev, curr) => (prev[1] > curr[1]) ? prev : curr);
+
+			var media;
+			var suma=0;
+			indicadores.some(function(d, indice){
+				suma += d[1]; 
+				media = indice;
+				console.log(suma);
+				return suma > 0.5 ;
+			})
+			console.log("media");
+			console.log(indicadores[media]);
+
+
+			console.log("mode");
+			console.log(mode);
+			
+			// indicadores.forEach(function (p){
+			// 	popupPersona += p[0] +": "+  parseFloat(p[1]).toFixed(2) + "</br>";
+
+			// });
+			popupPersona += "mode : "+  mode +"</br>";
+			popupPersona += "mode : "+  indicadores[media][0] +"</br>";
+			popupPersona += " <div id = 'graficoPersona'></div></div>" ;
+
+			popupPersona = $(popupPersona)[0];
+			colorPersona = getcolor(indicadores[media][0]);
+			console.log(colorPersona);
+
+			createPlotPersona(indicadores,popupPersona, colorPersona); 
+
+			var popup = L.popup().setContent(popupPersona);
+
+		}
+		else {
+			var popup = L.popup().setContent("Sin residencia")
+		}
+
+		
+		move0 = persona.moves[0];
+		arrayPersona = persona.moves.slice(1);
+
+
+		arrayPersona.forEach(function(mov){
+			var latlngs = [[move0[0], move0[1]]];
+			latlngs.push([mov[0],mov[1]])
+		
+			stringTooltip = "<b>Viaje</b> </br> desde: " + move0[3].toString()+" "+ move0[2].toString() + "</br>hasta: " + mov[3].toString()+" "+ mov[2].toString(); 
+
+			
+
+
+
+			var polyline = L.polyline(latlngs, 
+				{	color: colorPersona,
+					fillColor: colorPersona,
+				    fillOpacity: 0.5,
+				    opacity: 0.5,
+				    weight: 10,
+	                dashArray: '20,15',
+	                lineJoin: 'round'
+				}).addTo(mymap).bindTooltip(stringTooltip, { sticky: 'true'}).bindPopup(popup);
+
+			if (move0[3] == mov[3]){
+				// function filterAntenas(element, index){
+				// 	return element[3] == mov[3] ;
+				// }
+
+				// var movTorre = arrayPersona.filter(filterAntenas);
+				// stringTooltip = "" ;
+				// if (movTorre.length > 1){
+				// 	movTorre.forEach( function(nMov){
+				// 		stringTooltip += "<b>Estadia </b>" +nMov[3].toString()+ "</br>inicio: " + " "+ nMov[2].toString() + "</br>fin: " + nMov[2].toString() + "</br>"; 
+
+				// 	})
+
+				// }
+				// else {
+				// 	stringTooltip = "<b>Estadia </b>" +move0[3].toString()+ "</br>inicio: " + " "+ move0[2].toString() + "</br>fin: " + mov[2].toString(); 
+
+				// }
+				stringTooltip = "<b>Estadia </b>" +move0[3].toString()+ "</br>inicio: " + " "+ move0[2].toString() + "</br>fin: " + mov[2].toString(); 
+
+				var circle = L.circle([mov[0], mov[1]], {
+			    color: 'blue',
+			    fillColor: 'blue',
+			    fillOpacity: 0.5,
+			    radius: 50
+			}).bindTooltip(stringTooltip).openTooltip();
+        	circle.addTo(mymap)
+
+			}
+			move0 = mov;
+		});
+
+	});
 
 
 
@@ -548,7 +742,8 @@ function createBarCharIND(datosAntena, stringPopUp,total) {
 	var xAxis = d3.axisBottom(x);
 	var yAxis = d3.axisLeft(y);
 
-	var svg = d3.select(stringPopUp).select("svg").append("svg")
+
+	var svg = d3.select(stringPopUp).append("svg")
 	    .attr("width", width + margin.left + margin.right)
 	    .attr("height", height + margin.top + margin.bottom)
 	  .append("g")
@@ -579,17 +774,6 @@ function createBarCharIND(datosAntena, stringPopUp,total) {
 		  .attr("text-anchor", "end")
 		  .text("Porcentaje");
 
-		//   g.append("g")
-		//   .attr("class", "y axis")
-		//   .call(d3.axisLeft(y))
-		// .append("text")
-		//   .attr("fill", "#000")
-		//   .attr("transform", "rotate(-90)")
-		//   .attr("y",3)
-		//   .attr("dy", "0.71em")
-		//   .attr("text-anchor", "end")
-		//   .text("Km");
-
 		svg.selectAll(".bar")
 		  .data(data)
 		.enter().append("rect")
@@ -611,8 +795,7 @@ function createBarCharIND(datosAntena, stringPopUp,total) {
   })
     		    .on("mouseout", function(d, i) { tooltip.style("display", "none");d3.select(this).attr("fill", function(d) {return "#bd0026"}
             );});
-		  // .on('mouseover', tip.show)
-		  // .on('mouseout', tip.hide)
+
 
 		  var tooltip =d3.select("body").append("div").attr("class", "toolTip");
 		};
@@ -625,9 +808,7 @@ function createBarCharIND(datosAntena, stringPopUp,total) {
 }
 
 function tabulate(ind, data, columns) {
-// 	'<button type="button" class="btn btn-default" aria-label="Left Align">
-//   <span class="glyphicon glyphicon-download" aria-hidden="true"></span>
-// </button>'
+
 	var textButton = '<input name="updateButton" type="button" value="Update" onclick="descargaCSV("'+ ind +'")" />'
 	d3row = d3.select('#resultadosTabla').append("div").attr("class", "row");
 	
@@ -688,6 +869,7 @@ function tabulate(ind, data, columns) {
 }
 
 function createTable(indicadores, indSelect){
+
 	//Elimino el gráfico y tablas anteriores.
 	d3.select("#resultados").select("svg").remove()
 	d3.select("#resultadosTabla").selectAll("h1").remove()
@@ -696,8 +878,7 @@ function createTable(indicadores, indSelect){
 
 	DTHecho = true;
 	// maximo = Math.max(indicadores['maximo']);
-	console.log(indicadores);
-	console.log("maximo");
+
 	if (indicadores.results.length > 0 ){
 		maximo_graph = d3.max(indicadores['results'], function(d) { return d.promedio /1000; });
 	// console.log(a);
@@ -724,7 +905,8 @@ function createTable(indicadores, indSelect){
 }
 
 function createPlot(dataIndicadores, maximo_graph){
-
+	console.log("indicadores como son");
+	console.log(dataIndicadores);
 
 	var create = d3.select("#resultados").select("svg").empty(); // T: no hay gráfico 
 	// console.log(d3.select("#resultados").selectAll("g.y axis"));
@@ -822,10 +1004,7 @@ function createPlot(dataIndicadores, maximo_graph){
 }
 
 function descargaCSV(){
-	console.log("en descargaCSV");
-	console.log(dataAnalisisDHT.results);
 	args = {'data' : dataAnalisisDHT.results}
-	console.log(convertArrayOfObjectsToCSV(args));
 }
 
 	function convertArrayOfObjectsToCSV(args) {  
@@ -870,7 +1049,6 @@ function descargaCSV(){
         var data, filename, link;
 
         var csv = convertArrayOfObjectsToCSV(args);
-        console.log(csv);
         if (csv == null) return;
 
         filename = args.filename || 'export.csv';

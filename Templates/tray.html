@@ -321,6 +321,7 @@ font-weight: 500;
   		$.ajax({
         url: "{% url 'trayect' %}" , 
         type: 'POST',
+        async: false,
         data: {
           cidadTorres : idCiudad,
           csrfmiddlewaretoken: '{{ csrf_token }}'} ,

@@ -53,7 +53,7 @@
 	.huerotate {-webkit-filter: hue-rotate(180deg); filter: hue-rotate(180deg);}
 	.rss.opacity {-webkit-filter: opacity(50%); filter: opacity(50%);}*/
 h1, h2 {
-	color: #FFFFFF;
+	color: #000000;
 
 	text-align: center;
 	font-family: verdana;
@@ -72,7 +72,7 @@ h1, h2 {
 
 .list-group-item{
 	color: #000000;
-	margin-right:10px;
+/*	margin-right:10px;*/
 
 }
 
@@ -262,28 +262,30 @@ font-weight: 500;
 						<select class="selectpicker show-tick form-control" id ="SelectAnalisis" data-width="150px" title="...">
 					  		<option value= "DT">Despazamiento Acumulado en el Tiempo </option>
 					  		<option value= "DH">Despazamiento Por Hora </option>
-					  		<option value= "TR"> Ver Trayectoria </option>
+					  		<option value= "TR"> Ver Trayectorias por Antena (paso) </option>
+					  		<option value= "TR2"> Ver Trayectorias por Antena (origen) </option>
+					  		<!-- <option value= "TR3"> Ver Trayectorias por Indicadores </option> -->
 						</select>
 
 
 					</div>
 				</div>
-				<div class= "list-group-item"> 
-				<div class = "row">
-					<div class= "col-md-6" > Cantidad de Trayectorias Max: </div> 
+				
+			</div>
+			
+			<div class= "list-group-item" id = "numTrayListItem"> 
+				<div class = "row" >
+					<div class= "col-md-6" > Cantidad de Trayectorias : </div> 
 					<div class=" col-md-6  " >
-
-						<select class="selectpicker show-tick form-control" id ="SelectAnalisis" data-width="150px" title="...">
-					  		<option value= "DT">Despazamiento Acumulado en el Tiempo </option>
-					  		<option value= "DH">Despazamiento Por Hora </option>
-					  		<option value= "TR"> Ver Trayectoria </option>
-						</select>
-
-
+						<input type="number" id= "numTray"class="form-control" name="numTray" min="1" max="20" value="1">
+						<!-- si  1<n<20 -> busco n, si n = 21 busco el máximo , si n > que max(tray) => trae el maximo  -->
 					</div>
 				</div>
-			</div>
-			</div>
+			</div> 
+
+			<button type="button" class="list-group-item" id = "BotonLimpiar" onclick="cleanMap()">Limpiar Trayectorias en el Mapa</button>
+
+			</div> 
 		</div>
 	</div>
 	</div>
@@ -291,61 +293,115 @@ font-weight: 500;
 
 
 <script>
+	$("#numTrayListItem").hide();
+
+	function cleanMap(){
+		console.log("limpiando el mapa de las trayectorias")
+		
+		layer.forEach(function (layer) {
+		    mymap.removeLayer(layer);
+		});
+		layer = [];
+
+	}
+	var layer=[];
 	var torresList = [];
 	var torresCiudad;
 	var torreSelect;
 	var DTindicador = [];
 	var DTHecho = false;
+
 	var analisis,
 		idCiudad,
-		diaSelect,
-		idindicadores;
-	var mymap = L.map('mapid').setView([-35.505, -73.09], 13);
+		diaSelect = '150316',
+		idindicadores,
+		nTray = 1;
 
-	L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
-		maxZoom: 18,
-		attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
-			'<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
-			'Imagery © <a href="http://mapbox.com">Mapbox</a>',
-		id: 'mapbox.streets'
-	}).addTo(mymap);
+	var mymap;
+	createMap();
+	function createMap(){
+		mymap = L.map('mapid').setView([-35.505, -73.09], 13);
+
+		L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
+			maxZoom: 18,
+			attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
+				'<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+				'Imagery © <a href="http://mapbox.com">Mapbox</a>',
+			id: 'mapbox.streets'
+		}).addTo(mymap);
+
+	}
+
+
 
 	$('#SelectCiudad').on('hidden.bs.select', function (e) {
 		idCiudad = $('#SelectCiudad').val();
-        //$('select option[value="'+valores_seleccionados[i]+'"]').attr('descripcion')) ;
-		var latitud = $('#SelectCiudad option[value= "'+idCiudad+'"]' ).attr('lat');
-		var longitud = $('#SelectCiudad option[value= "'+idCiudad+'"]' ).attr('lon');
-		var zoom = $('#SelectCiudad option[value= "'+idCiudad+'"]' ).attr('zoom');
-  		mymap.setView([latitud, longitud],zoom );
-  		//Cargar todas las torres. 
-  		$.ajax({
-        url: "{% url 'trayect' %}" , 
-        type: 'POST',
-        async: false,
-        data: {
-          cidadTorres : idCiudad,
-          csrfmiddlewaretoken: '{{ csrf_token }}'} ,
-          success: function(data) {
-            createTowers(data.results, data.antIndic);
-          },
-          failure: function(data) {
-            alert('Error de conexión');
-          },
-          crossDomain: true
-        });
+		console.log(idCiudad);
+		if (idCiudad != "") { 
+			//$('select option[value="'+valores_seleccionados[i]+'"]').attr('descripcion')) ;
+			var latitud = $('#SelectCiudad option[value= "'+idCiudad+'"]' ).attr('lat');
+			var longitud = $('#SelectCiudad option[value= "'+idCiudad+'"]' ).attr('lon');
+			var zoom = $('#SelectCiudad option[value= "'+idCiudad+'"]' ).attr('zoom');
+	  		mymap.setView([latitud, longitud],zoom );
+	  		//Cargar todas las torres. 
+	  		$.ajax({
+	        url: "{% url 'trayect' %}" , 
+	        type: 'POST',
+	        async: false,
+	        data: {
+	          cidadTorres : idCiudad,
+	          csrfmiddlewaretoken: '{{ csrf_token }}'} ,
+	          success: function(data) {
+	            createTowers(data.results, data.antIndic);
+	          },
+	          failure: function(data) {
+	            alert('Error de conexión');
+	          },
+	          crossDomain: true
+	        });
+	  		(analisis != null & idCiudad != null & idindicadores != null ) ? doAnalisis() : null;
+		}
+        
+	});
+
+	$( "input[name=checkAntenas]:radio" ).change(function (e) {
+		if (this.value == 'si') {
+            torresCiudad ? torresCiudad.addTo(mymap) : alert("Selecciona Ciudad") ;
+        }
+        else if (this.value == 'no') {      
+            torresCiudad ? mymap.removeLayer(torresCiudad): null  ;
+        }
+
+	});
+
+	$('#SelectIndicadores').on('hidden.bs.select', function (e) {
+		idindicadores = $('#SelectIndicadores').val();
 
   		(analisis != null & idCiudad != null & idindicadores != null ) ? doAnalisis() : null;
-
 		
+
+
 	});
 
 	$('#SelectDia').on('hidden.bs.select', function (e) {
-
+		diaSelect != $('#SelectDia').val() ? cleanMap() : null;
 		diaSelect = $('#SelectDia').val();
         //$('select option[value="'+valores_seleccionados[i]+'"]').attr('descripcion')) ;
   		//Cargar todas las torres. 
   		(analisis != null & idCiudad != null & idindicadores != null ) ? doAnalisis() : null;
 		
+	});	
+
+
+	$('#numTray').change( function (e) {
+		nTray = $('#numTray').val();
+		max = $("#numTray").attr('max');
+		if (parseInt(nTray) > parseInt(max) ){
+			console.log(nTray,"max: ", max)
+			// cambiar el valor del combobox
+			nTray = max ; 
+			$("#numTray").val(max);
+		}		
 	});	
 
 
@@ -358,9 +414,12 @@ font-weight: 500;
   		if (analisis == "DT" || analisis == "DH"){
   			(analisis != null & idCiudad != null & idindicadores != null ) ? doAnalisis() : null;
   		}
-  		else{
-  			(analisis != null & idCiudad != null & idindicadores != null & torreSelect != null) ? console.log("en TR con torre", torreSelect) : null;
+  		else if (analisis == "TR" || analisis == "TR2") {
+  			$("#numTrayListItem").show();
+
+  			(analisis != null & idCiudad != null & idindicadores != null & torreSelect != null) ? (console.log("en TR con torre", torreSelect)) : null;
   		}
+
 
 
 
@@ -464,29 +523,6 @@ font-weight: 500;
 
 	}
 
-
-	$( "input[name=checkAntenas]:radio" ).change(function (e) {
-		if (this.value == 'si') {
-            torresCiudad ? torresCiudad.addTo(mymap) : alert("Selecciona Ciudad") ;
-        }
-        else if (this.value == 'no') {      
-            torresCiudad ? mymap.removeLayer(torresCiudad): null  ;
-        }
-
-	});
-
-	$('#SelectIndicadores').on('hidden.bs.select', function (e) {
-		idindicadores = $('#SelectIndicadores').val();
-
-  		(analisis != null & idCiudad != null & idindicadores != null ) ? doAnalisis() : null;
-		
-
-
-	});
-
-
-
-
 function createTowers(torres, indicadoresTorres){
 	torres.forEach(function(torre){
 		function esTorre(element) {
@@ -495,10 +531,39 @@ function createTowers(torres, indicadoresTorres){
 		var datosAntena = indicadoresTorres.filter(esTorre); // 130
 		var stringPopUp = "<div class = 'popuptorre'>" + torre.nombre + "</br> ";
 		var total = 0 ;
-		 datosAntena.forEach( function(d){ 
-		 	//stringPopUp = stringPopUp.concat(d.indicador__nombre + ": ").concat(d.cantidad+ "</br>");
-		 	total +=  Number(d.cantidad);
-		 });
+		var media = 0 ;
+		var moda;
+		var colorTorre = 'black';
+		 // datosAntena.forEach( function(d){ 
+		 // 	// stringPopUp = stringPopUp.concat(d.indicador__nombre + ": ").concat(d.cantidad+ "</br>");
+		 // 	total +=  Number(d.cantidad);
+		 // });
+		
+		console.log("datosAntena");
+		console.log(datosAntena);
+		if (datosAntena.length > 0 ) {
+			total = datosAntena.map(el => Number(el.cantidad) )
+							   .reduce( (prev, curr) => prev + curr , 0);
+			mode = datosAntena.reduce( (prev, curr) => (prev.cantidad > curr.cantidad) ? prev : curr);
+			
+			var suma=0;
+			
+			datosAntena.some(function(d, indice){
+				suma += Number(d.cantidad); 
+				media = indice;
+				console.log(suma);
+				return suma/total > 0.5 ;
+			})
+			console.log("media");
+			console.log(datosAntena[media]);
+			console.log("total:", total, " moda:" , mode );
+			colorTorre = getcolor(datosAntena[media].indicador__nombre);
+			console.log("color:", colorTorre);
+
+		}
+		
+
+
 		stringPopUp += " Total Habitantes: " +total.toString() + " </br>";
 		torre.residentesTotal ? stringPopUp += " Total Residentes: " +(torre.residentesTotal).toString() + " </div>": stringPopUp +=  " </div>";
 		stringPopUp = $(stringPopUp)[0];
@@ -506,20 +571,22 @@ function createTowers(torres, indicadoresTorres){
 
 		//var stringPopUp = datosAntena.toString().concat(torre.nombre); 
 		var popup = L.popup().setContent(stringPopUp);
-            
 
-		var circle = L.circle([torre.lat, torre.lon], {
-		    color: 'red',
-		    fillColor: 'red',
-		    fillOpacity: 0.5,
-		    radius: 50
-		}).bindPopup(popup).on('click', function (){ 
-			buscaTrayectorias(torre.nombre)
+		var x = parseFloat(torre.lat);
+		var y = parseFloat(torre.lon);
+
+		var polygon = L.polygon([[x+0.001,y], [x-0.001,y-0.001], [x-0.001,y+0.001]], {
+		    color: colorTorre,
+		    fillColor: colorTorre,
+		    fillOpacity: 0.5
+		});
+		polygon.bindPopup(popup).on('click', function (){ 
+			analisis == "TR" || analisis == "TR2" ?  buscaTrayectorias(torre.nombre) : null ;
 		})
+		// polygon.addTo(mymap)
 
 
-
-		torresList.push(circle);
+		torresList.push(polygon);
 		
 		total > 0 ? createBarCharIND(datosAntena, stringPopUp, total) : null;
 
@@ -531,7 +598,9 @@ function createTowers(torres, indicadoresTorres){
 }
 
 function buscaTrayectorias(torre) {
+
 	var dia = diaSelect != null ? diaSelect : "150316";  
+	var numT = nTray != null ? nTray : $("#numTray").attr("max"); 
 
 	console.log("click en ", torre);
 	$.ajax({
@@ -540,6 +609,8 @@ function buscaTrayectorias(torre) {
         data: {
           torreTray : torre,
           diaAnalisis : dia,
+          numT : numT,
+          analisisTR : analisis,
           csrfmiddlewaretoken: '{{ csrf_token }}'} ,
           success: function(data) {
             console.log(data);
@@ -627,7 +698,7 @@ function createPlotPersona(indicadores,popupPersona, setColor){
 
 }
 function getcolor(d){
-	console.log("getColor");
+	console.log("getcolor");
 	console.log(d);
 	return 	d === "ABC1" ? 'red':
 			d === "C2" ? 'orange':
@@ -642,7 +713,9 @@ function createMove(data){
 	console.log(data)
 	data2 = []
 	data2.push(data[0])
-	data2.forEach(function (persona){
+	data.forEach(function (persona){
+		console.log("persona si no hay nadi e:(");
+		console.log(persona);
 		if (persona.NSE.length > 0 ) {
 			console.log("persona.NSE–");
 			console.log(persona.NSE);
@@ -691,6 +764,7 @@ function createMove(data){
 		}
 		else {
 			var popup = L.popup().setContent("Sin residencia")
+			colorPersona = 'black';
 		}
 
 		
@@ -704,19 +778,17 @@ function createMove(data){
 		
 			stringTooltip = "<b>Viaje</b> </br> desde: " + move0[3].toString()+" "+ move0[2].toString() + "</br>hasta: " + mov[3].toString()+" "+ mov[2].toString(); 
 
-			
-
-
-
 			var polyline = L.polyline(latlngs, 
 				{	color: colorPersona,
 					fillColor: colorPersona,
 				    fillOpacity: 0.5,
 				    opacity: 0.5,
-				    weight: 10,
-	                dashArray: '20,15',
+				    weight: 5,
+	                dashArray: '18,15',
 	                lineJoin: 'round'
 				}).addTo(mymap).bindTooltip(stringTooltip, { sticky: 'true'}).bindPopup(popup);
+
+			layer.push(polyline);
 
 			if (move0[3] == mov[3]){
 				// function filterAntenas(element, index){
@@ -739,12 +811,14 @@ function createMove(data){
 				stringTooltip = "<b>Estadia </b>" +move0[3].toString()+ "</br>inicio: " + " "+ move0[2].toString() + "</br>fin: " + mov[2].toString(); 
 
 				var circle = L.circle([mov[0], mov[1]], {
-			    color: 'blue',
-			    fillColor: 'blue',
-			    fillOpacity: 0.5,
-			    radius: 50
-			}).bindTooltip(stringTooltip).openTooltip();
-        	circle.addTo(mymap)
+				    color: colorPersona,
+				    fillColor: colorPersona,
+				    fillOpacity: 0.5,
+				    fopacity: 0.5,
+				    radius: 40
+				}).bindTooltip(stringTooltip).openTooltip();
+	        	circle.addTo(mymap)
+				layer.push(circle);
 
 			}
 			move0 = mov;

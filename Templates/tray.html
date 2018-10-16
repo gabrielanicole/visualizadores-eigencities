@@ -215,7 +215,7 @@ font-weight: 500;
 				<div class = "row">
 					<div class= "col-md-6" > Mostrar Antenas: </div> 
 					  <div class=" col-md-6 ">
-				        Si <input type="radio" value="si" name="checkAntenas">
+				        Si <input type="radio" value="si" checked name="checkAntenas">
 				        No <input type="radio" value="no" name="checkAntenas">
 				      </div>
 				</div>
@@ -262,8 +262,8 @@ font-weight: 500;
 						<select class="selectpicker show-tick form-control" id ="SelectAnalisis" data-width="150px" title="...">
 					  		<option value= "DT">Despazamiento Acumulado en el Tiempo </option>
 					  		<option value= "DH">Despazamiento Por Hora </option>
-					  		<option value= "TR"> Ver Trayectorias por Antena (paso) </option>
-					  		<option value= "TR2"> Ver Trayectorias por Antena (origen) </option>
+					  		<option value= "TR">Ver Trayectorias por Antena (paso) </option>
+					  		<option value= "TR2" >Ver Trayectorias por Antena (origen) </option>
 					  		<!-- <option value= "TR3"> Ver Trayectorias por Indicadores </option> -->
 						</select>
 
@@ -296,7 +296,7 @@ font-weight: 500;
 	$("#numTrayListItem").hide();
 
 	function cleanMap(){
-		console.log("limpiando el mapa de las trayectorias")
+		// console.log("limpiando el mapa de las trayectorias")
 		
 		layer.forEach(function (layer) {
 		    mymap.removeLayer(layer);
@@ -336,7 +336,7 @@ font-weight: 500;
 
 	$('#SelectCiudad').on('hidden.bs.select', function (e) {
 		idCiudad = $('#SelectCiudad').val();
-		console.log(idCiudad);
+		// console.log(idCiudad);
 		if (idCiudad != "") { 
 			//$('select option[value="'+valores_seleccionados[i]+'"]').attr('descripcion')) ;
 			var latitud = $('#SelectCiudad option[value= "'+idCiudad+'"]' ).attr('lat');
@@ -397,7 +397,7 @@ font-weight: 500;
 		nTray = $('#numTray').val();
 		max = $("#numTray").attr('max');
 		if (parseInt(nTray) > parseInt(max) ){
-			console.log(nTray,"max: ", max)
+			// console.log(nTray,"max: ", max)
 			// cambiar el valor del combobox
 			nTray = max ; 
 			$("#numTray").val(max);
@@ -490,6 +490,7 @@ font-weight: 500;
 				dato = data.results.find( function(element){
 						return element.hora == i & element.indicador == ind;
 					});
+				// console.log(dato);
 				acumP += dato.promedio ;
 				dato.promedio = acumP;
 				acumS += dato.suma;
@@ -529,7 +530,7 @@ function createTowers(torres, indicadoresTorres){
 		  return element.antena == torre.id;
 		}
 		var datosAntena = indicadoresTorres.filter(esTorre); // 130
-		var stringPopUp = "<div class = 'popuptorre'>" + torre.nombre + "</br> ";
+		var stringPopUp = "<div class = 'popuptorre'><b>" + torre.nombre + "</b></br> ";
 		var total = 0 ;
 		var media = 0 ;
 		var moda;
@@ -539,8 +540,8 @@ function createTowers(torres, indicadoresTorres){
 		 // 	total +=  Number(d.cantidad);
 		 // });
 		
-		console.log("datosAntena");
-		console.log(datosAntena);
+		// console.log("datosAntena");
+		// console.log(datosAntena);
 		if (datosAntena.length > 0 ) {
 			total = datosAntena.map(el => Number(el.cantidad) )
 							   .reduce( (prev, curr) => prev + curr , 0);
@@ -554,18 +555,20 @@ function createTowers(torres, indicadoresTorres){
 				console.log(suma);
 				return suma/total > 0.5 ;
 			})
-			console.log("media");
-			console.log(datosAntena[media]);
-			console.log("total:", total, " moda:" , mode );
-			colorTorre = getcolor(datosAntena[media].indicador__nombre);
-			console.log("color:", colorTorre);
+			// console.log("media");
+			// console.log(datosAntena[media]);
+			// console.log("total:", total, " moda:" , mode );
+			// colorTorre = getcolor(datosAntena[media].indicador__nombre);
+			// console.log("color:", colorTorre);
 
 		}
 		
 
 
-		stringPopUp += " Total Habitantes: " +total.toString() + " </br>";
+		stringPopUp +=  colorTorre != 'black' ? " Total Habitantes: " +total.toString() + " </br>": "Antena sin habitantes, por falta de datos o localidad fuera de zona urbana </br>";
+
 		torre.residentesTotal ? stringPopUp += " Total Residentes: " +(torre.residentesTotal).toString() + " </div>": stringPopUp +=  " </div>";
+
 		stringPopUp = $(stringPopUp)[0];
 
 
@@ -594,6 +597,7 @@ function createTowers(torres, indicadoresTorres){
 	});
 
 	torresCiudad = L.layerGroup(torresList);
+	torresCiudad.addTo(mymap);
 
 }
 
@@ -602,7 +606,7 @@ function buscaTrayectorias(torre) {
 	var dia = diaSelect != null ? diaSelect : "150316";  
 	var numT = nTray != null ? nTray : $("#numTray").attr("max"); 
 
-	console.log("click en ", torre);
+	// console.log("click en ", torre);
 	$.ajax({
         url: "{% url 'trayect' %}" , 
         type: 'POST',
@@ -624,7 +628,7 @@ function buscaTrayectorias(torre) {
 }
 
 function createPlotPersona(indicadores,popupPersona, setColor){
-	console.log(indicadores);
+	// console.log(indicadores);
 	
 	var margin = {top: 15, right: 0, bottom: 30, left: 30},
 	    width = 200 - margin.left - margin.right,
@@ -673,15 +677,15 @@ function createPlotPersona(indicadores,popupPersona, setColor){
 	curveForm = d3.curveMonotoneX ;
 
  	lineForm = d3.line().y(function(d) { 
- 		console.log("y(d.cantidad)");
- 		console.log(y(d[1]));
+ 		// console.log("y(d.cantidad)");
+ 		// console.log(y(d[1]));
  		return y(d[1]); }) ;
 
 	var line = lineForm
 		.curve(curveForm)
 	    .x(function(d) {
-	    	console.log("d");
-	    	console.log(x(d[0]));
+	    	// console.log("d");
+	    	// console.log(x(d[0]));
 	    	 return x(d[0]); });
 
 	// fill = analisis == "DT" ? "none" : function(d) { return z(d[0].indicador); } ;
@@ -698,8 +702,8 @@ function createPlotPersona(indicadores,popupPersona, setColor){
 
 }
 function getcolor(d){
-	console.log("getcolor");
-	console.log(d);
+	// console.log("getcolor");
+	// console.log(d);
 	return 	d === "ABC1" ? 'red':
 			d === "C2" ? 'orange':
 			d === "C3" ? 'yellow':
@@ -710,22 +714,22 @@ function getcolor(d){
 } 
 
 function createMove(data){
-	console.log(data)
+	// console.log(data)
 	data2 = []
 	data2.push(data[0])
 	data.forEach(function (persona){
-		console.log("persona si no hay nadi e:(");
-		console.log(persona);
+		// console.log("persona si no hay nadi e:(");
+		// console.log(persona);
 		if (persona.NSE.length > 0 ) {
-			console.log("persona.NSE–");
-			console.log(persona.NSE);
+			// console.log("persona.NSE–");
+			// console.log(persona.NSE);
 			total = persona.NSE.map(el => +parseFloat(el[1]).toFixed(2) )
 							   .reduce( (prev, curr) => prev + curr , 0);
 
 			indicadores = persona.NSE.map(el=> [el[0],+(parseFloat(el[1])/total).toFixed(2)] );
-			console.log(indicadores);
-			console.log("total");
-			console.log(total);
+			// console.log(indicadores);
+			// console.log("total");
+			// console.log(total);
 			popupPersona = "<div id='popupPersona' >";
 
 			var mode = indicadores.reduce( (prev, curr) => (prev[1] > curr[1]) ? prev : curr);
@@ -738,12 +742,12 @@ function createMove(data){
 				console.log(suma);
 				return suma > 0.5 ;
 			})
-			console.log("media");
-			console.log(indicadores[media]);
+			// console.log("media");
+			// console.log(indicadores[media]);
 
 
-			console.log("mode");
-			console.log(mode);
+			// console.log("mode");
+			// console.log(mode);
 			
 			// indicadores.forEach(function (p){
 			// 	popupPersona += p[0] +": "+  parseFloat(p[1]).toFixed(2) + "</br>";
@@ -755,7 +759,7 @@ function createMove(data){
 
 			popupPersona = $(popupPersona)[0];
 			colorPersona = getcolor(indicadores[media][0]);
-			console.log(colorPersona);
+			// console.log(colorPersona);
 
 			createPlotPersona(indicadores,popupPersona, colorPersona); 
 
@@ -763,7 +767,7 @@ function createMove(data){
 
 		}
 		else {
-			var popup = L.popup().setContent("Sin residencia")
+			var popup = L.popup().setContent("NSE no determinado </br> No tenemos datos suficientes para este usuario")
 			colorPersona = 'black';
 		}
 
@@ -1007,8 +1011,8 @@ function createTable(indicadores, indSelect){
 }
 
 function createPlot(dataIndicadores, maximo_graph){
-	console.log("indicadores como son");
-	console.log(dataIndicadores);
+	// console.log("indicadores como son");
+	// console.log(dataIndicadores);
 
 	var create = d3.select("#resultados").select("svg").empty(); // T: no hay gráfico 
 	// console.log(d3.select("#resultados").selectAll("g.y axis"));

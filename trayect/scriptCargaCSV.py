@@ -2,11 +2,11 @@ import pandas as pd
 from trayect.models import Ciudad, Indicador, CiudIndic, Antena, AntIndic, Estadia, Desplazamiento, Persona   
 
 antenas = Antena.objects.filter(ciudad = 1).values()
-csv = "/Users/gabi/Documents/visualizador_opencensus/observatorio_BigData/workflowScripts/antofagasta150321.csv"
+csv = "/Users/gabi/Documents/visualizador_opencensus/observatorio_BigData/workflowScripts/"
 
 diaEstudio = "150321"
-ciudadEstudio = "antofagasta"
-df = pd.read_csv(csv)
+ciudadEstudio = "gran santiago"
+df = pd.read_csv(csv + ciudadEstudio + diaEstudio + ".csv")
 #Este es solo de gran puerto montt
 
 #suma	mediana	moda	average	desvstd	minim	maxim	varianza 
@@ -31,6 +31,7 @@ for i in range(len(df)):
     p50 = df.iloc[i].p50
     p75 = df.iloc[i].p75
 
+    
     ciudad = Ciudad.objects.get(nombre = ciudadEstudio)
     ind = Indicador.objects.get(nombre = ind)
     ciudadRevisar = CiudIndic.objects.filter(indicador= ind, ciudad=ciudad) 
@@ -67,7 +68,7 @@ for i in range(len(df)):
             antenaGuardar = Antena(nombre = nombre, ciudad = ciudad, lat = lat, lon = lon)
             antenaGuardar.save()
 
-csv = "/mysql_exp/ANTCAR_CHILE.csv"
+csv = "/mysql_exp/ANTCAR-STGO.csv"
 
 df = pd.read_csv(csv)
 
@@ -227,11 +228,32 @@ def guardarEstadia(antena, numa, dia, hora):
         print("antena o numa no esta: ", antena, numa)
 
 
+##Actualizar Habitantes total por antena en Chile 
+antenas = Antena.objects.all()
+for i in antenas:
+    indicadores = AntIndic.objects.filter(antena = i) 
+    total =0 
+    for j in indicadores:
+        #print(j, j.cantidad)
+        total = total + j.cantidad
+
+    i.habitantesTotal = total
+    i.save()
+                                          
+    print(i.ciudad, i.nombre, i.residentesTotal, total)
 
 
+##Cargar datos para matriz de correlacion 
+ciudad_str = "gran santiago"
+ciudad = Ciudad.objects.get(nombre=ciudad_str)
+antenas = Antena.objects.filter(ciudad = ciudad )
 
+datos = []
+for i in antenas:
+    datos.append({"torre": str(i.nombre), "residentes" : i.residentesTotal, "habitantes": float(i.habitantesTotal)})
 
-
-
+#Para exportar en csv
+dfTorres = pd.DataFrame(datos)
+dfTorres.to_csv(ciudad_str+'Hab-Res')
      
 

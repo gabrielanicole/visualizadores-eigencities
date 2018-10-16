@@ -33,7 +33,7 @@ class Antena(models.Model):
     voronoi = models.CharField(max_length=200, blank= True)
 
     residentesTotal = models.IntegerField(blank= True, null = True)
-    habitantesTotal = models.IntegerField(blank= True, null = True )
+    habitantesTotal = models.DecimalField(max_digits=9, decimal_places=4, blank= True, null = True )
 
 
     def __unicode__(self): # __unicode__ on Python 2
@@ -89,7 +89,7 @@ class Desplazamiento(models.Model):
     p75 = models.IntegerField()
 
     def __unicode__(self): # __unicode__ on Python 2
-        return self.hora
+        return self.dia
 
 
  

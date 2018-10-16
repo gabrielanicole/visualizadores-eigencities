@@ -33,8 +33,7 @@ def index(request):
 			def primero(user, antena):
 				persona = Persona.objects.get(id = user['numa_id'])
 				estadiasPersona = Estadia.objects.filter(numa = persona, dia = diaAnalisis).values_list('antena__lat', 'antena__lon', 'horaP', 'antena__nombre').order_by('horaP').first()
-				print("estadiasPersona, antena")
-				print(estadiasPersona, antena)
+
 				if estadiasPersona[3] == antena.nombre:
 					return True 
 				else:

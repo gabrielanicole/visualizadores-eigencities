@@ -17,14 +17,14 @@ import logging
 
 VERIFIER = None
 
-logging.basicConfig(level=logging.DEBUG,
-                    format='%(asctime)s %(levelname)s %(message)s',
-                    filename='/var/www/html/visualizador/visualizador_opencensus/django/cluster.log',
-                    #filename='cluster.log',
-                    filemode='w')
-logging.debug('A debug message')
-logging.info('Some information')
-logging.warning('A problem happened')
+# logging.basicConfig(level=logging.DEBUG,
+#                     format='%(asctime)s %(levelname)s %(message)s',
+#                     filename='/var/www/html/visualizador/visualizador_opencensus/django/cluster.log',
+#                     #filename='cluster.log',
+#                     filemode='w')
+# logging.debug('A debug message')
+# logging.info('Some information')
+# logging.warning('A problem happened')
 net = nx.Graph()
 # Create your views here.
 def index(request):
@@ -63,9 +63,9 @@ def index(request):
 			resp = { 'salida': salida}
 			
 		elif 'inicio_red' in request.POST:
-			logging.debug('inicio_red')
+			# logging.debug('inicio_red')
 			resp = loadNet(request)
-			logging.debug('red_cargada')
+			# logging.debug('red_cargada')
 		
 		return JsonResponse(resp, safe=False)
 

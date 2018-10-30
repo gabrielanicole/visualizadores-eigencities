@@ -104,6 +104,10 @@ body {
  <h1> <img src="{% static 'img/Logotipo_fondoblanco.png' %}" alt="cluster" ></div> </h1>
 <div>
  <table align="center">
+ 	<tr>
+
+
+
  	<td>
 		<div id="imagen" class="container"  >
 			<a href="{% url 'cluster' %}">  <img src="{% static '/img/clusterCuadrado.png' %}" alt="cluster" class="opacity image" width="100%" >
@@ -135,6 +139,8 @@ body {
 
  		
  	</td>
+ 	</tr>
+ 	<tr>
  	<td>
 
 		<div id="imagen" class="container" width="100%">
@@ -150,6 +156,23 @@ body {
 
  		
  	</td>
+
+ 	<td>
+
+		<div id="imagen" class="container" width="100%">
+			<a href="{% url 'escalamiento' %}" >  <img src="{% static 'img/trayectorias.png' %}" alt="manzanas" class="opacity image" width="100%">
+			
+
+			<div id="divimagen" > Visualizador de Escalamiento  </div>
+			<div class="overlay">
+			    <div class="text"> Escalamiento en Chile</div>
+			</div>
+			</a>
+		</div>
+
+ 		
+ 	</td>
+ 	</tr>
 
  </table>
 </div> 

@@ -22,5 +22,6 @@ urlpatterns = [
     url(r'^cluster/', include('cluster.urls')),
     url(r'^', include('inicio.urls')),
     url(r'^trayectoria/', include('trayect.urls')),
+    url(r'^escalamiento/', include('escalamiento.urls')),
     url(r'^admin/', admin.site.urls),
 ]

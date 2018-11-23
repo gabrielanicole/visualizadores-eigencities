@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+{% load static %}
+
+<html>
+<head>
+
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+<!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script> -->
+
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/css/bootstrap-select.min.css">
+
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/js/bootstrap-select.min.js"></script>
+
+
+ <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+  <script src="https://d3js.org/d3.v4.min.js"></script>
+ 
+</head>
+
+
+<body>
+
+
+<div class = "container" >
+	<div class = "row" id= "titulo">
+		<h1> Observatorio de escalamiento</h1>
+	</div>
+	<div class ="row" >
+		<div class = "col-md-6">
+		<select id = "SelectVar"  class="selectpicker show-tick "  title="Variable de escalamiento" > 
+	  		<option value= "vehicle"> vehiculos </option>
+	  		<option value= "motor"> vehiculos motorizados </option>
+	  		<option value= "Non_motorized"> vehiculos no motorizados </option>
+	  		<!-- <option value= "private_transport"> Transporte privado </option> -->
+	  		<option value= "public_transport"> Transporte público </option>
+	  		<!-- <option value= "CO2_transport"> CO2 (fuentes moviles) </option> -->
+	  		<option value= "Green"> Espacios verdes </option>
+	  		<option value= "Iliteracy"> Analfabetismo </option>
+		</select>
+		</div>
+	</div>
+
+	<div class ="row" id = "graficos" >
+		<div class = "col-md-6" id = "escalamiento" > </div>
+		<div class = "col-md-3" id = "pais" > </div>
+		<div class = "col-md-3" id = "desviaciones" > </div>
+	</div>
+</body>
+
+
+<script type="text/javascript"> 
+	console.log("hola "); 
+
+$( "#SelectVar" ).change(function() {
+  console.log("SelectVar.val: ", $('#SelectVar').val() );
+  var varSelect = $('#SelectVar').val() ;
+  var log = "log_".concat(varSelect);
+  console.log(log);
+  var valor = 0.0 ; 
+
+ //  	{% for ciudad in ciudades %}
+	// 	console.log("{{ciudad.nombre}} ");
+ //  		valor = {{ciudad.varSelect}};
+	// 	console.log(valor);
+	// {% endfor %}
+	var variables = 0;
+	//Para el mapa pido los datos de log_variable 
+	$.ajax({
+		url: "{% url 'escalamiento' %}" , 
+		type: 'POST',
+		async: false,
+		data: {
+			varSelect : log,
+			csrfmiddlewaretoken: '{{ csrf_token }}'} ,
+		success: function(data) {
+			console.log("llego");
+			console.log(data);
+			variables = data; 
+
+		},
+		failure: function(data) {
+			alert('Error de conexión');
+		},
+		crossDomain: true
+	});
+	console.log(variables);
+	console.log("fin ajax");
+
+
+});
+
+
+
+
+
+	// $('#SelectVar').on('hidden.bs.select', function (e) {
+	// 	console.log("en selectvar");
+	// 	console.log(e);
+	// 	// console.log("SelectVar.val: ", $('#SelectVar').val() );
+	// 	// varSelect != $('#SelectVar').val() ? console.log("no seleccionado") : null;
+	// 	// varSelect = $('#SelectVar').val();
+	// 	// console.log("SelectVar: ", varSelect);
+
+ //        //$('select option[value="'+valores_seleccionados[i]+'"]').attr('descripcion')) ;
+ //  		//Cargar todas las torres. 
+ //  		//(analisis != null & idCiudad != null & idindicadores != null ) ? doAnalisis() : null;
+		
+	// });	
+
+
+
+</script> 
+
+
+
+
+</html>
+

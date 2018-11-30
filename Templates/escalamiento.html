@@ -95,6 +95,7 @@ $( "#SelectVar" ).change(function() {
 			
 			
 			scaling_graph(variables, $('#SelectVar  option:selected').text(), data['reg']);
+			desviaciones_graph(variables, $('#SelectVar  option:selected').text(), data['reg']);
 		/*	variables.forEach(function(c){
 				x.push(c);
 				y.push();
@@ -117,21 +118,28 @@ $( "#SelectVar" ).change(function() {
 
 
 function scaling_graph(dataset, varS, reg) {
+	console.log(dataset);
 	//var xAxis = d3.svg.axis(); 
 	var w = 600;
-	var h = 300; 
-	var padding = 30;
+	var h = 400; 
+	var padding = 40;
+
+	
+
 	var svg = d3.select("#escalamiento")
             .append("svg")
 			.attr("class", "graph_escalamiento")
             .attr("width", w)
             .attr("height", h);
 
-	
+
+
+
 
 	var scale = d3.scale.linear();
 
-   var xScale = d3.scale.linear()
+
+    var xScale = d3.scale.linear()
                      .domain([0, d3.max(dataset, function(d) { return d[1]*1.2; })])
                      .range([padding, w - padding * 2]);
 
@@ -160,14 +168,20 @@ var tip = d3.tip()
 				return yScale(d[2]); //h - d[2]*10;
 		})
 		.attr("r",  function(d) {
-				return d[2]*0.7;
+				return 6;
 		})
+		.attr("id", function(d) {return d[0] +'_circle' } )
 		.attr("fill", function(d) {return color(d,reg); } )
 		.attr("fill-opacity", 0.6)
-		.on('mouseover', tip.show)
-		.on('mouseout', tip.hide);
+		//.on('mouseover', tip.show)
+		//.on('mouseover', tip.show)
+		.on('mouseover', function(d) {
+							tip.show(d);
+							mouseover_circle(d); })
+		.on('mouseout', function(d) {
+							tip.hide(d);
+							mouseout_circle(d, reg); } );
 	svg.call(tip);
-
 
 	// apply the reults of the least squares regression
 	var x1 = d3.min(dataset, function(d) { return Number(d[1])*0.8; }) ;
@@ -195,7 +209,7 @@ var tip = d3.tip()
 	svg.append("text")
 		.text("eq: " + Number(reg[1]).toFixed(2)   + " + " + Number(reg[0]).toFixed(2) + "x"  )
 		.attr("class", "text-label")
-		.attr("y", h - (padding*2))
+		.attr("y", h - (padding + 10))
 		.attr("x", w )
 		.style("text-anchor", "end");
 
@@ -226,8 +240,8 @@ var tip = d3.tip()
 	.attr("transform", "translate(0," + (h - padding) + ")")
 	.call(xAxis)
 	.append("text")
-      .attr("y", (-1*padding)*0.5 )
-	  .attr("x", w )
+      .attr("y",  padding -10 )
+	  .attr("x", (w + padding)*0.5 )
       .attr("dy", ".71em")
       .style("text-anchor", "end")
 	  .text("[Log] Número de habitantes");
@@ -245,10 +259,99 @@ var tip = d3.tip()
     .call(yAxis)
 	.append("text")
       .attr("transform", "rotate(-90)")
-      .attr("y", 6)
+      .attr("y", -(padding ))
+	  .attr("x",- (padding +10))
       .attr("dy", ".71em")
       .style("text-anchor", "end")
 	  .text("[Log] " + varS);
+
+	var wD = 200;
+	var hD = 430; 
+	var paddingD = 0;
+
+	var svgD = d3.select("#desviaciones")
+            .append("svg")
+			//.attr("class", "graph_escalamiento")
+            .attr("width", wD)
+            .attr("height", hD);
+
+	var xScaleD = d3.scale.linear()
+					.domain(d3.extent(dataset, function(d) { return (reg[1] + reg[0]*d[1]) - d[2]; }))
+                     //.domain([d3.min(dataset, function(d) { return (reg[1] + reg[0]*d[1]) - d[2]; }) , d3.max(dataset, function(d) { return (reg[1] + reg[0]*d[1]) - d[2]; })])
+                     .range([0, wD]);
+
+	var yScaleD = d3.scale.ordinal()
+			.domain(dataset.map(function(d) { return (reg[1] + reg[0]*d[1]) - d[2] ; }))
+			.rangeRoundBands([0, hD], .2);
+
+	var yScaleDD = d3.scale.ordinal()
+				.domain(d3.range(dataset.length))
+				.rangeRoundBands([paddingD, hD - paddingD ], 0.2); 
+				//.rangeRoundBands([0, hD], 0.2);
+
+		// var x0 = x.domain(data.sort(this.checked
+        // ? function(a, b) { return b.frequency - a.frequency; }
+        // : function(a, b) { return d3.ascending(a.letter, b.letter); })
+        // .map(function(d) { return d.letter; }))
+        // .copy();
+
+	var bars = svgD.selectAll(".bar")
+    .data(dataset)
+  .enter().append("rect")
+    .attr("class", "bar")
+	.attr("id", function(d) {return d[0] +'_bar' } )
+    .attr("x", function(d) { return xScaleD(Math.min(0,  (reg[1] + reg[0]*d[1]) - d[2] )); })
+    .attr("y", function(d) { return yScaleDD((reg[1] + reg[0]*d[1]) - d[2]); })
+    .attr("width", function(d) { return Math.abs(xScaleD( (reg[1] + reg[0]*d[1]) - d[2] ) - xScaleD(0)); })
+    .attr("height", yScaleD.rangeBand())
+	.attr("fill", function(d) {return color(d,reg); } )
+	.attr("fill-opacity", 0.6)
+	.on('mouseover', function(d) {
+							tip.show(d);
+							mouseover_circle(d); })
+      .on('mouseout',  function(d) {
+							tip.hide(d);
+							mouseout_circle(d, reg); })
+	
+	  svgD.call(tip);
+
+	//   d3.select("#sortAscending")
+	// 		.on("click", function() {
+
+				bars.sort(function(a, b) {
+  						return d3.ascending((reg[1] + reg[0]*a[1]) - a[2], (reg[1] + reg[0]*b[1]) - b[2]);
+					})
+					.transition()
+					.delay(function(d, i) {
+						return i * 50;  // gives it a smoother effect
+					})
+					.duration(1000)
+					.attr("transform", function(d, i) {
+						console.log("i", i);
+				  		return "translate(0,"+ yScaleDD(i) +" )";
+					});
+ 
+			//});
+
+
+	//   svgD.selectAll(".bar")
+    //   .data(dataset)
+    // .enter().append("rect")
+    //   .attr("class", "bar")
+    //   .attr("x", function(d) { return xScaleD( (reg[1] + reg[0]*d[1]) - d[2] ); })
+    //   .attr("width", 10)
+    //   .attr("y", function(d) { return xScale(d[1]); })
+    //   .attr("height", function(d) { return hD - xScale(d[1]); })
+    //   .on('mouseover', tip.show)
+    //   .on('mouseout', tip.hide);
+	
+	//   svgD.call(tip);
+	
+}
+
+function desviaciones_graph(dataset, varS, reg) {
+
+
 	
 }
 
@@ -258,6 +361,38 @@ function color(d, reg){
 	else  return "#000080"; //azul
 
 }
+
+function mouseover_circle(d) {
+	
+	console.log(d); 
+	var ciudad = d3.selectAll('#' + d[0] + '_circle');
+	ciudad.attr("class", "point_over")
+		  .attr("fill", "rgb(0, 0, 0)")
+		  .attr("r",  10 );
+
+	var ciudad_bar = d3.selectAll('#' + d[0] + '_bar')
+	ciudad_bar.attr("fill", "rgb(0, 0, 0)" )
+	.attr("fill-opacity", 0.6)
+	.attr("r", 6);
+	
+}
+
+function mouseout_circle(d, reg) {
+	
+	console.log(d); 
+	var ciudad = d3.selectAll('#' + d[0] + '_circle');
+	ciudad.attr("fill", function(d) {return color(d,reg); } )
+	.attr("fill-opacity", 0.6)
+	.attr("r", 6)
+
+	var ciudad_bar = d3.selectAll('#' + d[0] + '_bar')
+	ciudad_bar.attr("fill", function(d) {return color(d,reg); } )
+	.attr("fill-opacity", 0.6)
+	.attr("r", 6);
+	
+}
+
+
 
 	// $('#SelectVar').on('hidden.bs.select', function (e) {
 	// 	console.log("en selectvar");

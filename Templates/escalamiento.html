@@ -1,35 +1,13 @@
 <!DOCTYPE html>
+{% extends "base.html" %}
 {% load static %}
 
 <html>
-<head>
-
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-
-<!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script> -->
-
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-
-<!-- Latest compiled and minified CSS -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/css/bootstrap-select.min.css">
-
-<!-- Latest compiled and minified JavaScript -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/js/bootstrap-select.min.js"></script>
 
 
- <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
-  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-
-  <script src="https://d3js.org/d3.v3.min.js"></script>
-  <link rel="stylesheet" href="{% static 'css/escalamiento_style.css' %}">
-  <script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
-  
-</head>
+{% block content %}
 
 
-<body>
 
 
 <div class = "container" >
@@ -52,11 +30,17 @@
 	</div>
 
 	<div class ="row" id = "graficos" >
+			<div class = "col-md-3" id = "pais" >   </div>
 		<div class = "col-md-6" id = "escalamiento" > </div>
-		<div class = "col-md-3" id = "pais" > </div>
+		
 		<div class = "col-md-3" id = "desviaciones" > </div>
+		
+		
 	</div>
-</body>
+	<div class = "row" id = "info-escalamiento" > </div>
+</div>
+
+
 
 
 <script type="text/javascript"> 
@@ -93,9 +77,18 @@ $( "#SelectVar" ).change(function() {
 			//	});
 			variables = data['results'];
 			
+			var info_titulo = "ANALFABETISMO";
+			var info_descripcion = "Número de personas que no saben leer o escribir, respecto al total de la  población mayor de 15 años por comuna." ;
+			var info_unidad = "Unidad";
+			var info_fuente = "Ministerio de Planificación y Cooperación (Mideplan). Encuesta de Caracterización Socio-Económica Nacional (CASEN)";
+			var info_año = "2003";
+			var info_regimen = "Sub lineal"
 			
 			scaling_graph(variables, $('#SelectVar  option:selected').text(), data['reg']);
 			desviaciones_graph(variables, $('#SelectVar  option:selected').text(), data['reg']);
+			scaling_text(info_titulo,info_descripcion,info_unidad,info_fuente,info_año,info_regimen);
+
+			scaling_map(variables);
 		/*	variables.forEach(function(c){
 				x.push(c);
 				y.push();
@@ -114,17 +107,66 @@ $( "#SelectVar" ).change(function() {
 
 
 });
+function scaling_map(data){
+	d3.selectAll("#pais").select("div").remove();
+	$("#pais").append("<div id='mapid' '></div>");
 
+
+	
+	var mymap = L.map('mapid').setView([-35.505, -73.09], 3);
+	
+	L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
+				maxZoom: 10,
+				attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
+					'<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+					'Imagery © <a href="http://mapbox.com">Mapbox</a>',
+				id: 'mapbox.streets'
+			}).addTo(mymap);
+
+	for (let i = 0; i < data.length; i++) {
+		const ciudad = data[i];
+		const lat = ciudad[5];
+		const lon = ciudad[6];
+		const value = ciudad[2];
+
+		var circle = L.circle([lat, lon], {
+			color: '#ffffff',
+			fillColor: '#800000',
+			fillOpacity: 0.4,
+			opacity: 0,
+			radius: value * 5000
+		}).addTo(mymap);
+				
+	 }
+	
+
+};
+
+function scaling_text(info_titulo,info_descripcion,info_unidad,info_fuente,info_año,info_regimen){
+	d3.selectAll("#info-escalamiento").select("div").remove();
+	// $("#info-escalamiento")
+	d3.selectAll("#info-escalamiento")
+	.append("div");
+	$("#info-escalamiento div").append("<b>"+info_titulo+": </b> " + info_descripcion + "<br>");
+	$("#info-escalamiento div").append("<b>Unidad de medida: </b> " + info_unidad+ "<br>");
+	$("#info-escalamiento div").append("<b>Fuente de la información: </b> " + info_fuente+ "<br>");
+	$("#info-escalamiento div").append("<b>Año de toma de dato: </b> " + info_año+ "<br>");
+	$("#info-escalamiento div").append("<b>Régimen de escalamiento teórico esperado: </b> " + info_regimen+ "<br>");
+	
+
+
+}
 
 
 function scaling_graph(dataset, varS, reg) {
 	console.log(dataset);
 	//var xAxis = d3.svg.axis(); 
-	var w = 600;
+	var w = 500;
 	var h = 400; 
 	var padding = 40;
 
 	
+	d3.selectAll("svg").remove();
 
 	var svg = d3.select("#escalamiento")
             .append("svg")
@@ -151,7 +193,7 @@ var tip = d3.tip()
   .attr('class', 'd3-tip')
   .offset([-10, 0])
   .html(function(d) {
-    return "<strong> <center>"+ d[0] + "</center> </strong>  </br> Población:  <span style='color:red'>  " + Number(d[3]).toFixed(0) +
+    return "<strong> <center>"+ d[0] + "</center> </strong> <a href='ciudad/"+d[7] +"' > ver mas  </a>  </br> Población:  <span style='color:red'>  " + Number(d[3]).toFixed(0) +
 	 "</span> </br><strong>"+ varS +"</strong> <span style='color:red'> "+ Number(d[4]).toFixed(2)+ "</span> " +
 	"</br><strong> Estimado </strong> <span style='color:red'> "+ Number(Math.exp(reg[1] + (reg[0]*d[1]) ) ).toFixed(2)+ "</span> ";
   })
@@ -177,8 +219,10 @@ var tip = d3.tip()
 		//.on('mouseover', tip.show)
 		.on('mouseover', function(d) {
 							tip.show(d);
-							mouseover_circle(d); })
+							mouseover_circle(d);
+							 })
 		.on('mouseout', function(d) {
+			tip.delay(5);
 							tip.hide(d);
 							mouseout_circle(d, reg); } );
 	svg.call(tip);
@@ -364,16 +408,37 @@ function color(d, reg){
 
 function mouseover_circle(d) {
 	
+
+
 	console.log(d); 
 	var ciudad = d3.selectAll('#' + d[0] + '_circle');
+	
+	
 	ciudad.attr("class", "point_over")
 		  .attr("fill", "rgb(0, 0, 0)")
 		  .attr("r",  10 );
 
+	// ciudad.append("a")
+    // .attr("xlink:href", "http://en.wikipedia.org/").append("rect")  
+    // .attr("x", 100)
+    // .attr("y", 50)
+    // .attr("height", 100)
+    // .attr("width", 200)
+    // .style("fill", "lightgreen")
+    // .attr("rx", 10)
+    // .attr("ry", 10).style("pointer-events", "none")
+
+	ciudad.html(
+            '<a href= "http://google.com">' + // The first <a> tag
+              + "</a>" + "hola"  +                       // closing </a> tag
+            "<br/>" ) ;
+
 	var ciudad_bar = d3.selectAll('#' + d[0] + '_bar')
 	ciudad_bar.attr("fill", "rgb(0, 0, 0)" )
 	.attr("fill-opacity", 0.6)
-	.attr("r", 6);
+	.attr("r", 20);
+
+	
 	
 }
 
@@ -413,6 +478,7 @@ function mouseout_circle(d, reg) {
 </script> 
 
 
+{% endblock %}
 
 
 </html>

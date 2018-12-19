@@ -6,6 +6,10 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from escalamiento.models import Comuna_esc
 
+import jsonpickle
+
+
+
 #Create your views here.
 def index(request):
 
@@ -16,7 +20,8 @@ def index(request):
 			varSelect = request.POST['varSelect']
 			logVar = "log_" + varSelect
 			#if log: 
-			data = list(Comuna_esc.objects.values_list("nombre", "log_pob_Comun_2002" , logVar, "pob_Comun_2002", varSelect ))
+			data = list(Comuna_esc.objects.values_list("nombre", "log_pob_Comun_2002" , logVar, "pob_Comun_2002", varSelect, "lat", "lon", 'id' ))
+			
 			data_x = [float(x[1]) for x in data if  x[1] and x[2] and len(str(x[2])) > 3 ]
 			data_y = [float(x[2]) for x in data if  x[1] and x[2] and len(str(x[2])) > 3 ]
 			reg = np.polyfit(data_x, data_y , 1) 
@@ -38,3 +43,16 @@ def index(request):
 
 	
 	return render(request, 'escalamiento.html', {"ciudades": ciudades} )
+
+
+def ciudad(request, pk):
+	print("ciudad", pk)
+
+	comuna = Comuna_esc.objects.filter(id= pk).values()
+	#print(comuna[0])
+
+	context = {}
+	context['ciudades'] = jsonpickle.encode(comuna[0])
+	print(context)
+
+	return render(request, 'ciudad.html', context )

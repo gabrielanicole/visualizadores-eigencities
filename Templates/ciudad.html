@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+{% extends "base.html" %}
+{% load static %}
+
+<html>
+
+
+{% block content %}
+
+
+
+
+<div class = "container" >
+	<div class = "row" id= "titulo">
+    </div>
+
+
+	<div class ="row" id = "graficos" >
+		<div  id = "escalamiento" > </div>
+		
+		
+	</div>
+</div>
+
+
+
+
+<script type="text/javascript"> 
+//var ciudad ='{{ciudades}}';
+//console.log(ciudad);
+var ciudad ='{{ ciudades|escapejs }}';
+//console.log(ciudad);
+var my_var_parsed = jQuery.parseJSON(ciudad);
+var ciudad_keys = Object.keys(my_var_parsed);
+//console.log(Object.keys(my_var_parsed));
+var dataset = [];
+for (let index = 0; index < ciudad_keys.length; index++) {
+    const element = my_var_parsed[ciudad_keys[index]];
+    console.log('element: ', ciudad_keys[index], element);
+    if (typeof element == 'object' ){
+        if (element  ) {
+            var valor = my_var_parsed[ciudad_keys[index]]["py/reduce"][1]["py/tuple"][0]
+            if (valor != 'NaN'){
+                dataset.push([ciudad_keys[index], parseFloat(valor)])}
+
+        }
+       
+    }
+    else{
+        dataset.push([ciudad_keys[index], element ])
+    }
+    
+}
+console.log('variables:', dataset);
+
+let initial_log = 'log_';
+dataset = dataset.filter(function(d){ return d[0].indexOf(initial_log) == 0 & d[0].indexOf('nombre') != 0; })
+d3.select('#titulo').append('h1').html( "Ciudad de estudio: " +my_var_parsed['nombre']   )
+
+var w = 500;
+var h = 400; 
+var padding = 20;
+var barPadding = 1;
+
+var svg = d3.select("#escalamiento")
+        .append("svg")
+        .attr("class", "graph_escalamiento")
+        .attr("width", w)
+        .attr("height", h);
+
+console.log(dataset.length);
+
+var yScale = d3.scale.linear()
+                     .domain([0 , d3.max(dataset, function(d) { return d[1]; })])
+                     .range([padding,h - padding]);
+
+var tip = d3.tip()
+  .attr('class', 'd3-tip')
+  .offset([-10, 0])
+  .html(function(d) {
+      
+    return "<strong> <center>"+ d[0] + "</center> </strong>  <span style='color:red'> "+ Number(d[1]).toFixed(2)+ "</span> " +
+	"</br><strong> Decimal  </strong> <span style='color:red'>"+  Number(Math.exp(d[1])  ).toFixed(2) +"</span> ";
+  
+  })
+
+
+svg.selectAll("rect")
+   .data(dataset)
+   .enter()
+   .append("rect")
+   .attr("x", function(d, i) {
+    return i * (w / dataset.length);  //Bar width of 20 plus 1 for padding
+})
+    .attr("y", function(d) {
+    return h - yScale(d[1]) ;  //Height minus data value
+})
+   .attr("width", w / dataset.length - barPadding)
+   .attr("height", function(d) {
+       console.log(d);
+    return yScale(d[1]);
+}).attr("fill", "teal")
+
+.on('mouseover', tip.show)
+							//mouseover_circle(d); })
+		.on('mouseout',tip.hide);
+
+	svg.call(tip);
+
+
+svg.selectAll("text")
+   .data(dataset)
+   .enter()
+   .append("text")
+   .attr("transform", "translate(0," + h + ")")
+   //.attr("transform", "rotate(-90,"+(h - padding)+","+padding +")" ) //translate(0," + (h - padding) + ")")
+   .attr("dx", "-.5em")
+            .attr("dy", ".15em")
+            .attr("transform", function(d) {
+                return "rotate(-90)" 
+                })
+   .text(function(d) {
+        return d[0];
+   }).attr("x", function(d, i) {
+        return i * (w / dataset.length);
+   })
+   .attr("y", function(d) {
+        return h - (yScale(d[1]) * 4) + 14;
+   })
+   .attr("font-family", "sans-serif")
+   .attr("font-size", "11px")
+   .attr("fill", "white").attr("text-anchor", "middle");
+
+
+
+
+
+</script> 
+
+
+{% endblock %}
+
+
+</html>
+

@@ -1,6 +1,4 @@
-<!DOCTYPE html>
-{% extends "base.html" %}
-{% load static %}
+<!DOCTYPE html> {% extends "base.html" %} {% load static %}
 
 <html>
 
@@ -9,137 +7,317 @@
 
 
 
+<div class="container">
+    <div>
+        <h1>
+            <img src="http://ecoinformatica.cl/wp-content/uploads/2017/04/nosotros-featured-1125x300.jpg">
 
-<div class = "container" >
-	<div class = "row" id= "titulo">
+        </h1>
     </div>
+    <div class="content-page wrap">
+
+        <div class="titulo-page" id="titulo_general">
+            <h1> Ciudades de Chile</h1>
+            <select id="SelectVar" class="selectpicker show-tick " title="ciudades de escalamiento">
+                <option value=""> Select de ciudades... </option>
+
+            </select>
+            <br>
+        </div>
+        <div class="espacio"></div>
+
+        <div class="titulo-page" id="titulo">
+            <h2> Resumen </h2>
+        </div>
+
+        <div class="post" id="resumen_ciudad">
+            <div class="texto">
+                <p> Población </p>
+                <p> N° variables con datos</p>
+                <p> N° variables sobre </p>
+                <p> N° variables bajo</p>
+            </div>
+        </div>
+
+        <div class="espacio"></div>
+
+        <div class="titulo-page">
+            <h2>Fichas por variable de estudio</h2>
+
+        </div>
+        <div class="post">
+            <div class='texto'>
+                <div class="" id="info-escalamiento">
+                </div>
 
 
-	<div class ="row" id = "graficos" >
-		<div  id = "escalamiento" > </div>
-		
-		
-	</div>
-</div>
+            </div>
+        </div>
+        <div class="espacio"></div>
+
+        <div class="titulo-page">
+            <h2>Desviación de cada variable desde el valor esperado</h2>
+
+        </div>
+        <div class="post">
+            <div class='texto'>
+
+                <div id="desviaciones">
+                </div>
+            </div>
+        </div>
+        <div class="espacio"></div>
+
+        <div class="titulo-page" id="">
+            <h2> Resumen de todas las variables </h2>
+
+        </div>
+        <div class="post">
+            <div class='texto'>
+
+                <div id="escalamiento">
+                   
+                </div>
+            </div>
+        </div>
+
+
+
+
+    </div>
 
 
 
 
 <script type="text/javascript"> 
-//var ciudad ='{{ciudades}}';
-//console.log(ciudad);
-var ciudad ='{{ ciudades|escapejs }}';
-//console.log(ciudad);
-var my_var_parsed = jQuery.parseJSON(ciudad);
-var ciudad_keys = Object.keys(my_var_parsed);
-//console.log(Object.keys(my_var_parsed));
-var dataset = [];
-for (let index = 0; index < ciudad_keys.length; index++) {
-    const element = my_var_parsed[ciudad_keys[index]];
-    console.log('element: ', ciudad_keys[index], element);
-    if (typeof element == 'object' ){
-        if (element  ) {
-            var valor = my_var_parsed[ciudad_keys[index]]["py/reduce"][1]["py/tuple"][0]
-            if (valor != 'NaN'){
-                dataset.push([ciudad_keys[index], parseFloat(valor)])}
+
+
+
+
+    var ciudad = '{{ ciudades|escapejs }}';
+    if (ciudad.length > 2) {
+        console.log("ciudad", ciudad.length);  // 2 = vacio ; 
+        var variables = '{{ variables|escapejs }}';
+        console.log(variables);
+        var my_var_parsed = jQuery.parseJSON(ciudad);
+        var var_parsed = jQuery.parseJSON(variables);
+        console.log(var_parsed)
+        var ciudad_keys = Object.keys(my_var_parsed);
+        var variables_keys = Object.keys(var_parsed);
+
+        console.log(variables_keys);
+        var dataset_var = [];
+        for (let index = 0; index < variables_keys.length; index++) {
+            let element = var_parsed[variables_keys[index]]["py/tuple"];
+            a0 = element[7]["py/reduce"][1]["py/tuple"][0]
+            m = element[8]["py/reduce"][1]["py/tuple"][0]
+            console.log('element: ', variables_keys[index], element, a0, m);
+
+            // <div class = "container" >
+            var real = my_var_parsed[element[0]]["py/reduce"][1]["py/tuple"][0]
+            var pob = my_var_parsed['pob_Comun_2002']
+            var log_pob = my_var_parsed['log_pob_Comun_2002']["py/reduce"][1]["py/tuple"][0]
+
+            dataset_var.push([Number(a0), Number(m), Number(log_pob), Number(real), element[1]]);
+            console.log(Number(a0), Number(m), Number(log_pob), log_pob);
+            $("#info-escalamiento").append(' <div id="row_' + index + '" class = "row"> <div class = "col-md-3"> </div> <div class = "col-md-9"> </div> </div> ');
+
+            $("#row_" + index + " div.col-md-3").append("<b>Modelo : </b> " + a0 + " + " + m + "x = y" + "<br>");
+            $("#row_" + index + " div.col-md-3").append("<b>Población: </b> " + pob + "<br>");
+            $("#row_" + index + " div.col-md-3").append("<b>Valor Real: </b> " + Number(real).toFixed(2) + "<br>");
+            $("#row_" + index + " div.col-md-3").append("<b>Valor Estimado: </b> " + (10 ** (Number(a0) + Number(m) * Number(log_pob))).toFixed(2) + "<br>");
+
+            $("#row_" + index + " div.col-md-9").append("<b>" + element[1] + ": </b> " + element[2] + "<br>");
+            $("#row_" + index + " div.col-md-9").append("<b>Unidad de medida: </b> " + element[3] + "<br>");
+            $("#row_" + index + " div.col-md-9").append("<b>Fuente de la información: </b> " + element[4] + "<br>");
+            $("#row_" + index + " div.col-md-9").append("<b>Año de toma de dato: </b> " + element[5] + "<br>");
+            $("#row_" + index + " div.col-md-9").append("<b>Régimen de escalamiento teórico esperado: </b> " + element[6] + "<br><br><br>");
+
+
+
 
         }
-       
-    }
-    else{
-        dataset.push([ciudad_keys[index], element ])
-    }
-    
-}
-console.log('variables:', dataset);
 
-let initial_log = 'log_';
-dataset = dataset.filter(function(d){ return d[0].indexOf(initial_log) == 0 & d[0].indexOf('nombre') != 0; })
-d3.select('#titulo').append('h1').html( "Ciudad de estudio: " +my_var_parsed['nombre']   )
+        var dataset = [];
+        for (let index = 0; index < ciudad_keys.length; index++) {
+            const element = my_var_parsed[ciudad_keys[index]];
+            // console.log('element: ', ciudad_keys[index], element);
+            if (typeof element == 'object') {
+                if (element) {
+                    var valor = my_var_parsed[ciudad_keys[index]]["py/reduce"][1]["py/tuple"][0]
+                    if (valor != 'NaN') {
+                        dataset.push([ciudad_keys[index], parseFloat(valor)])
+                    }
+                }
+            }
+            else {
+                dataset.push([ciudad_keys[index], element])
+            }
+        }
+        // console.log('variables:', dataset);
 
-var w = 500;
-var h = 400; 
-var padding = 20;
-var barPadding = 1;
-
-var svg = d3.select("#escalamiento")
-        .append("svg")
-        .attr("class", "graph_escalamiento")
-        .attr("width", w)
-        .attr("height", h);
-
-console.log(dataset.length);
-
-var yScale = d3.scale.linear()
-                     .domain([0 , d3.max(dataset, function(d) { return d[1]; })])
-                     .range([padding,h - padding]);
-
-var tip = d3.tip()
-  .attr('class', 'd3-tip')
-  .offset([-10, 0])
-  .html(function(d) {
-      
-    return "<strong> <center>"+ d[0] + "</center> </strong>  <span style='color:red'> "+ Number(d[1]).toFixed(2)+ "</span> " +
-	"</br><strong> Decimal  </strong> <span style='color:red'>"+  Number(Math.exp(d[1])  ).toFixed(2) +"</span> ";
-  
-  })
+        let initial_log = 'log_';
+        dataset = dataset.filter(function (d) { return d[0].indexOf(initial_log) == 0 & d[0].indexOf('nombre') != 0; })
+        d3.select('#titulo').append('h1').html("Ciudad de estudio: " + my_var_parsed['nombre'])
 
 
-svg.selectAll("rect")
-   .data(dataset)
-   .enter()
-   .append("rect")
-   .attr("x", function(d, i) {
-    return i * (w / dataset.length);  //Bar width of 20 plus 1 for padding
-})
-    .attr("y", function(d) {
-    return h - yScale(d[1]) ;  //Height minus data value
-})
-   .attr("width", w / dataset.length - barPadding)
-   .attr("height", function(d) {
-       console.log(d);
-    return yScale(d[1]);
-}).attr("fill", "teal")
-
-.on('mouseover', tip.show)
-							//mouseover_circle(d); })
-		.on('mouseout',tip.hide);
-
-	svg.call(tip);
 
 
-svg.selectAll("text")
-   .data(dataset)
-   .enter()
-   .append("text")
-   .attr("transform", "translate(0," + h + ")")
-   //.attr("transform", "rotate(-90,"+(h - padding)+","+padding +")" ) //translate(0," + (h - padding) + ")")
-   .attr("dx", "-.5em")
+        var w = 500;
+        var h = 400;
+        var padding = 20;
+        var barPadding = 1;
+
+        var svg = d3.select("#escalamiento")
+            .append("svg")
+            .attr("class", "graph_escalamiento")
+            .attr("width", w)
+            .attr("height", h);
+
+        // console.log(dataset.length);
+
+        var yScale = d3.scale.linear()
+            .domain([0, d3.max(dataset, function (d) { return d[1]; })])
+            .range([padding, h - padding]);
+
+        var tip = d3.tip()
+            .attr('class', 'd3-tip')
+            .offset([-10, 0])
+            .html(function (d) {
+
+                return "<strong> <center>" + d[0] + "</center> </strong> " + d[4] + "<span style='color:red'> " + Number(d[1]).toFixed(2) + "</span> " +
+                    "</br><strong> Decimal  </strong> <span style='color:red'>" + Number(Math.exp(d[1])).toFixed(2) + "</span> ";
+
+            })
+
+
+        svg.selectAll("rect")
+            .data(dataset)
+            .enter()
+            .append("rect")
+            .attr("x", function (d, i) {
+                return i * (w / dataset.length);  //Bar width of 20 plus 1 for padding
+            })
+            .attr("y", function (d) {
+                return h - yScale(d[1]);  //Height minus data value
+            })
+            .attr("width", w / dataset.length - barPadding)
+            .attr("height", function (d) {
+                //    console.log(d);
+                return yScale(d[1]);
+            }).attr("fill", "teal")
+
+            .on('mouseover', tip.show)
+            //mouseover_circle(d); })
+            .on('mouseout', tip.hide);
+
+        svg.call(tip);
+
+
+        svg.selectAll("text")
+            .data(dataset)
+            .enter()
+            .append("text")
+            .attr("transform", "translate(0," + h + ")")
+            //.attr("transform", "rotate(-90,"+(h - padding)+","+padding +")" ) //translate(0," + (h - padding) + ")")
+            .attr("dx", "-.5em")
             .attr("dy", ".15em")
-            .attr("transform", function(d) {
-                return "rotate(-90)" 
-                })
-   .text(function(d) {
-        return d[0];
-   }).attr("x", function(d, i) {
-        return i * (w / dataset.length);
-   })
-   .attr("y", function(d) {
-        return h - (yScale(d[1]) * 4) + 14;
-   })
-   .attr("font-family", "sans-serif")
-   .attr("font-size", "11px")
-   .attr("fill", "white").attr("text-anchor", "middle");
+            .attr("transform", function (d) {
+                return "rotate(-90)"
+            })
+            .text(function (d) {
+                return d[0];
+            }).attr("x", function (d, i) {
+                return i * (w / dataset.length);
+            })
+            .attr("y", function (d) {
+                return h - (yScale(d[1]) * 4) + 14;
+            })
+            .attr("font-family", "sans-serif")
+            .attr("font-size", "11px")
+            .attr("fill", "white").attr("text-anchor", "middle");
 
 
 
+        var wD = 200;
+        var hD = 430;
+        var paddingD = 10;
+
+        var svgD = d3.select("#desviaciones")
+            .append("svg")
+            //.attr("class", "graph_escalamiento")
+            .attr("width", wD)
+            .attr("height", hD);
+
+        var xScaleD = d3.scale.linear()
+            .domain(d3.extent(dataset_var, function (d) { return (d[0] + d[1] * d[2]) - d[3]; }))
+            //.domain([d3.min(dataset, function(d) { return (reg[1] + reg[0]*d[1]) - d[2]; }) , d3.max(dataset, function(d) { return (reg[1] + reg[0]*d[1]) - d[2]; })])
+            .range([0, wD]);
+
+        var yScaleD = d3.scale.ordinal()
+            .domain(dataset_var.map(function (d) { return (d[0] + d[1] * d[2]) - d[3]; }))
+            .rangeRoundBands([0, hD], .2);
+
+        var yScaleDD = d3.scale.ordinal()
+            .domain(d3.range(dataset_var.length))
+            .rangeRoundBands([paddingD, hD - paddingD], 0.2);
+        //.rangeRoundBands([0, hD], 0.2);
+
+        // var x0 = x.domain(data.sort(this.checked
+        // ? function(a, b) { return b.frequency - a.frequency; }
+        // : function(a, b) { return d3.ascending(a.letter, b.letter); })
+        // .map(function(d) { return d.letter; }))
+        // .copy();
+
+        var bars = svgD.selectAll(".bar")
+            .data(dataset_var) //a0, m, pob, ve 
+            .enter().append("rect")
+            .attr("class", "bar")
+            .attr("id", function (d) { return d[0] + '_bar' })
+            .attr("x", function (d) { return xScaleD(Math.min(0, (d[0] + d[1] * d[2]) - d[3])) - paddingD; })
+            .attr("y", function (d) { return yScaleDD((d[0] + d[0] * d[2]) - d[3]); })
+            .attr("width", function (d) { return Math.abs(xScaleD((d[0] + d[1] * d[2]) - d[3]) - xScaleD(0)); })
+            .attr("height", yScaleD.rangeBand())
+            .attr("fill", function (d) { return color(d, [d[0], d[1]]); })
+            .attr("fill-opacity", 0.6)
+            .on('mouseover', function (d) {
+                tip.show(d)            
+})
+            .on('mouseout', function (d) {
+                tip.hide(d)
+            })
+        // mouseout_circle(d, [d[0], d[1]]); })
+
+        svgD.call(tip);
+
+        //   d3.select("#sortAscending")
+        // 		.on("click", function() {
+
+        bars.sort(function (a, b) {
+            return d3.descending(((a[0] + a[1] * a[2]) - a[3]), (b[0] + b[1] * b[2]) - b[3]);
+        })
+            .transition()
+            .delay(function (d, i) {
+                return i * 50;  // gives it a smoother effect
+            })
+            .duration(1000)
+            .attr("transform", function (d, i) {
+                console.log("i", i);
+                return "translate(0," + yScaleDD(i) + " )";
+            });
+
+        function color(d, reg) {
+            var estimado = d[0] + d[1] * d[2];
+            if (d[3] > estimado) return "#000080" //rojo
+            else return "#800000"; //azul
+
+        }
+    }
+    else { //ciudad.length <= 2
 
 
-</script> 
-
-
-{% endblock %}
+    }
+</script> {% endblock %}
 
 
 </html>
-

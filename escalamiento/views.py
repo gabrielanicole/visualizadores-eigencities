@@ -4,7 +4,7 @@ import numpy as np
 from django.http import HttpResponse, JsonResponse
 
 from django.shortcuts import render
-from escalamiento.models import Comuna_esc
+from escalamiento.models import Comuna_esc, Variable
 
 import jsonpickle
 
@@ -46,13 +46,32 @@ def index(request):
 
 
 def ciudad(request, pk):
+
 	print("ciudad", pk)
 
-	comuna = Comuna_esc.objects.filter(id= pk).values()
-	#print(comuna[0])
+	context = {'ciudades': [], 'variables': [] }
 
-	context = {}
-	context['ciudades'] = jsonpickle.encode(comuna[0])
-	print(context)
+	if pk != '0' :
+		print("en el if")
+		comuna = Comuna_esc.objects.filter(id= pk).values()
+		variables = Variable.objects.all().values()
+		data = list(Variable.objects.values_list("nombre", "nombre_mostrar" , "descripcion", "medida","fuente", "toma_dato", "regimen", "a0b10", "mb10" ))
+
+		#print(comuna[0])
+
+		context = {}
+		context['ciudades'] = jsonpickle.encode(comuna[0])
+		context['variables'] =jsonpickle.encode(data)
+		
+		
+		print(context)
+	
 
 	return render(request, 'ciudad.html', context )
+
+
+def inicio_escalamiento(request):
+
+
+
+	return render(request, 'inicio_escalamiento.html')

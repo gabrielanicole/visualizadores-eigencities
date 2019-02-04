@@ -10,36 +10,86 @@
 
 
 
-<div class = "container" >
-	<div class = "row" id= "titulo">
-		<h1> Observatorio de escalamiento</h1>
-	</div>
-	<div class ="row" >
-		<div class = "col-md-6">
-		<select id = "SelectVar"  class="selectpicker show-tick "  title="Variable de escalamiento" > 
-	  		<option value= "vehicle"> vehiculos </option>
-	  		<option value= "motor"> vehiculos motorizados </option>
-	  		<option value= "Non_motorized"> vehiculos no motorizados </option>
-	  		<!-- <option value= "private_transport"> Transporte privado </option> -->
-	  		<option value= "public_transport"> Transporte público </option>
-	  		<!-- <option value= "CO2_transport"> CO2 (fuentes moviles) </option> -->
-	  		<option value= "Green"> Espacios verdes </option>
-	  		<option value= "Iliteracy"> Analfabetismo </option>
-		</select>
+
+
+
+<div class="container">
+		<div>
+			<h1>
+				<img src="http://ecoinformatica.cl/wp-content/uploads/2017/04/nosotros-featured-1125x300.jpg">
+	
+			</h1>
 		</div>
+		<div class="content-page wrap">
+	
+	
+	
+			<div class="titulo-page" id="titulo">
+				<h1> Observatorio de escalamiento</h1>
+				<select id="SelectVar" class="selectpicker show-tick " title="Variable de escalamiento">
+					<option value="vehicle"> vehiculos </option>
+					<option value="motor"> vehiculos motorizados </option>
+					<!-- <option value= "Non_motorized"> vehiculos no motorizados </option> -->
+					<!-- <option value= "private_transport"> Transporte privado </option> -->
+					<option value="public_transport"> Transporte público </option>
+					<!-- <option value= "CO2_transport"> CO2 (fuentes moviles) </option> -->
+					<option value="Green"> Espacios verdes </option>
+					<option value="Iliteracy"> Analfabetismo </option>
+				</select>
+				<br>
+			</div>
+			<div class="espacio"></div>
+	
+			<div class="titulo-page">
+				<h2> Variable de estudio </h2>
+	
+	
+			</div>
+			<div class="post">
+				<div class='texto'>
+	
+					<div id="info-escalamiento"> <div></div> </div>
+	
+				</div>
+			</div>
+			<div class="espacio"></div>
+	
+			<div class="titulo-page">
+				<h2> Modelo de escalamiento </h2>
+	
+			</div>
+			<div class="post">
+				<div class='texto'>
+					<div id="escalamiento"> </div>
+				</div>
+			</div>
+			<div class="espacio"></div>
+	
+			<div class="titulo-page">
+				<h2> Desviaciones y ubicacion en Chile </h2>
+	
+	
+			</div>
+			<div class="post">
+				<div class='texto'>
+					<div class="row">
+						<div class="col-md-6" id="pais"> </div>
+			
+						<div class="col-md-6" id="desviaciones"> </div>
+					</div>
+			
+				</div>
+			</div>
+	
+	
+	
+	
+		</div>
+	
+	
 	</div>
-
-	<div class ="row" id = "graficos" >
-			<div class = "col-md-3" id = "pais" >   </div>
-		<div class = "col-md-6" id = "escalamiento" > </div>
-		
-		<div class = "col-md-3" id = "desviaciones" > </div>
-		
-		
-	</div>
-	<div class = "row" id = "info-escalamiento" > </div>
-</div>
-
+	
+	
 
 
 
@@ -193,9 +243,9 @@ var tip = d3.tip()
   .attr('class', 'd3-tip')
   .offset([-10, 0])
   .html(function(d) {
-    return "<strong> <center>"+ d[0] + "</center> </strong> <a href='ciudad/"+d[7] +"' > ver mas  </a>  </br> Población:  <span style='color:red'>  " + Number(d[3]).toFixed(0) +
-	 "</span> </br><strong>"+ varS +"</strong> <span style='color:red'> "+ Number(d[4]).toFixed(2)+ "</span> " +
-	"</br><strong> Estimado </strong> <span style='color:red'> "+ Number(Math.exp(reg[1] + (reg[0]*d[1]) ) ).toFixed(2)+ "</span> ";
+    return "<strong> <center>"+ d[0] + "</center> </strong> <a href='ciudad/"+d[7] +"' > ver mas  </a>  </br> Población:  <span style='color:red'>  " + Number(d[3]).toFixed(0) +"- log: "+ Number(d[1]).toFixed(2)+
+	 "</span> </br><strong>"+ varS +"</strong> <span style='color:red'> "+ Number(d[4]).toFixed(2) +"- log: "+ Number(d[2]).toFixed(2)+"</span> " +
+	"</br><strong> Estimado </strong> <span style='color:red'> "+(reg[1] + reg[0]*d[1]).toFixed(2) +" - "+ Number(10**(reg[1] + (reg[0]*d[1]) ) ).toFixed(2)+ "</span> ";
   })
 
 
@@ -204,7 +254,7 @@ var tip = d3.tip()
 		.enter()
 		.append("circle")
 		.attr("cx", function(d) {
-				return xScale(d[1]);
+				return xScale(d[1]) ;
 		})
 		.attr("cy", function(d) {
 				return yScale(d[2]); //h - d[2]*10;
@@ -345,7 +395,7 @@ var tip = d3.tip()
     .attr("class", "bar")
 	.attr("id", function(d) {return d[0] +'_bar' } )
     .attr("x", function(d) { return xScaleD(Math.min(0,  (reg[1] + reg[0]*d[1]) - d[2] )); })
-    .attr("y", function(d) { return yScaleDD((reg[1] + reg[0]*d[1]) - d[2]); })
+    .attr("y", function(d) { return yScaleDD( (reg[1] + reg[0]*d[1]) - d[2]); })
     .attr("width", function(d) { return Math.abs(xScaleD( (reg[1] + reg[0]*d[1]) - d[2] ) - xScaleD(0)); })
     .attr("height", yScaleD.rangeBand())
 	.attr("fill", function(d) {return color(d,reg); } )
@@ -363,7 +413,7 @@ var tip = d3.tip()
 	// 		.on("click", function() {
 
 				bars.sort(function(a, b) {
-  						return d3.ascending((reg[1] + reg[0]*a[1]) - a[2], (reg[1] + reg[0]*b[1]) - b[2]);
+  						return d3.descending(((reg[1] + reg[0]*a[1]) - a[2]), (reg[1] + reg[0]*b[1]) - b[2]);
 					})
 					.transition()
 					.delay(function(d, i) {
@@ -401,15 +451,13 @@ function desviaciones_graph(dataset, varS, reg) {
 
 function color(d, reg){
 	var estimado = reg[1] + reg[0]*d[1];
-	if (d[2] > estimado) return "#800000" //rojo
-	else  return "#000080"; //azul
+	if (d[2] > estimado) return "#000080" //rojo
+	else  return "#800000"; //azul
 
 }
 
 function mouseover_circle(d) {
 	
-
-
 	console.log(d); 
 	var ciudad = d3.selectAll('#' + d[0] + '_circle');
 	

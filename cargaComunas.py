@@ -1,22 +1,11 @@
 #Script carga de datos desde csv 
-
 import pandas as pd 
 import math
-#from trayect.models import Ciudad , Indicador, CiudIndic, Antena, AntIndic, Estadia, Desplazamiento, Persona   
 from escalamiento.models import Conurbacion_esc, Comuna_esc
-
-#antenas = Antena.objects.filter(ciudad = 1).values()
-#csv = "/Users/gabi/Documents/visualizador_opencensus/manzanas_django/esclamiento/centros_prueba2_sinBlancos_conurbaciones.csv"
 csv= "escalamiento/centros_prueba2_sinBlancos_conurbaciones.csv"
 df_centros = pd.read_csv(csv)
-
-#print(df)
-
-#for i in df:
-#    print(i)
-
 for i in range(len(df_centros)):
-    nombre = df_centros.iloc[i].NOMBRE if df_centros.iloc[i].NOMBRE else None  
+    nombre = df_centros.iloc[i].NOMBRE if df_centros.iloc[i].NOMBRE else None 
     pob = df_centros.iloc[i]["conb_Pob_Conurb_2002"] if df_centros.iloc[i]["conb_Pob_Conurb_2002"] else None  
     conb_Crime  = df_centros.iloc[i]["conb_Crime reports"]  if df_centros.iloc[i]["conb_Crime reports"] else None 
     conb_Income= df_centros.iloc[i]["conb_Income(workers)"] if df_centros.iloc[i]["conb_Income(workers)"] else None 
@@ -56,138 +45,347 @@ for i in range(len(df_centros)):
     conb_Hospitalizations = df_centros.iloc[i]["conb_Hospitalizations"] if df_centros.iloc[i]["conb_Hospitalizations"] else None 
     conb_Street = df_centros.iloc[i]["conb_Street length"] if df_centros.iloc[i]["conb_Street length"] else None 
     comuna = Comuna_esc.objects.filter(nombre = nombre)[0]
-    # try:
-        # comuna = Comuna_esc.objects.filter(nombre = nombre)[0]
-        #comuna.log_pob_Comun_2002 = math.log(pob) 
-        #comuna.log_vehicle = math.log(conb_vehicle) 
-        #comuna.log_motor = math.log(conb_motor) 
-        #comuna.log_Non_motorized = math.log(conb_Nonmotorized)
-        #comuna.log_private_transport =  math.log(conb_private) 
-        #comuna.log_public_transport = math.log(conb_public) 
-        #comuna.log_CO2_transport =  math.log(conb_CO) --> NO SE CARGO 
-        #comuna.log_Green = math.log(conb_Green)
-
-
+    print(comuna)
     try:  
-        comuna.log_Iliteracy = math.log(conb_Iliteracy)
+        comuna.log_private_transport = math.log10(conb_private)
+        comuna.save()
     except:
-        None 
+        print(nombre,i, "no se cargo :( conb_private")    
+    try:  
+        comuna.log_public_transport = math.log10(conb_public)
+        comuna.save()
+    except:
+        print(nombre,i, "no se cargo :( conb_public")
+    try:  
+        comuna.log_CO2_transport = math.log10(conb_CO2)
+        comuna.save()
+    except:
+        print(nombre,i, "no se cargo :( conb_CO2")
+    try:  
+        comuna.log_vehicle = math.log10(conb_vehicle)
+        comuna.save()
+    except:
+        print(nombre,i, "no se cargo :( conb_vehicle")
+    try:  
+        comuna.log_motor = math.log10(conb_motor)
+        comuna.save()
+    except:
+        print(nombre,i, "no se cargo :( conb_motor")
+    try:  
+        comuna.log_Nonmotorized = math.log10(conb_Nonmotorized)
+        comuna.save()
+    except:
+        print(nombre,i, "no se cargo :( conb_Nonmotorized")
+    try:  
+        comuna.log_Green = math.log10(conb_Green)
+        comuna.save()
+    except:
+        print(nombre,i, "no se cargo :( conb_Green")
+    try:  
+        comuna.log_pob_Comun_2002 = math.log10(pob)
+        comuna.save()
+    except:
+        print(nombre,i, "no se cargo :( log_pob")
+    try:  
+        comuna.log_Iliteracy = math.log10(conb_Iliteracy)
+        comuna.save()
+    except:
+        print(nombre,i, "no se cargo :( log_Iliteracy")
     try:
-        comuna.log_Municipal_spending = math.log(conb_Municipal)
+        comuna.log_Municipal_spending = math.log10(conb_Municipal)
+        comuna.save()
     except:
-        None
+        print(nombre,i, "no se cargo :( log_Municipal_spending")
     try:
-        comuna.log_Unemployment = math.log(conb_Unemployment)
+        comuna.log_Unemployment = math.log10(conb_Unemployment)
+        comuna.save()
     except:
-        None
+        print(nombre,i, "no se cargo :( log_Unemployment")
     try:
-        comuna.log_Crime =  math.log(conb_Crime)            
+        comuna.log_Crime =  math.log10(conb_Crime)            
+        comuna.save()
     except:
-        None
+        print(nombre,i, "no se cargo :( conb_Crime")
     try:
-        comuna.log_Arrested = math.log(conb_Arrested)
+        comuna.log_Arrested = math.log10(conb_Arrested)
+        comuna.save()
     except:
-        None
+        print(nombre,i, "no se cargo :( conb_Arrested")
     try:
-        comuna.log_Companies = math.log(conb_Companies)
+        comuna.log_Companies = math.log10(conb_Companies)
+        comuna.save()
     except:
-        None
+        print(nombre,i, "no se cargo :( conb_Companies")
     try:
-        comuna.log_Sales = math.log(conb_Sales)
+        comuna.log_Sales = math.log10(conb_Sales)
+        comuna.save()
     except:
-        None
+        print(nombre,i, "no se cargo :( conb_Sales")
     try:
-        comuna.log_workers = math.log(conb_workers)   
+        comuna.log_workers = math.log10(conb_workers)   
+        comuna.save()
     except:
-        None
+        print(nombre,i, "no se cargo :( conb_workers")
     try:
-        comuna.log_Income = math.log(conb_Income)        
+        comuna.log_Income = math.log10(conb_Income)        
+        comuna.save()
     except:
-        None 
+        print(nombre,i, "no se cargo :( conb_Income") 
     try:
-        comuna.log_technicians = math.log(conb_technicians) 
+        comuna.log_technicians = math.log10(conb_technicians) 
+        comuna.save()
     except:
-        None
+        print(nombre,i, "no se cargo :( conb_technicians")
     try:
-        comuna.log_University = math.log(conb_University)
+        comuna.log_University = math.log10(conb_University)
+        comuna.save()
     except:
-        None
+        print(nombre,i, "no se cargo :( conb_University")
     try:
-        comuna.log_Professionals = math.log(conb_Professionals)
+        comuna.log_Professionals = math.log10(conb_Professionals)
+        comuna.save()
     except:
-        None
+        print(nombre,i, "no se cargo :( conb_Professionals")
     try:
-        comuna.log_Solid_waste = math.log(conb_Solid)
+        comuna.log_Solid_waste = math.log10(conb_Solid)
+        comuna.save()
     except:
-        None
+        print(nombre,i, "no se cargo :( conb_Solid")
     try:
-        comuna.log_Municipal_Power = math.log(conb_Municipalspending)
+        comuna.log_Municipal_Power = math.log10(conb_MunicipalspendingPower)
+        comuna.save()
     except:
-        None
+        print(nombre,i, "no se cargo :( conb_MunicipalspendingPower")
     try:
-        comuna.log_Municipal_Water = math.log(conb_Municipalspending)
+        comuna.log_Municipal_Water = math.log10(conb_MunicipalspendingWater)
+        comuna.save()
     except:
-        None
+        print(nombre,i, "no se cargo :( conb_MunicipalspendingWater")
     try:
-        comuna.log_Municipal_cleaning = math.log(conb_Municipal)
+        comuna.log_Municipal_cleaning = math.log10(conb_MunicipalSpendingcleaning)
+        comuna.save()
     except:
-        None
+        print(nombre,i, "no se cargo :( conb_MunicipalSpendingcleaning")
     try:
-        comuna.log_Deaths = math.log(conb_Deaths)
+        comuna.log_Deaths = math.log10(conb_Deaths)
+        comuna.save()
     except:
-        None
+        print(nombre,i, "no se cargo :( conb_Deaths")
     try:
-        comuna.log_Birthrate = math.log(conb_Birthrate)
+        comuna.log_Birthrate = math.log10(conb_Birthrate)
+        comuna.save()
     except:
-        None
+        print(nombre,i, "no se cargo :( conb_Birthrate")
     try:
-        comuna.log_Year_scholarship = math.log(conb_scholarship) 
+        comuna.log_Year_scholarship = math.log10(conb_scholarship) 
+        comuna.save()
     except:
-        None
+        print(nombre,i, "no se cargo :( conb_scholarship")
     try:
-        comuna.log_Offence_Property = math.log(conb_Property)
+        comuna.log_Offence_Property = math.log10(conb_Property)
+        comuna.save()
     except:
-        None
+        print(nombre,i, "no se cargo :( conb_Property")
     try:
-        comuna.log_Offence_Person = math.log(conb_Person)
+        comuna.log_Offence_Person = math.log10(conb_Person)
+        comuna.save()
     except:
-        None
+        print(nombre,i, "no se cargo :( conb_Person")
     try:
-        comuna.log_Burglary = math.log(conb_Burglary)
+        comuna.log_Burglary = math.log10(conb_Burglary)
+        comuna.save()
     except:
-        None
+        print(nombre,i, "no se cargo :( conb_Burglary")
     try:
-        comuna.log_Robbery = math.log(conb_Robbery)
+        comuna.log_Robbery = math.log10(conb_Robbery)
+        comuna.save()
     except:
-        None
+        print(nombre,i, "no se cargo :( conb_Robbery")
     try:
-        comuna.log_Injuries = math.log(conb_Injuries)
+        comuna.log_Injuries = math.log10(conb_Injuries)
+        comuna.save()
     except:
-        None
+        print(nombre,i, "no se cargo :( conb_Injuries")
     try:
-        comuna.log_Indigenous = math.log(conb_Indigenous)
+        comuna.log_Indigenous = math.log10(conb_Indigenous)
+        comuna.save()
     except:
-        None
+        print(nombre,i, "no se cargo :( conb_Indigenous")
     try:
-        comuna.log_Emergency = math.log(conb_Emergency)
+        comuna.log_Emergency = math.log10(conb_Emergency)
+        comuna.save()
     except:
-        None
+        print(nombre,i, "no se cargo :( conb_Emergency")
     try:
-        comuna.log_Respiratory = math.log(conb_Respiratory)
+        comuna.log_Respiratory = math.log10(conb_Respiratory)
+        comuna.save()
     except:
-        None
+        print(nombre,i, "no se cargo :( conb_Respiratory")
     try:
-        comuna.log_Cardiovascular = math.log(conb_Cardiovascular)
+        comuna.log_Cardiovascular = math.log10(conb_Cardiovascular)
+        comuna.save()
     except:
-        None
+        print(nombre,i, "no se cargo :( conb_Cardiovascular")
     try:
-        comuna.log_Hospitalizations = math.log(conb_Hospitalizations)
+        comuna.log_Hospitalizations = math.log10(conb_Hospitalizations)
+        comuna.save()
     except:
-        None
+        print(nombre,i, "no se cargo :( conb_Hospitalizations")
     try:
-        comuna.log_Street = math.log(conb_Street)
+        comuna.log_Street = math.log10(conb_Street)
+        comuna.save()
     except:
-        None
+        print(nombre,i, "no se cargo :( conb_Street")
+    try:  
+        comuna.Iliteracy = conb_Iliteracy
+        comuna.save()
+    except:
+        print(nombre,i, "no se cargo :( Iliteracy")
+    try:
+        comuna.Municipal_spending = conb_Municipal
+        comuna.save()
+    except:
+        print(nombre,i, "no se cargo :( Municipal_spending")
+    try:
+        comuna.Unemployment = conb_Unemployment
+        comuna.save()
+    except:
+        print(nombre,i, "no se cargo :( Unemployment")
+    try:
+        comuna.Crime =  conb_Crime            
+        comuna.save()
+    except:
+        print(nombre,i, "no se cargo :( conb_Crime")
+    try:
+        comuna.Arrested = conb_Arrested
+        comuna.save()
+    except:
+        print(nombre,i, "no se cargo :( conb_Arrested")
+    try:
+        comuna.Companies = conb_Companies
+        comuna.save()
+    except:
+        print(nombre,i, "no se cargo :( conb_Companies")
+    try:
+        comuna.Sales = conb_Sales
+        comuna.save()
+    except:
+        print(nombre,i, "no se cargo :( conb_Sales")
+    try:
+        comuna.workers = conb_workers   
+        comuna.save()
+    except:
+        print(nombre,i, "no se cargo :( conb_workers")
+    try:
+        comuna.Income = conb_Income        
+        comuna.save()
+    except:
+        print(nombre,i, "no se cargo :( conb_Income") 
+    try:
+        comuna.technicians = conb_technicians 
+        comuna.save()
+    except:
+        print(nombre,i, "no se cargo :( conb_technicians")
+    try:
+        comuna.University = conb_University
+        comuna.save()
+    except:
+        print(nombre,i, "no se cargo :( conb_University")
+    try:
+        comuna.Professionals = conb_Professionals
+        comuna.save()
+    except:
+        print(nombre,i, "no se cargo :( conb_Professionals")
+    try:
+        comuna.Solid_waste = conb_Solid
+        comuna.save()
+    except:
+        print(nombre,i, "no se cargo :( conb_Solid")
+    try:
+        comuna.Municipal_Power = conb_MunicipalspendingPower
+        comuna.save()
+    except:
+        print(nombre,i, "no se cargo :( conb_MunicipalspendingPower")
+    try:
+        comuna.Municipal_Water = conb_MunicipalspendingWater
+        comuna.save()
+    except:
+        print(nombre,i, "no se cargo :( conb_MunicipalspendingWater")
+    try:
+        comuna.Municipal_cleaning = conb_MunicipalSpendingcleaning
+        comuna.save()
+    except:
+        print(nombre,i, "no se cargo :( conb_MunicipalSpendingcleaning")
+    try:
+        comuna.Deaths = conb_Deaths
+        comuna.save()
+    except:
+        print(nombre,i, "no se cargo :( conb_Deaths")
+    try:
+        comuna.Birthrate = conb_Birthrate
+        comuna.save()
+    except:
+        print(nombre,i, "no se cargo :( conb_Birthrate")
+    try:
+        comuna.Year_scholarship = conb_scholarship 
+        comuna.save()
+    except:
+        print(nombre,i, "no se cargo :( conb_scholarship")
+    try:
+        comuna.Offence_Property = conb_Property
+        comuna.save()
+    except:
+        print(nombre,i, "no se cargo :( conb_Property")
+    try:
+        comuna.Offence_Person = conb_Person
+        comuna.save()
+    except:
+        print(nombre,i, "no se cargo :( conb_Person")
+    try:
+        comuna.Burglary = conb_Burglary
+        comuna.save()
+    except:
+        print(nombre,i, "no se cargo :( conb_Burglary")
+    try:
+        comuna.Robbery = conb_Robbery
+        comuna.save()
+    except:
+        print(nombre,i, "no se cargo :( conb_Robbery")
+    try:
+        comuna.Injuries = conb_Injuries
+        comuna.save()
+    except:
+        print(nombre,i, "no se cargo :( conb_Injuries")
+    try:
+        comuna.Indigenous = conb_Indigenous
+        comuna.save()
+    except:
+        print(nombre,i, "no se cargo :( conb_Indigenous")
+    try:
+        comuna.Emergency = conb_Emergency
+        comuna.save()
+    except:
+        print(nombre,i, "no se cargo :( conb_Emergency")
+    try:
+        comuna.Respiratory = conb_Respiratory
+        comuna.save()
+    except:
+        print(nombre,i, "no se cargo :( conb_Respiratory")
+    try:
+        comuna.Cardiovascular = conb_Cardiovascular
+        comuna.save()
+    except:
+        print(nombre,i, "no se cargo :( conb_Cardiovascular")
+    try:
+        comuna.Hospitalizations = conb_Hospitalizations
+        comuna.save()
+    except:
+        print(nombre,i, "no se cargo :( conb_Hospitalizations")
+    try:
+        comuna.Street = conb_Street
+        comuna.save()
+    except:
+        print(nombre,i, "no se cargo :( conb_Street")
     try:
         comuna.save()
     except:

@@ -3,6 +3,7 @@
     <head>
         <link rel="stylesheet" href="{% static 'css/escalamiento_style.css' %}">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <link href="https://fonts.googleapis.com/css?family=Roboto+Condensed:300,400|Roboto:400,900" rel="stylesheet">
     
     <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script> -->
     
@@ -35,16 +36,7 @@
 
  <style> 
         
-        #info-escalamiento{
-          margin-top: 20px;
-          line-height: 1;
-          padding: 12px;
-          background: rgba(255, 255, 255, 0.8);
-          border-radius: 2px;
-          text-align: left; !important;
-          width: 1125px;
-        
-        }
+
         
         #mapid { 
           height: 400px;
@@ -99,8 +91,61 @@
             top: 100%;
             left: 0;
           }
-        
-        
+          body {
+            margin: 0;
+            padding: 0;
+            text-align: center;
+            font-family: 'Roboto Condensed', sans-serif;
+            font-weight: 300;
+            font-size: 14px;
+            background: #efefef;
+          }
+
+          h1, h2, h3, h4, h5, h6 {
+    margin: 0 auto;
+    font-weight: 300;
+}
+
+.titulo-page h2 {
+    font-size: 25px;
+    color: #3a3a3a;
+}
+
+.container {
+    padding-top: 40px;
+}
+
+.espacio {
+  font-size: initial;
+  width: 100%;
+  height: 75px;
+  background: #ffffff url(http://ecoinformatica.cl/wp-content/themes/ecoinfo/img/espacio-bg.png) top left repeat;
+  border-bottom: 1px solid #efefef;
+}
+
+          .content-page{   
+            width: 1125px;
+           text-align: left;
+           }
+          .titulo-page {
+          background: #fff;
+          padding: 35px 20px;
+      }
+        .post {
+            margin-top: 1px;
+            padding: 0;
+            background: #fff;
+        }
+         .texto { padding: 30px;
+          margin: 0 280px 0 219px;
+          border-left: 1px solid #efefef;}
+          p{
+
+                  margin: 0 0 15px;
+          line-height: 150%;
+
+          }
+
         .home  {
             margin: 0;
             padding: 0;
@@ -117,12 +162,14 @@
             height: 60px;
             font-size: 0;
             margin-top :0;
-            /* position: fixed; */
+            position: fixed;
             z-index: 9999;
             border-bottom: 1px solid #efefef;
             width: 95%;
-            /* width: 1125px; */
+            width: 1125px;
         }
+        
+
         header .cont-header {
           position: relative;
         }
@@ -156,35 +203,78 @@
           clear: both;
           visibility: hidden;
         }
+
+        header .cont-header a.menu-trigger {
+  display: inline-block;
+  vertical-align: top;
+  width: 60px;
+  height: 60px;
+  cursor: pointer;
+  z-index: 999;
+  padding: 23px 10px 0;
+  text-align: center;
+  background: #121412;
+  float: right;
+}
+
+header .cont-header a.menu-trigger span.bar {
+  display: inline-block;
+  width: 30px;
+  height: 2px;
+  background: #fff;
+  margin: 0 auto 4px;
+  -ms-transition: 0.2s;
+  -moz-transition: 0.2s;
+  -webkit-transition: 0.2s;
+  transition: 0.2s;
+}
+header .cont-header a.menu-trigger:hover span.bar {
+  opacity: 0.5;
+  filter: alpha(opacity=50);
+}
         
         header .cont-header a.menu-trigger {
           display: inline-block;
-          vertical-align: top;
-          width: 60px;
+          /* vertpxical-align: center; */
+          width: auto;
           height: 60px;
           cursor: pointer;
           z-index: 999;
-          padding: 23px 10px 0;
+          /* padding: 23px 10px 0; */
           text-align: center;
-          background: #121412;
+          text-decoration: none;
+          font-size: 14px;
+          color: #919191;
+          /* color:#efefef; */
+          background: #ffffff;
           float: right;
+          border-left: 1px solid #efefef;
+          border-bottom: 1px solid #efefef;
         }
-        header .cont-header a.menu-trigger span.bar {
-          display: inline-block;
-          width: 30px;
-          height: 2px;
-          background: #fff;
-          margin: 0 auto 4px;
+
+
+        header .cont-header a.menu-trigger {
+          display: block;
+        }
+        header .cont-header a.menu-trigger {
+          display: block;
+          /* padding: 12px 20px;
+          padding-right: 35px; */
+          /* margin-top: -15px; */
+          opacity: 1;
+          filter: alpha(opacity=100);
           -ms-transition: 0.2s;
           -moz-transition: 0.2s;
           -webkit-transition: 0.2s;
           transition: 0.2s;
         }
-        header .cont-header a.menu-trigger:hover span.bar {
-          opacity: 0.5;
-          filter: alpha(opacity=50);
+
+        header .cont-header  a.menu-trigger:hover {
+          opacity: 1;
+          filter: alpha(opacity=100);
+          color: rgb(0, 0, 0);
         }
-        
+                
         
         
         
@@ -252,14 +342,24 @@
         <h1 class = 'logo'>
             <a href="http://ecoinformatica.cl"> </a>
         </h1>
-       
-
+        
+        <a class="menu-trigger"  href="{% url 'escalamiento' %}"> 
+            Variables
+        </a>
+        <a class="menu-trigger" href="{% url 'ciudad' 0 %}" > 
+            Ciudades
+        </a>
+        <a class="menu-trigger" href="{% url 'inicio_escalamiento' %}" > 
+            Inicio 
+          </a>
+  
     </div>
 
 
 </header>
+<br>
 </div> 
-
+<br>
     {% block content %}{% endblock %}
 
 

@@ -12,6 +12,21 @@ class Conurbacion_esc(models.Model):
 	pob_Conurb_2002 = models.IntegerField(default=10)
 	def __unicode__(self): # __unicode__ on Python 2
 	    return self.nombre
+	
+
+class Variable(models.Model):
+	nombre = models.CharField(max_length=50)
+	nombre_mostrar = models.CharField(max_length=50, blank= True, null = True)  
+	descripcion = models.CharField(max_length=5000, blank= True, null = True)
+	medida = models.CharField(max_length = 100, blank= True, null = True)  
+	fuente =models.CharField(max_length = 500, blank= True, null = True)  
+	toma_dato = models.CharField(max_length = 100, blank= True, null = True)  
+	regimen = models.CharField(max_length = 100, blank= True, null = True)
+	a0b10 = models.DecimalField(max_digits=10, decimal_places=5, blank= True, null = True)  #(private transport, )
+	mb10 = models.DecimalField(max_digits=10, decimal_places=5, blank= True, null = True)  #(private transport, )
+	n_calculob10 = models.DecimalField(max_digits=10, decimal_places=5, blank= True, null = True)  #(private transport, )
+	def __unicode__(self): # __unicode__ on Python 2
+	    return self.nombre
 
 
 class Comuna_esc(models.Model):
